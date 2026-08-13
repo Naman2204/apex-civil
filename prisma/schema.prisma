@@ -1,0 +1,140 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id             String    @id @default(cuid())
+  clerkId        String    @unique
+  email          String    @unique
+  examTargetDate DateTime?
+  
+  attempts       ExamAttempt[]
+  bookmarks      Bookmark[]
+  streaks        UserStreak?
+  dailyGoals     DailyGoal[]
+  notifications  Notification[]
+
+  createdAt      DateTime  @default(now())
+}
+
+model Question {
+  id            String   @id @default(cuid())
+  topic         String   @default("Uncategorized")
+  subTopic      String?
+  chapter       String?
+  questionText  String
+  options       Json
+  correctAnswer String
+  explanation   String?
+  difficulty    String   @default("Medium")
+  sourceExam    String?
+  
+  answers       AttemptAnswer[]
+  bookmarks     Bookmark[]
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model ExamAttempt {
+  id                     String   @id @default(cuid())
+  userId                 String
+  user                   User     @relation(fields: [userId], references: [id])
+  mode                   String   // "PRACTICE" | "EXAM"
+  topic                  String?
+  startedAt              DateTime @default(now())
+  completedAt            DateTime?
+  totalQuestions         Int
+  correctCount           Int      @default(0)
+  wrongCount             Int      @default(0)
+  skippedCount           Int      @default(0)
+  negativeMarkingEnabled Boolean  @default(false)
+  negativeMarkingPenalty Float    @default(0.25)
+  score                  Float    @default(0)
+  timeTakenSeconds       Int      @default(0)
+  
+  answers                AttemptAnswer[]
+
+  @@index([userId])
+}
+
+model AttemptAnswer {
+  id               String      @id @default(cuid())
+  attemptId        String
+  attempt          ExamAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  questionId       String
+  question         Question    @relation(fields: [questionId], references: [id])
+  selectedAnswer   String?
+  isCorrect        Boolean     @default(false)
+  timeSpentSeconds Int         @default(0)
+  wasFlagged       Boolean     @default(false)
+
+  @@index([attemptId])
+  @@index([questionId])
+}
+
+model Bookmark {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  questionId String
+  question   Question @relation(fields: [questionId], references: [id])
+  note       String?
+  createdAt  DateTime @default(now())
+
+  @@unique([userId, questionId])
+}
+
+model UserStreak {
+  id               String   @id @default(cuid())
+  userId           String   @unique
+  user             User     @relation(fields: [userId], references: [id])
+  currentStreak    Int      @default(0)
+  longestStreak    Int      @default(0)
+  lastActivityDate DateTime?
+}
+
+model DailyGoal {
+  id                String   @id @default(cuid())
+  userId            String
+  user              User     @relation(fields: [userId], references: [id])
+  date              DateTime // Stored as midnight date
+  targetQuestions   Int      @default(50)
+  completedQuestions Int      @default(0)
+
+  @@unique([userId, date])
+}
+
+model ExamHistory {
+  id              String   @id @default(cuid())
+  userId          String   // Clerk User ID
+  chapter         String
+  difficulty      String
+  totalQuestions  Int
+  correctCount    Int
+  scorePercentage Int
+  timeTakenSeconds Int
+  
+  createdAt       DateTime @default(now())
+}
+
+model Notification {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  title       String
+  message     String
+  read        Boolean  @default(false)
+  
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+}
