@@ -3,6 +3,8 @@ import { getChapterStats } from "./actions";
 import { SignInButton } from "@clerk/nextjs";
 import { auth } from "@clerk/nextjs/server";
 
+export const dynamic = "force-dynamic";
+
 export default async function Home() {
   const { totalQuestions, chapters } = await getChapterStats();
   const { userId } = await auth();
