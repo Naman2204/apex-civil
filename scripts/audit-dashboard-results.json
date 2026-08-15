@@ -1,0 +1,86 @@
+[
+  {
+    "id": "D-00",
+    "ctrl": "Dashboard view loaded",
+    "expected": "Dashboard visible",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Qui",
+    "status": "PASS"
+  },
+  {
+    "id": "D-01",
+    "ctrl": "\"Edit Goal\"",
+    "expected": "Open its target view",
+    "actual": "no navigation (stayed on dashboard)",
+    "status": "FAIL"
+  },
+  {
+    "id": "D-02",
+    "ctrl": "\"Edit Target\"",
+    "expected": "Open its target view",
+    "actual": "no navigation (stayed on dashboard)",
+    "status": "FAIL"
+  },
+  {
+    "id": "D-03",
+    "ctrl": "\"Set Target Date\"",
+    "expected": "Open its target view",
+    "actual": "no navigation (stayed on dashboard)",
+    "status": "FAIL"
+  },
+  {
+    "id": "D-04",
+    "ctrl": "\"View All Topics\"",
+    "expected": "Open its target view",
+    "actual": "no navigation (stayed on dashboard)",
+    "status": "FAIL"
+  },
+  {
+    "id": "D-05",
+    "ctrl": "\"View All →\"",
+    "expected": "Open its target view",
+    "actual": "no navigation (stayed on dashboard)",
+    "status": "FAIL"
+  },
+  {
+    "id": "D-06",
+    "ctrl": "Weak Topics card state",
+    "expected": "Dynamic or empty state",
+    "actual": "empty state (dynamic)",
+    "status": "PASS"
+  },
+  {
+    "id": "D-07",
+    "ctrl": "Topic card (Railway Engineering)",
+    "expected": "Exam setup prefilled",
+    "actual": "setup + Railway",
+    "status": "PASS"
+  },
+  {
+    "id": "D-08",
+    "ctrl": "Start Simulation",
+    "expected": "Opens exam setup",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practic",
+    "status": "FAIL"
+  },
+  {
+    "id": "D-09",
+    "ctrl": "Quick Practice (hero)",
+    "expected": "Opens exam setup",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practic",
+    "status": "FAIL"
+  },
+  {
+    "id": "D-10",
+    "ctrl": "Configure Exam (hero)",
+    "expected": "Opens exam setup",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practic",
+    "status": "FAIL"
+  },
+  {
+    "id": "D-11",
+    "ctrl": "Topic card progress bars",
+    "expected": "Reflect real progress",
+    "actual": "found 7 topic cards showing hardcoded 0%",
+    "status": "FAIL (0% regardless of data)"
+  }
+]

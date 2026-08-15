@@ -156,9 +156,10 @@ export async function saveAttemptAnswer(
   // Correctness is determined by the server against the stored correct answer.
   const computedCorrect = (selectedAnswer || "").trim().toUpperCase() === question.correctAnswer.trim().toUpperCase();
 
-  // Find if an answer already exists (scoped to this attempt)
-  const existing = await db.attemptAnswer.findFirst({
-    where: { attemptId, questionId }
+  // Race-safe upsert under the unique (attemptId, questionId) constraint:
+  // a concurrent create can never produce a duplicate row (BUG-10).
+  const existing = await db.attemptAnswer.findUnique({
+    where: { attemptId_questionId: { attemptId, questionId } }
   });
 
   if (existing) {
@@ -167,27 +168,40 @@ export async function saveAttemptAnswer(
       data: { selectedAnswer, isCorrect: computedCorrect, timeSpentSeconds }
     });
   } else {
-    await db.attemptAnswer.create({
-      data: {
-        attemptId,
-        questionId,
-        selectedAnswer,
-        isCorrect: computedCorrect,
-        timeSpentSeconds
-      }
-    });
+    try {
+      await db.attemptAnswer.create({
+        data: {
+          attemptId,
+          questionId,
+          selectedAnswer,
+          isCorrect: computedCorrect,
+          timeSpentSeconds
+        }
+      });
 
-    // Increment correct/wrong count on the attempt using the server-computed value
-    if (computedCorrect) {
-      await db.examAttempt.update({
-        where: { id: attemptId },
-        data: { correctCount: { increment: 1 } }
-      });
-    } else {
-      await db.examAttempt.update({
-        where: { id: attemptId },
-        data: { wrongCount: { increment: 1 } }
-      });
+      // Increment correct/wrong count on the attempt using the server-computed value
+      if (computedCorrect) {
+        await db.examAttempt.update({
+          where: { id: attemptId },
+          data: { correctCount: { increment: 1 } }
+        });
+      } else {
+        await db.examAttempt.update({
+          where: { id: attemptId },
+          data: { wrongCount: { increment: 1 } }
+        });
+      }
+    } catch (err) {
+      // Lost a create race (P2002 unique violation): another request created
+      // the row first — update it instead of erroring.
+      if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
+        await db.attemptAnswer.update({
+          where: { attemptId_questionId: { attemptId, questionId } },
+          data: { selectedAnswer, isCorrect: computedCorrect, timeSpentSeconds }
+        });
+      } else {
+        throw err;
+      }
     }
   }
 }
@@ -195,8 +209,7 @@ export async function saveAttemptAnswer(
 export async function finishExamAttemptBatch(
   attemptId: string, 
   timeTakenSeconds: number,
-  answers: Record<string, string>,
-  questions: any[]
+  answers: Record<string, string>
 ) {
   const user = await getOrCreateDbUser();
 
@@ -217,26 +230,44 @@ export async function finishExamAttemptBatch(
     });
     if (!attempt) return null;
 
+    // Correctness is ALWAYS computed server-side: the stored correct answer
+    // for every answered question is looked up from the database. The client
+    // never supplies correctness data (BUG-04).
+    const answeredIds = Object.keys(answers).filter((id) => answers[id]);
+    const storedQuestions = answeredIds.length > 0
+      ? await tx.question.findMany({
+          where: { id: { in: answeredIds } },
+          select: { id: true, correctAnswer: true }
+        })
+      : [];
+    const correctByQuestion = new Map(storedQuestions.map((q) => [q.id, q.correctAnswer]));
+
     let correctCount = 0;
     let wrongCount = 0;
     
-    const attemptAnswersData = [];
+    const attemptAnswersData: {
+      attemptId: string;
+      questionId: string;
+      selectedAnswer: string;
+      isCorrect: boolean;
+      timeSpentSeconds: number;
+    }[] = [];
 
-    for (const q of questions) {
-      const selected = answers[q.id];
-      if (selected) {
-        const isCorrect = selected.trim().toUpperCase() === q.correctAnswer.trim().toUpperCase();
-        if (isCorrect) correctCount++;
-        else wrongCount++;
-        
-        attemptAnswersData.push({
-          attemptId,
-          questionId: q.id,
-          selectedAnswer: selected,
-          isCorrect,
-          timeSpentSeconds: 0 // In batch, we don't have individual times unless tracked
-        });
-      }
+    for (const [questionId, selected] of Object.entries(answers)) {
+      if (!selected) continue;
+      const storedCorrect = correctByQuestion.get(questionId);
+      if (!storedCorrect) continue; // Unknown question id — never trust it
+      const isCorrect = selected.trim().toUpperCase() === storedCorrect.trim().toUpperCase();
+      if (isCorrect) correctCount++;
+      else wrongCount++;
+      
+      attemptAnswersData.push({
+        attemptId,
+        questionId,
+        selectedAnswer: selected,
+        isCorrect,
+        timeSpentSeconds: 0 // In batch, we don't have individual times unless tracked
+      });
     }
 
     // skippedCount must reconcile: correct + wrong + skipped === totalQuestions
@@ -264,13 +295,22 @@ export async function finishExamAttemptBatch(
       }
     });
 
-    // Batch insert answers (deduped by question — one row per question)
-    const uniqueAnswers = attemptAnswersData.filter(
-      (a, i, arr) => arr.findIndex((x) => x.questionId === a.questionId) === i
-    );
-    if (uniqueAnswers.length > 0) {
-      await tx.attemptAnswer.createMany({
-        data: uniqueAnswers
+    // Persist answers idempotently — the unique (attemptId, questionId)
+    // constraint means a repeated finish (or pre-saved incremental answers)
+    // can never create duplicate rows. Upsert so the stored rows always
+    // reflect the FINAL answer state (an answer changed mid-exam must not
+    // leave a stale row that disagrees with the recomputed counts).
+    for (const row of attemptAnswersData) {
+      await tx.attemptAnswer.upsert({
+        where: { attemptId_questionId: { attemptId: row.attemptId, questionId: row.questionId } },
+        update: { selectedAnswer: row.selectedAnswer, isCorrect: row.isCorrect, timeSpentSeconds: row.timeSpentSeconds },
+        create: {
+          attemptId: row.attemptId,
+          questionId: row.questionId,
+          selectedAnswer: row.selectedAnswer,
+          isCorrect: row.isCorrect,
+          timeSpentSeconds: row.timeSpentSeconds
+        }
       });
     }
 

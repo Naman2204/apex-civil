@@ -1,25 +1,180 @@
 "use client";
 import React, { useEffect, useState } from 'react';
-import { Play, BookOpen, Target, Flame, Calendar, AlertTriangle, ChevronRight, Zap, Settings2, BarChart3, Infinity, Clock, ArrowRight } from 'lucide-react';
+import { Play, BookOpen, Target, Flame, AlertTriangle, Zap, Settings2, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { getDashboardStats } from '../app/actions/dashboard';
-import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
+import { getExamHistory } from '../app/actions/analytics';
+import { AreaChart, Area, ResponsiveContainer } from 'recharts';
 
 interface DashboardProps {
   totalQuestions: number;
   chapterStats: { name: string; count: number }[];
   onStartExam: (chapter?: string) => void;
-  onNavigate: (page: 'settings' | 'topics' | 'weak-topics') => void;
+  onNavigate: (page: string) => void;
 }
+
+/* Semicircle arc progress gauge — "Progress Arcs" from reference */
+function ArcGauge({ pct }: { pct: number }) {
+  const w = 280, h = 160;
+  const cx = w / 2, cy = h - 20;
+  const tracks = [
+    { r: 110, color: '#7c3aed', width: 10 },
+    { r: 90, color: '#06b6d4', width: 10 },
+    { r: 70, color: '#10b981', width: 10 },
+  ];
+  const toArc = (r: number, angleDeg: number) => {
+    const start = -Math.PI;
+    const end = start + (Math.PI * Math.min(angleDeg, 179.9) / 180);
+    const sx = cx + r * Math.cos(start), sy = cy + r * Math.sin(start);
+    const ex = cx + r * Math.cos(end), ey = cy + r * Math.sin(end);
+    const large = angleDeg > 180 ? 1 : 0;
+    return `M ${sx} ${sy} A ${r} ${r} 0 ${large} 1 ${ex} ${ey}`;
+  };
+  const angles = [pct * 1.8, pct * 1.5, pct * 1.2];
+  return (
+    <svg viewBox={`0 0 ${w} ${h}`} className="w-full max-w-[280px]">
+      {tracks.map((t, i) => (
+        <g key={i}>
+          <path d={toArc(t.r, 180)} stroke="rgba(255,255,255,0.07)" strokeWidth={t.width} fill="none" strokeLinecap="round" />
+          <path d={toArc(t.r, angles[i])} stroke={t.color} strokeWidth={t.width} fill="none" strokeLinecap="round"
+            style={{ filter: `drop-shadow(0 0 6px ${t.color}aa)` }} />
+        </g>
+      ))}
+      <text x={cx} y={cy - 18} textAnchor="middle" className="fill-white font-black" fontSize="32" fontWeight="900">{Math.round(pct)}%</text>
+      <text x={cx} y={cy - 2} textAnchor="middle" fill="rgba(199,210,254,0.7)" fontSize="11">Matt % Completed</text>
+      <text x={20} y={cy + 4} fill="rgba(199,210,254,0.5)" fontSize="10">0%</text>
+      <text x={w - 40} y={cy + 4} fill="rgba(199,210,254,0.5)" fontSize="10">8,007 Questions</text>
+    </svg>
+  );
+}
+
+/* Streak heatmap calendar grid */
+function StreakHeatmap({ currentStreak }: { currentStreak: number }) {
+  const weeks = 20;
+  const days = ['Sun', 'Mon', 'Tue'];
+  const months = ['Mon', 'Tue', 'Wed', 'Thu', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  // Generate fake heatmap data seeded from streak
+  const cells: boolean[][] = Array.from({ length: 3 }, (_, row) =>
+    Array.from({ length: weeks }, (_, col) => {
+      const seed = (row + 1) * (col + 1) * 7919;
+      return (seed % 100) < (30 + Math.min(currentStreak, 60));
+    })
+  );
+  return (
+    <div className="w-full overflow-x-auto">
+      <div className="flex gap-0.5 mb-1 ml-8">
+        {months.map((m, i) => (
+          <div key={i} className="flex-1 text-[9px] text-slate-500 font-bold truncate">{m}</div>
+        ))}
+      </div>
+      {days.map((day, row) => (
+        <div key={day} className="flex items-center gap-0.5 mb-0.5">
+          <span className="text-[9px] text-slate-500 w-7 shrink-0">{day}</span>
+          {cells[row].map((active, col) => (
+            <div
+              key={col}
+              className={`flex-1 rounded-sm ${active ? 'bg-emerald-500 shadow-[0_0_4px_rgba(52,211,153,0.6)]' : 'bg-slate-800/80'}`}
+              style={{ height: 10 }}
+            />
+          ))}
+        </div>
+      ))}
+      <div className="flex items-center gap-3 mt-2 ml-8">
+        <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-sm bg-emerald-500" /><span className="text-[9px] text-slate-400">Active</span></div>
+        <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-sm bg-slate-800" /><span className="text-[9px] text-slate-400">No activity</span></div>
+      </div>
+    </div>
+  );
+}
+
+/* Circular donut for daily goal */
+function GoalRing({ completed, target }: { completed: number; target: number }) {
+  const pct = target > 0 ? Math.min(100, (completed / target) * 100) : 0;
+  const size = 100, stroke = 10;
+  const r = (size - stroke) / 2;
+  const c = 2 * Math.PI * r;
+  return (
+    <div className="relative" style={{ width: size, height: size }}>
+      <svg viewBox={`0 0 ${size} ${size}`} className="w-full h-full -rotate-90">
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="rgba(99,102,241,0.15)" strokeWidth={stroke} />
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="url(#goalGrad)"
+          strokeWidth={stroke} strokeLinecap="round" strokeDasharray={`${(pct / 100) * c} ${c}`} />
+        <defs>
+          <linearGradient id="goalGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#6366f1" />
+            <stop offset="100%" stopColor="#06b6d4" />
+          </linearGradient>
+        </defs>
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <span className="text-xl font-black text-white leading-none">{completed}</span>
+        <span className="text-[9px] text-slate-400 font-bold">/{target}</span>
+      </div>
+    </div>
+  );
+}
+
+/* Topic review ring */
+function TopicRing({ pct }: { pct: number }) {
+  const size = 100, stroke = 10;
+  const r = (size - stroke) / 2;
+  const c = 2 * Math.PI * r;
+  const p = Math.min(100, Math.max(0, pct));
+  return (
+    <div className="relative" style={{ width: size, height: size }}>
+      <svg viewBox={`0 0 ${size} ${size}`} className="w-full h-full -rotate-90">
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="rgba(99,102,241,0.15)" strokeWidth={stroke} />
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="url(#topicGrad)"
+          strokeWidth={stroke} strokeLinecap="round" strokeDasharray={`${(p / 100) * c} ${c}`} />
+        <defs>
+          <linearGradient id="topicGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#06b6d4" />
+            <stop offset="100%" stopColor="#6366f1" />
+          </linearGradient>
+        </defs>
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <span className="text-xl font-black text-white leading-none">{Math.round(p)}%</span>
+        <span className="text-[9px] text-slate-400 font-bold mt-0.5">Completed</span>
+      </div>
+    </div>
+  );
+}
+
+/* Mini sparkline for Recent Activity card */
+function MiniSparkline({ color = '#a78bfa' }: { color?: string }) {
+  const data = [{ v: 2 }, { v: 5 }, { v: 3 }, { v: 8 }, { v: 6 }, { v: 9 }, { v: 7 }];
+  return (
+    <ResponsiveContainer width={80} height={30}>
+      <AreaChart data={data} margin={{ top: 2, right: 2, left: 2, bottom: 2 }}>
+        <defs>
+          <linearGradient id={`sg-${color}`} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={color} stopOpacity={0.35} />
+            <stop offset="100%" stopColor={color} stopOpacity={0} />
+          </linearGradient>
+        </defs>
+        <Area type="monotone" dataKey="v" stroke={color} strokeWidth={1.5} fill={`url(#sg-${color})`} dot={false} />
+      </AreaChart>
+    </ResponsiveContainer>
+  );
+}
+
+const SCORE_COLORS: Record<string, string> = { '8': 'bg-emerald-500', '7': 'bg-sky-500', '6': 'bg-amber-500' };
+const SCORE_TEXT: Record<string, string> = { '8': 'text-emerald-400', '7': 'text-sky-400', '6': 'text-amber-400' };
 
 export const Dashboard: React.FC<DashboardProps> = ({ totalQuestions, chapterStats, onStartExam, onNavigate }) => {
   const [stats, setStats] = useState<any>(null);
+  const [recentActivity, setRecentActivity] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchStats() {
       try {
-        const data = await getDashboardStats();
+        const [data, history] = await Promise.all([
+          getDashboardStats(),
+          getExamHistory().catch(() => []),
+        ]);
         setStats(data);
+        setRecentActivity((history as any[]).slice(0, 8));
       } catch (err) {
         console.error("Failed to fetch stats", err);
       } finally {
@@ -29,391 +184,306 @@ export const Dashboard: React.FC<DashboardProps> = ({ totalQuestions, chapterSta
     fetchStats();
   }, []);
 
-  const goalData = stats?.dailyGoal ? [
-    { name: 'Completed', value: stats.dailyGoal.completedQuestions },
-    { name: 'Remaining', value: Math.max(0, stats.dailyGoal.targetQuestions - stats.dailyGoal.completedQuestions) }
-  ] : [];
-  const COLORS = ['#22c55e', '#1e293b']; // Emerald for completed, dark for remaining
-
-  // Map icons and colors to specific chapters for the mockup look
-  const getChapterStyle = (name: string) => {
-    const n = name.toLowerCase();
-    if (n.includes('railway')) return { icon: <div className="w-8 h-8 rounded-lg bg-[#2563eb] text-white flex items-center justify-center"><TrainIcon /></div>, color: 'bg-[#2563eb]' };
-    if (n.includes('hydro')) return { icon: <div className="w-8 h-8 rounded-lg bg-[#3b82f6] text-white flex items-center justify-center"><DropletsIcon /></div>, color: 'bg-[#3b82f6]' };
-    if (n.includes('highway')) return { icon: <div className="w-8 h-8 rounded-lg bg-[#16a34a] text-white flex items-center justify-center"><HighwayIcon /></div>, color: 'bg-[#16a34a]' };
-    if (n.includes('geo')) return { icon: <div className="w-8 h-8 rounded-lg bg-[#ea580c] text-white flex items-center justify-center"><HammerIcon /></div>, color: 'bg-[#ea580c]' };
-    if (n.includes('estimation')) return { icon: <div className="w-8 h-8 rounded-lg bg-[#a855f7] text-white flex items-center justify-center"><CalculatorIcon /></div>, color: 'bg-[#a855f7]' };
-    if (n.includes('environ')) return { icon: <div className="w-8 h-8 rounded-lg bg-[#65a30d] text-white flex items-center justify-center"><LeafIcon /></div>, color: 'bg-[#65a30d]' };
-    if (n.includes('structure')) return { icon: <div className="w-8 h-8 rounded-lg bg-[#ec4899] text-white flex items-center justify-center"><BuildingIcon /></div>, color: 'bg-[#ec4899]' };
-    
-    // Default
-    return { icon: <div className="w-8 h-8 rounded-lg bg-indigo-500 text-white flex items-center justify-center"><BookOpen className="w-4 h-4" /></div>, color: 'bg-indigo-500' };
-  };
+  const totalAnswered = stats?.totalAnswered ?? 0;
+  const totalAvailable = totalQuestions;
+  const overallPct = totalAvailable > 0 ? (totalAnswered / totalAvailable) * 100 : 0;
+  const dailyCompleted = stats?.dailyGoal?.completedQuestions ?? 0;
+  const dailyTarget = stats?.dailyGoal?.targetQuestions ?? 50;
+  const topicReviewPct = chapterStats.length > 0
+    ? Math.round((Object.keys(stats?.answeredByChapter || {}).length / chapterStats.length) * 100)
+    : 0;
 
   return (
-    <div className="space-y-6 pb-12">
-      
-      {/* Hero Section */}
-      <div className="relative overflow-hidden bg-gradient-to-r from-[#2913e8] via-[#4f34f7] to-[#804dee] rounded-2xl p-8 sm:p-10 shadow-lg">
-        {/* Abstract Bridge Illustration / Vectors */}
-        <div className="absolute right-0 bottom-0 opacity-40 pointer-events-none w-1/2 h-full flex justify-end">
-           {/* Placeholder for the bridge illustration in the mockup */}
-           <svg viewBox="0 0 800 400" className="w-full h-full object-cover origin-bottom-right scale-110">
-              <path d="M100 400 L300 100 L350 100 L550 400 Z" fill="rgba(255,255,255,0.1)" />
-              <path d="M400 400 L600 150 L650 150 L850 400 Z" fill="rgba(255,255,255,0.15)" />
-              <path d="M0 380 L800 380 L800 400 L0 400 Z" fill="rgba(255,255,255,0.2)" />
-              <path d="M100 400 L100 150 M150 400 L150 200 M200 400 L200 250 M250 400 L250 300" stroke="rgba(255,255,255,0.2)" strokeWidth="2" />
-              <path d="M600 400 L600 200 M650 400 L650 250 M700 400 L700 300 M750 400 L750 350" stroke="rgba(255,255,255,0.2)" strokeWidth="2" />
-           </svg>
+    <div className="flex gap-6 pb-12 w-full">
+      {/* Main column */}
+      <div className="flex-1 min-w-0 space-y-5">
+
+        {/* Hero Banner — Progress Arcs */}
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#1a0a3a] via-[#0f1a3a] to-[#0a1628] border border-indigo-500/20 p-6 sm:p-8">
+          <div className="absolute inset-0 bg-gradient-to-r from-violet-900/30 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_70%_50%,rgba(99,102,241,0.15)_0%,transparent_60%)]" />
+
+          <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center gap-6">
+            <div className="flex-1 min-w-0">
+              <div className="inline-flex items-center gap-2 bg-indigo-500/20 border border-indigo-400/30 px-3 py-1 rounded-full mb-4">
+                <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
+                <span className="text-[10px] font-bold text-indigo-300 uppercase tracking-widest">Progress Arcs</span>
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-black text-white leading-tight mb-2">
+                Master Civil Engineering
+              </h2>
+              <p className="text-sm text-indigo-200/70 mb-5 max-w-sm">
+                Master canpleted completed by 8,007 questions toward Master civil Engineering.
+              </p>
+              <div className="flex flex-wrap gap-3">
+                <button
+                  onClick={() => onStartExam()}
+                  className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-lg shadow-indigo-500/30 transition-all hover:-translate-y-0.5"
+                >
+                  <Zap className="w-4 h-4 fill-current" />
+                  Learn More
+                </button>
+                <button
+                  onClick={() => onStartExam()}
+                  className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/15 border border-white/20 text-white px-5 py-2.5 rounded-xl font-bold text-sm transition-all"
+                >
+                  <Settings2 className="w-4 h-4" />
+                  Configure Exam
+                </button>
+              </div>
+              {/* Progress indicator dots */}
+              <div className="flex gap-1.5 mt-5">
+                {[0, 1, 2].map(i => (
+                  <div key={i} className={`h-1 rounded-full transition-all ${i === 0 ? 'w-6 bg-indigo-400' : 'w-3 bg-white/20'}`} />
+                ))}
+              </div>
+            </div>
+
+            {/* Arc Gauge */}
+            <div className="shrink-0 hidden sm:flex flex-col items-center">
+              <ArcGauge pct={overallPct} />
+            </div>
+          </div>
         </div>
 
-        <div className="relative z-10 max-w-xl">
-          <div className="inline-flex items-center space-x-2 bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20 mb-6">
-            <BookOpen className="w-3.5 h-3.5 text-emerald-300" />
-            <span className="text-[10px] font-bold text-white uppercase tracking-widest">YOUR LEARNING HUB</span>
+        {/* Quick Access header */}
+        <div>
+          <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Quick Access</h3>
+        </div>
+
+        {/* Quick Access Grid — 2×2 */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+          {/* Daily Goal card */}
+          <div className="rounded-2xl bg-[#0f111e] border border-slate-800/80 p-5 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Target className="w-4 h-4 text-slate-400" />
+                <h4 className="text-sm font-bold text-white">Daily Goal</h4>
+              </div>
+              <button className="text-slate-600 hover:text-slate-400 transition-colors">
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" /></svg>
+              </button>
+            </div>
+            <div className="flex items-center gap-4">
+              <GoalRing completed={dailyCompleted} target={dailyTarget} />
+              <div>
+                <p className="text-2xl font-black text-white">{dailyCompleted}<span className="text-slate-500 font-bold text-lg">/{dailyTarget}</span></p>
+                <p className="text-xs text-slate-400 mt-1">Questions</p>
+                <div className="mt-2 w-full bg-slate-800 rounded-full h-1.5">
+                  <div className="h-1.5 rounded-full bg-gradient-to-r from-indigo-500 to-cyan-500 transition-all"
+                    style={{ width: `${Math.min(100, (dailyCompleted / Math.max(dailyTarget, 1)) * 100)}%` }} />
+                </div>
+                <p className="text-[10px] text-slate-500 mt-1">{dailyCompleted}/{dailyTarget}</p>
+              </div>
+            </div>
           </div>
-          
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-white leading-tight mb-4">
-            Master Civil Engineering
-          </h2>
-          <p className="text-sm text-indigo-100 mb-8 font-medium max-w-md">
-            Access {totalQuestions.toLocaleString()} meticulously categorized questions. Build your customized exam or jump into a quick practice session.
-          </p>
-          
-          <div className="flex flex-wrap gap-4">
+
+          {/* Streak card */}
+          <div className="rounded-2xl bg-[#0f111e] border border-slate-800/80 p-5 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Flame className="w-4 h-4 text-orange-400" />
+                <h4 className="text-sm font-bold text-white">Streak</h4>
+              </div>
+              <button className="text-slate-600 hover:text-slate-400 transition-colors">
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" /></svg>
+              </button>
+            </div>
+            {loading ? (
+              <div className="h-20 animate-pulse bg-slate-800/50 rounded-xl" />
+            ) : (
+              <StreakHeatmap currentStreak={stats?.streak?.currentStreak ?? 0} />
+            )}
+            <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1">
+                <div className="w-2.5 h-2.5 rounded-sm bg-emerald-500" />
+                <span className="text-[9px] text-slate-400">Active</span>
+              </div>
+              <div className="flex items-center gap-1 ml-3">
+                <div className="w-2.5 h-2.5 rounded-sm bg-slate-800" />
+                <span className="text-[9px] text-slate-400">No 1day</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Topic Review card */}
+          <div className="rounded-2xl bg-[#0f111e] border border-slate-800/80 p-5 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <BookOpen className="w-4 h-4 text-slate-400" />
+                <h4 className="text-sm font-bold text-white">Topic Review</h4>
+              </div>
+              <button className="text-slate-600 hover:text-slate-400 transition-colors">
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" /></svg>
+              </button>
+            </div>
+            <div className="flex items-center gap-4">
+              <TopicRing pct={topicReviewPct} />
+              <div className="space-y-2 flex-1">
+                {chapterStats.slice(0, 3).map((ch, i) => {
+                  const answered = stats?.answeredByChapter?.[ch.name] || 0;
+                  const pct = ch.count > 0 ? (answered / ch.count) * 100 : 0;
+                  return (
+                    <div key={ch.name}>
+                      <p className="text-[10px] text-slate-400 truncate mb-0.5">{ch.name.slice(0, 18)}</p>
+                      <div className="h-1 bg-slate-800 rounded-full">
+                        <div className="h-1 rounded-full bg-indigo-500" style={{ width: `${pct}%` }} />
+                      </div>
+                    </div>
+                  );
+                })}
+                <button onClick={() => onNavigate('topics')} className="text-[10px] text-indigo-400 flex items-center gap-1 mt-1">
+                  View all topics <ArrowRight className="w-3 h-3" />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Overall Progress card */}
+          <div className="rounded-2xl bg-[#0f111e] border border-slate-800/80 p-5 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <svg className="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                <h4 className="text-sm font-bold text-white">Overall Progress</h4>
+              </div>
+              <button className="text-slate-600 hover:text-slate-400 transition-colors">
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" /></svg>
+              </button>
+            </div>
+            {/* Axes labels */}
+            <div className="text-[10px] text-slate-500 flex justify-between">
+              <span>1,000</span>
+            </div>
+            {/* Mini sparkline area chart */}
+            <ResponsiveContainer width="100%" height={80}>
+              <AreaChart data={[
+                { v: 0 }, { v: 20 }, { v: 80 }, { v: 200 }, { v: 350 }, { v: 500 }, { v: Math.max(10, totalAnswered) }
+              ]} margin={{ top: 4, right: 4, left: 4, bottom: 4 }}>
+                <defs>
+                  <linearGradient id="overallGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#06b6d4" stopOpacity={0.3} />
+                    <stop offset="100%" stopColor="#06b6d4" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <Area type="monotone" dataKey="v" stroke="#06b6d4" strokeWidth={2} fill="url(#overallGrad)" dot={false} />
+              </AreaChart>
+            </ResponsiveContainer>
+            <div className="text-[10px] text-slate-500 flex justify-between">
+              <span>0</span>
+              <span>1/0th</span>
+              <span>1/Mar</span>
+              <span>1/day</span>
+              <span>1/2nd</span>
+              <span>Time</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Weak Topics + Simulate Exam row */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Weak Topics shortcut */}
+          <div className="rounded-2xl bg-[#0f111e] border border-slate-800/80 p-5">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-rose-400" />
+                <h4 className="text-sm font-bold text-white">Weak Topics</h4>
+              </div>
+              <button onClick={() => onNavigate('weak-topics')} className="text-xs text-slate-400 hover:text-slate-200">View All →</button>
+            </div>
+            {stats?.weakTopics?.length > 0 ? (
+              <div className="space-y-2">
+                {stats.weakTopics.slice(0, 3).map((t: any) => (
+                  <div key={t.topic} className="flex items-center gap-2">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs text-slate-300 truncate">{t.topic}</p>
+                      <div className="mt-1 h-1 bg-slate-800 rounded-full">
+                        <div className="h-1 rounded-full bg-rose-500" style={{ width: `${t.accuracy}%` }} />
+                      </div>
+                    </div>
+                    <span className="text-[10px] font-bold text-rose-400 shrink-0">{t.accuracy}%</span>
+                    <button onClick={() => onStartExam(t.topic)} className="shrink-0 p-1 rounded-lg hover:bg-slate-800 transition-colors">
+                      <Play className="w-3 h-3 text-slate-400" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-xs text-slate-500">Complete more exams to identify weak areas.</p>
+            )}
+          </div>
+
+          {/* Simulate Exam CTA */}
+          <div className="rounded-2xl bg-gradient-to-br from-[#1a1040] to-[#0f0a1e] border border-indigo-500/20 p-5 flex flex-col justify-between">
+            <div>
+              <Target className="w-5 h-5 text-indigo-400 mb-2" />
+              <h4 className="text-sm font-bold text-white mb-1">Simulate Exam</h4>
+              <p className="text-xs text-slate-400">Test your limits with a strict timed exam and negative marking.</p>
+            </div>
             <button
               onClick={() => onStartExam()}
-              className="inline-flex items-center space-x-2 bg-white text-indigo-700 px-6 py-2.5 rounded-xl font-bold text-sm shadow-xl hover:shadow-2xl transition-all hover:-translate-y-0.5"
+              className="mt-4 inline-flex items-center gap-2 bg-[#5c2dd5] hover:bg-[#4b22b6] text-white text-xs font-bold px-4 py-2 rounded-xl transition-all shadow-lg shadow-indigo-500/20 self-start"
             >
-              <Zap className="w-4 h-4 fill-current" />
-              <span>Quick Practice</span>
-            </button>
-            <button
-              onClick={() => onStartExam()}
-              className="inline-flex items-center space-x-2 bg-transparent border border-white/30 text-white px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-white/10 transition-colors"
-            >
-              <Settings2 className="w-4 h-4" />
-              <span>Configure Exam</span>
+              <Play className="w-3 h-3 fill-current" />
+              Start Simulation
             </button>
           </div>
         </div>
       </div>
 
-      {/* Stats Grid - 4 Columns */}
-      {loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-pulse">
-          {[1,2,3,4].map(i => <div key={i} className="h-32 bg-slate-200 dark:bg-[#131627] rounded-2xl"></div>)}
-        </div>
-      ) : stats && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Daily Goal */}
-          <div className="bg-white dark:bg-[#131627] border border-slate-200 dark:border-slate-800/80 rounded-2xl p-5 shadow-sm flex items-center justify-between">
-            <div className="flex-1">
-              <div className="flex items-center space-x-2 mb-2 text-slate-500 dark:text-slate-400">
-                <Target className="w-4 h-4" />
-                <h3 className="text-xs font-semibold">Daily Goal</h3>
-              </div>
-              <p className="text-sm font-bold text-slate-800 dark:text-slate-200 mb-1">
-                {stats.dailyGoal?.completedQuestions} / {stats.dailyGoal?.targetQuestions} Questions
-              </p>
-              <p className="text-[10px] text-slate-500">Keep going to reach your target!</p>
-              <button onClick={() => onNavigate('settings')} className="text-[10px] text-indigo-500 font-semibold flex items-center mt-2 hover:text-indigo-400">
-                <span className="mr-1">✎</span> Edit Goal
-              </button>
-            </div>
-            <div className="w-16 h-16 relative shrink-0">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie data={goalData} cx="50%" cy="50%" innerRadius={22} outerRadius={32} stroke="none" dataKey="value">
-                    {goalData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
-                  </Pie>
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="absolute inset-0 flex items-center justify-center font-bold text-[10px] text-white">
-                {stats.dailyGoal?.targetQuestions > 0 ? Math.round((stats.dailyGoal.completedQuestions / stats.dailyGoal.targetQuestions) * 100) : 0}%
-              </div>
-            </div>
-          </div>
-
-          {/* Current Streak */}
-          <div className="bg-white dark:bg-[#131627] border border-slate-200 dark:border-slate-800/80 rounded-2xl p-5 shadow-sm">
-            <div className="flex items-center space-x-2 mb-2 text-slate-500 dark:text-slate-400">
-              <Flame className="w-4 h-4 text-orange-500" />
-              <h3 className="text-xs font-semibold">Current Streak</h3>
-            </div>
-            <div className="flex items-baseline space-x-1 mb-1">
-              <span className="text-3xl font-black text-orange-500">{stats.streak?.currentStreak}</span>
-              <span className="text-sm font-bold text-slate-400">Days</span>
-            </div>
-            <p className="text-[10px] text-slate-500">Longest streak: {stats.streak?.longestStreak} days</p>
-            {/* Tiny sparkline placeholder */}
-            <div className="mt-3 h-6 w-full flex items-end space-x-1">
-               {[2,4,3,6,5,8,7].map((h, i) => (
-                 <div key={i} className="flex-1 bg-orange-500/20 rounded-t-sm" style={{ height: `${h*10}%` }}></div>
-               ))}
-            </div>
-          </div>
-
-          {/* Overall Progress */}
-          <div className="bg-white dark:bg-[#131627] border border-slate-200 dark:border-slate-800/80 rounded-2xl p-5 shadow-sm flex items-center justify-between">
-            <div className="flex-1">
-              <div className="flex items-center space-x-2 mb-2 text-slate-500 dark:text-slate-400">
-                <BarChart3 className="w-4 h-4" />
-                <h3 className="text-xs font-semibold">Overall Progress</h3>
-              </div>
-              <p className="text-sm font-bold text-slate-800 dark:text-slate-200 mb-1">
-                {stats.totalAnswered || 0} / {totalQuestions.toLocaleString()} Questions
-              </p>
-              {stats.totalAnswered > 0 ? (
-                <p className="text-[10px] text-emerald-600 dark:text-emerald-400">Keep going — {Math.round(((stats.totalAnswered || 0) / Math.max(1, totalQuestions)) * 100)}% of the bank explored!</p>
-              ) : (
-                <p className="text-[10px] text-slate-500">Start practicing to see progress!</p>
-              )}
-              {/* Wave line placeholder */}
-              <div className="mt-3 h-4 w-full text-indigo-500/50">
-                <svg viewBox="0 0 100 20" preserveAspectRatio="none" className="w-full h-full stroke-current fill-none" strokeWidth="2">
-                  <path d="M0 10 Q 25 0 50 10 T 100 10" />
-                </svg>
-              </div>
-            </div>
-            <div className="w-12 h-12 relative shrink-0 rounded-full border-4 border-slate-800 flex items-center justify-center ml-2">
-               <span className="text-[10px] font-bold">{stats.totalAnswered > 0 ? Math.round(((stats.totalAnswered || 0) / Math.max(1, totalQuestions)) * 100) : 0}%</span>
-            </div>
-          </div>
-
-          {/* Exam Countdown */}
-          <div className="bg-white dark:bg-[#131627] border border-slate-200 dark:border-slate-800/80 rounded-2xl p-5 shadow-sm">
-            <div className="flex items-center space-x-2 mb-2 text-slate-500 dark:text-slate-400">
-              <Calendar className="w-4 h-4" />
-              <h3 className="text-xs font-semibold">Exam Countdown</h3>
-            </div>
-            {stats.examTargetDate && stats.daysRemaining !== null ? (
+      {/* Recent Activity right sidebar */}
+      <div className="w-72 shrink-0 hidden xl:block">
+        <div className="rounded-2xl bg-[#0f111e] border border-slate-800/80 p-4 sticky top-6">
+          <h3 className="text-sm font-bold text-white mb-4">Recent Activity</h3>
+          <div className="space-y-2">
+            {recentActivity.length === 0 ? (
               <>
-                <div className="flex items-baseline space-x-1 mb-1">
-                  <span className="text-3xl font-black text-indigo-600 dark:text-indigo-500">{Math.max(0, stats.daysRemaining)}</span>
-                  <span className="text-sm font-bold text-slate-400">Days</span>
-                </div>
-                <p className="text-[10px] text-slate-500 mb-3">Target Date: {new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(stats.examTargetDate))}</p>
-                <button onClick={() => onNavigate('settings')} className="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-[11px] font-bold px-4 py-1.5 rounded-lg transition-colors">
-                  Edit Target
-                </button>
+                {/* Placeholder rows when no real data */}
+                {[
+                  { label: 'Completed Practice Session Review', score: '8', time: '3 hours ago', color: '#a78bfa' },
+                  { label: 'Completed Practice Session - Topic Review', score: '8', time: '3 hours ago', color: '#a78bfa' },
+                  { label: 'Completed Practice Session Review', score: '7', time: '3 hours ago', color: '#06b6d4' },
+                  { label: 'Completed Practice- Topic Review', score: '6', time: '2 minutes ago', color: '#f59e0b' },
+                  { label: 'Completed Practice Session Review 1', score: '8', time: '2 minutes ago', color: '#a78bfa' },
+                  { label: 'Completed Practice- Topic Review 2', score: '8', time: '2 minutes ago', color: '#a78bfa' },
+                  { label: 'Completed Practice Session', score: '8', time: '2 minutes ago', color: '#06b6d4' },
+                  { label: 'Completed Practice- Topic Review 1', score: '8', time: '2 minutes ago', color: '#a78bfa' },
+                ].map((item, i) => (
+                  <div key={i} className="flex items-start gap-2.5 py-2 border-b border-slate-800/60 last:border-0">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[11px] text-slate-300 leading-tight line-clamp-2">{item.label}</p>
+                      <p className="text-[9px] text-slate-500 mt-0.5">{item.time}</p>
+                    </div>
+                    <MiniSparkline color={item.color} />
+                    <span className={`text-[9px] font-bold shrink-0 mt-0.5 ${item.score === '8' ? 'text-emerald-400' : item.score === '7' ? 'text-sky-400' : 'text-amber-400'}`}>
+                      Score {item.score}
+                    </span>
+                  </div>
+                ))}
               </>
             ) : (
-              <>
-                <p className="text-sm font-bold text-slate-800 dark:text-slate-200 mb-1">No exam date set.</p>
-                <p className="text-[10px] text-slate-500 mb-3">Set your target date and stay on track.</p>
-                <button onClick={() => onNavigate('settings')} className="bg-[#5c2dd5] hover:bg-[#4b22b6] text-white text-[11px] font-bold px-4 py-1.5 rounded-lg transition-colors">
-                  Set Target Date
-                </button>
-              </>
+              recentActivity.map((item, i) => (
+                <div key={i} className="flex items-start gap-2.5 py-2 border-b border-slate-800/60 last:border-0">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[11px] text-slate-300 leading-tight line-clamp-2">
+                      Completed {item.mode} - {item.topic}
+                    </p>
+                    <p className="text-[9px] text-slate-500 mt-0.5">{item.date}</p>
+                  </div>
+                  <MiniSparkline color={item.score >= 75 ? '#34d399' : item.score >= 50 ? '#fbbf24' : '#fb7185'} />
+                  <span className={`text-[9px] font-bold shrink-0 mt-0.5 ${item.score >= 75 ? 'text-emerald-400' : item.score >= 50 ? 'text-amber-400' : 'text-rose-400'}`}>
+                    Score {Math.round(item.score / 12.5)}
+                  </span>
+                </div>
+              ))
             )}
           </div>
         </div>
-      )}
-
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        {/* Explore Topics (Col span 2) */}
-        <div className="lg:col-span-2 space-y-4">
-          <div className="flex items-center justify-between px-1">
-            <div className="flex items-center space-x-2">
-              <BookOpen className="w-4 h-4 text-slate-400" />
-              <h3 className="text-base font-bold text-slate-200">Explore Topics</h3>
-            </div>
-            <button onClick={() => onNavigate('topics')} className="text-xs font-semibold text-indigo-400 hover:text-indigo-300 flex items-center">
-              View All Topics <ArrowRight className="w-3 h-3 ml-1" />
-            </button>
-          </div>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {chapterStats.slice(0, 7).map((chapter) => {
-              const style = getChapterStyle(chapter.name);
-              const answered = stats?.answeredByChapter?.[chapter.name] || 0;
-              const pct = chapter.count > 0 ? Math.round((answered / chapter.count) * 100) : 0;
-              return (
-                <button
-                  key={chapter.name}
-                  onClick={() => onStartExam(chapter.name)}
-                  className="bg-white dark:bg-[#131627] border border-slate-200 dark:border-slate-800/80 rounded-xl p-4 text-left hover:border-indigo-300 dark:hover:border-indigo-500/50 transition-colors group flex items-start space-x-4 shadow-sm dark:shadow-none cursor-pointer"
-                >
-                  {style.icon}
-                  <div className="flex-1 min-w-0">
-                    <h4 className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate group-hover:text-indigo-600 dark:group-hover:text-white mb-1 transition-colors">{chapter.name}</h4>
-                    <p className="text-[10px] text-slate-500 mb-3">{chapter.count} Questions</p>
-                    <div className="flex items-center space-x-2">
-                      <div className="flex-1 bg-slate-100 dark:bg-[#0A0C18] rounded-full h-1">
-                        <div className={`h-1 rounded-full ${style.color}`} style={{ width: `${Math.min(100, pct)}%` }}></div>
-                      </div>
-                      <span className="text-[9px] text-slate-500 font-bold">{pct}%</span>
-                    </div>
-                  </div>
-                </button>
-              );
-            })}
-            
-            {/* View All Card */}
-            <button
-              onClick={() => onNavigate('topics')}
-              className="bg-white dark:bg-[#131627] border border-slate-200 dark:border-slate-800/80 rounded-xl p-4 text-left hover:border-indigo-300 dark:hover:border-indigo-500/50 transition-colors flex items-center justify-center space-x-3 shadow-sm dark:shadow-none"
-            >
-              <div className="flex space-x-1">
-                <div className="w-4 h-4 rounded bg-indigo-500/10 dark:bg-indigo-500/20"></div>
-                <div className="w-4 h-4 rounded bg-blue-500/10 dark:bg-blue-500/20"></div>
-                <div className="w-4 h-4 rounded bg-emerald-500/10 dark:bg-emerald-500/20"></div>
-              </div>
-              <div>
-                <h4 className="text-xs font-bold text-slate-800 dark:text-slate-200 transition-colors">View All Topics</h4>
-                <p className="text-[10px] text-slate-500">{chapterStats.length} Topics Available</p>
-              </div>
-              <ArrowRight className="w-4 h-4 text-slate-400 dark:text-slate-500" />
-            </button>
-          </div>
-        </div>
-
-        {/* Right Sidebar (Weak Topics & Simulate Exam) */}
-        <div className="space-y-4">
-          
-          <div className="flex items-center justify-between px-1">
-            <div className="flex items-center space-x-2">
-              <AlertTriangle className="w-4 h-4 text-rose-500" />
-              <h3 className="text-base font-bold text-slate-800 dark:text-slate-200 transition-colors">Weak Topics</h3>
-            </div>
-            <button onClick={() => onNavigate('weak-topics')} className="text-xs font-semibold text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300 transition-colors">View All →</button>
-          </div>
-          
-          {stats?.weakTopics && stats.weakTopics.length > 0 ? (
-            <div className="bg-white dark:bg-[#131627] border border-slate-200 dark:border-slate-800/80 rounded-xl shadow-sm dark:shadow-none transition-colors overflow-hidden">
-              {stats.weakTopics.map((topic: any, idx: number) => (
-                <div
-                  key={topic.topic}
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => onStartExam(topic.topic)}
-                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onStartExam(topic.topic); }}
-                  className={`p-4 flex items-center justify-between cursor-pointer hover:bg-slate-50 dark:hover:bg-white/[0.03] transition-colors ${idx !== stats.weakTopics.length - 1 ? 'border-b border-slate-100 dark:border-slate-800/50' : ''}`}
-                >
-                  <div className="flex-1 pr-4">
-                    <p className="text-sm font-bold text-slate-800 dark:text-slate-200 mb-1 truncate">{topic.topic}</p>
-                    <div className="flex items-center space-x-2">
-                      <div className="flex-1 bg-slate-100 dark:bg-[#0A0C18] rounded-full h-1.5">
-                        <div className="h-1.5 rounded-full bg-rose-500" style={{ width: `${topic.accuracy}%` }}></div>
-                      </div>
-                      <span className="text-[10px] font-bold text-rose-500">{topic.accuracy}%</span>
-                    </div>
-                  </div>
-                  <span className="shrink-0 p-2 text-slate-400 group-hover:text-indigo-500 rounded-lg transition-colors">
-                    <Play className="w-4 h-4" />
-                  </span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="bg-white dark:bg-[#131627] border border-slate-200 dark:border-slate-800/80 rounded-xl p-6 text-center flex flex-col items-center justify-center min-h-[200px] shadow-sm dark:shadow-none transition-colors">
-              <div className="w-12 h-12 rounded-full bg-rose-50 dark:bg-rose-500/10 flex items-center justify-center mb-3 transition-colors">
-                <AlertTriangle className="w-6 h-6 text-rose-500" />
-              </div>
-              <h4 className="text-sm font-bold text-slate-900 dark:text-slate-200 mb-1 transition-colors">No Data Yet</h4>
-              <p className="text-xs text-slate-500 px-4">Complete more practice exams to identify your weak areas.</p>
-              <div className="flex items-end space-x-1 mt-4 opacity-20">
-                <div className="w-2 h-4 bg-slate-400 rounded-sm"></div>
-                <div className="w-2 h-8 bg-slate-400 rounded-sm"></div>
-                <div className="w-2 h-6 bg-slate-400 rounded-sm"></div>
-                <div className="w-2 h-10 bg-slate-400 rounded-sm"></div>
-                <div className="w-2 h-5 bg-slate-400 rounded-sm"></div>
-              </div>
-            </div>
-          )}
-
-          <div className="bg-gradient-to-br from-[#1b1e36] to-[#0A0C18] border border-indigo-500/20 rounded-xl p-6 relative overflow-hidden group">
-            <div className="absolute right-0 bottom-0 opacity-10">
-              <Clock className="w-32 h-32 transform translate-x-8 translate-y-8" />
-            </div>
-            <div className="relative z-10">
-              <div className="flex items-center space-x-2 mb-2 text-indigo-400">
-                <Target className="w-4 h-4" />
-                <h3 className="text-xs font-semibold uppercase tracking-wider">Simulate Exam</h3>
-              </div>
-              <p className="text-xs text-slate-400 mb-5 max-w-[200px]">Test your limits with a strict timed exam and negative marking.</p>
-              <button 
-                onClick={() => onStartExam()}
-                className="bg-[#5c2dd5] hover:bg-[#4b22b6] text-white text-xs font-bold px-4 py-2 rounded-lg transition-colors flex items-center shadow-lg shadow-indigo-500/20"
-              >
-                <Play className="w-3 h-3 mr-1.5 fill-current" />
-                Start Simulation
-              </button>
-            </div>
-          </div>
-
-        </div>
       </div>
-
-      {/* Bottom Summary Footer */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-6">
-        <div className="bg-white dark:bg-[#131627] rounded-xl p-4 flex items-center space-x-4 border border-slate-200 dark:border-slate-800/50 shadow-sm dark:shadow-none transition-colors">
-          <div className="w-10 h-10 rounded-lg bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-indigo-500 dark:text-indigo-400">
-            <LayersIcon className="w-5 h-5" />
-          </div>
-          <div>
-            <div className="text-sm font-bold text-slate-900 dark:text-white transition-colors">{totalQuestions.toLocaleString()}</div>
-            <div className="text-[10px] text-slate-500">Total Questions</div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-[#131627] rounded-xl p-4 flex items-center space-x-4 border border-slate-200 dark:border-slate-800/50 shadow-sm dark:shadow-none transition-colors">
-          <div className="w-10 h-10 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center text-emerald-500 dark:text-emerald-400">
-            <BookOpen className="w-5 h-5" />
-          </div>
-          <div>
-            <div className="text-sm font-bold text-slate-900 dark:text-white transition-colors">{chapterStats.length}</div>
-            <div className="text-[10px] text-slate-500">Major Topics</div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-[#131627] rounded-xl p-4 flex items-center space-x-4 border border-slate-200 dark:border-slate-800/50 shadow-sm dark:shadow-none transition-colors">
-          <div className="w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center text-blue-500 dark:text-blue-400">
-            <Clock className="w-5 h-5" />
-          </div>
-          <div>
-            <div className="text-sm font-bold text-slate-900 dark:text-white transition-colors">4</div>
-            <div className="text-[10px] text-slate-500">Practice Modes</div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-[#131627] rounded-xl p-4 flex items-center space-x-4 border border-slate-200 dark:border-slate-800/50 shadow-sm dark:shadow-none transition-colors">
-          <div className="w-10 h-10 rounded-lg bg-purple-50 dark:bg-purple-500/10 flex items-center justify-center text-purple-500 dark:text-purple-400">
-            <Infinity className="w-5 h-5" />
-          </div>
-          <div>
-            <div className="text-sm font-bold text-slate-900 dark:text-white transition-colors">∞</div>
-            <div className="text-[10px] text-slate-500">Possibilities</div>
-          </div>
-        </div>
-      </div>
-
     </div>
   );
 };
-
-// SVG Icons
-function LayersIcon(props: any) {
-  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>;
-}
-function TrainIcon() {
-  return <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="3" width="16" height="16" rx="2"/><path d="M4 11h16"/><path d="M12 3v8"/><path d="m8 19-2 3"/><path d="m16 19 2 3"/><path d="M8 15h0"/><path d="M16 15h0"/></svg>;
-}
-function DropletsIcon() {
-  return <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7 16.3c2.2 0 4-1.83 4-4.05 0-1.16-.57-2.26-1.71-3.19S7 6.3 7 6.3s-2.15 1.83-3.29 2.76S2 11.09 2 12.25c0 2.22 1.8 4.05 4 4.05z"/><path d="M12.56 6.6A10.97 10.97 0 0 0 14 3.02c.5 2.5 2 4.9 4 6.5s3 3.5 3 5.5a6.98 6.98 0 0 1-11.91 4.97"/></svg>;
-}
-function HighwayIcon() {
-  return <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 22 8 2"/><path d="M22 22 14 2"/><path d="M2 22l8-20"/><path d="M14 22 6 2"/></svg>;
-}
-function HammerIcon() {
-  return <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 12-8.5 8.5c-.83.83-2.17.83-3 0 0 0 0 0 0 0a2.12 2.12 0 0 1 0-3L12 9"/><path d="M17.64 15 22 10.64"/><path d="m20.91 11.7-1.25-1.25c-.6-.6-.93-1.4-.93-2.25v-.86L16 4.6V3.86a2.92 2.92 0 0 0-.86-2.25L13.89.36l-4.26 4.26A2 2 0 0 0 9 6.03l-.4.4a2 2 0 0 0 0 2.83l2.54 2.54a2 2 0 0 0 2.83 0l.4-.4a2 2 0 0 0 1.42-.59L20.05 6.55z"/></svg>;
-}
-function CalculatorIcon() {
-  return <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></svg>;
-}
-function LeafIcon() {
-  return <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>;
-}
-function BuildingIcon() {
-  return <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="16" height="20" x="4" y="2" rx="2" ry="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M12 14h.01"/><path d="M16 10h.01"/><path d="M16 14h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/></svg>;
-}

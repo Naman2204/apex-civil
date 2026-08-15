@@ -1,0 +1,254 @@
+[
+  {
+    "viewport": "1440",
+    "id": "KB-1 options focusable",
+    "expected": "Answer option A focusable via Tab",
+    "status": "PASS",
+    "actual": "BUTTON Option A: C = 4500 / H_t"
+  },
+  {
+    "viewport": "1440",
+    "id": "KB-2 focus visible",
+    "expected": "Active element matches :focus-visible",
+    "status": "PASS",
+    "actual": "fv=true"
+  },
+  {
+    "viewport": "1440",
+    "id": "KB-3 select with Enter",
+    "expected": "Enter selects option + feedback shows",
+    "status": "PASS",
+    "actual": "ApexCivil Quick Practice All Chapters 1 / 10 answered 00:02 "
+  },
+  {
+    "viewport": "1440",
+    "id": "KB-3b focus after answer",
+    "expected": "Focus lands on feedback region (not BODY)",
+    "status": "PASS",
+    "actual": "{\"tag\":\"DIV\",\"text\":\"✗ IncorrectThe correct answer is: C. C =\",\"label\":\"\",\"cls\":\"mt-6 focus:outline-none\",\"fv\":true}"
+  },
+  {
+    "viewport": "1440",
+    "id": "KB-4 mark focusable",
+    "expected": "Mark for Review focusable",
+    "status": "PASS",
+    "actual": "Mark for Review"
+  },
+  {
+    "viewport": "1440",
+    "id": "KB-4b mark state",
+    "expected": "Mark toggles aria-pressed + chip",
+    "status": "PASS",
+    "actual": "{\"text\":\"Unmark\",\"pressed\":\"true\"}"
+  },
+  {
+    "viewport": "1440",
+    "id": "KB-5 next works",
+    "expected": "Enter on Next → Q2",
+    "status": "PASS",
+    "actual": "{\"cur\":2,\"tot\":10}"
+  },
+  {
+    "viewport": "1440",
+    "id": "KB-5b focus after next",
+    "expected": "Focus stays on Next button after navigation",
+    "status": "PASS",
+    "actual": "{\"tag\":\"BUTTON\",\"text\":\"Next Question\",\"label\":\"\",\"cls\":\"inline-flex items-center justify-center gap-2 px-8 py-3 rounded-xl bg-[#8c32ff] hover:bg-[#7b24e6] text-white text-sm font-bold shadow-[0_0_20px_rgba(140,50,255,0.35)] transition-all active:scale-[0.98] min-h-[44px]\",\"fv\":true}"
+  },
+  {
+    "viewport": "1440",
+    "id": "KB-6 previous works",
+    "expected": "Enter on Previous → Q1",
+    "status": "PASS",
+    "actual": "{\"cur\":1,\"tot\":10}"
+  },
+  {
+    "viewport": "1440",
+    "id": "KB-7 bookmark focusable",
+    "expected": "Bookmark button focusable (aria-label)",
+    "status": "PASS",
+    "actual": "Bookmark this question"
+  },
+  {
+    "viewport": "1440",
+    "id": "KB-7b bookmark toggles",
+    "expected": "Bookmark toggle via keyboard",
+    "status": "PASS",
+    "actual": "{\"tag\":\"BUTTON\",\"text\":\"\",\"label\":\"Remove bookmark\",\"cls\":\"w-8 h-8 rounded-lg border flex items-center justify-center transition-colors bg-amber-500/15 border-amber-500/50 text-amber-400\",\"fv\":true}"
+  },
+  {
+    "viewport": "1440",
+    "id": "KB-8 finish focusable",
+    "expected": "Finish Practice focusable",
+    "status": "PASS",
+    "actual": "Finish Practice"
+  },
+  {
+    "viewport": "1440",
+    "id": "KB-9 submit works",
+    "expected": "Enter on Finish → results",
+    "status": "PASS",
+    "actual": "Practice Completed! 🎉 Quick Practice · All Chapters (Mixed)"
+  },
+  {
+    "viewport": "1440",
+    "id": "KB-10 focus after results",
+    "expected": "Focus lands on meaningful result element",
+    "status": "PASS",
+    "actual": "H2 \"Practice Completed! 🎉\""
+  },
+  {
+    "viewport": "1440",
+    "id": "KB-11 start simulation focusable",
+    "expected": "Start Simulation keyboard reachable",
+    "status": "PASS",
+    "actual": "Start Simulation"
+  },
+  {
+    "viewport": "1440",
+    "id": "KB-11b start sim focus visible",
+    "expected": "Start Simulation :focus-visible",
+    "status": "PASS",
+    "actual": "fv=true"
+  },
+  {
+    "viewport": "1440",
+    "id": "KB-12 start sim works",
+    "expected": "Enter starts exam → Q1",
+    "status": "PASS",
+    "actual": "{\"cur\":1,\"tot\":25}"
+  },
+  {
+    "viewport": "1440",
+    "id": "KB-13 exam options reachable",
+    "expected": "Exam option focusable",
+    "status": "PASS",
+    "actual": "Option A: ₹200"
+  },
+  {
+    "viewport": "1440",
+    "id": "KB-14 clear response disabled state",
+    "expected": "Clear Response disabled before answering + exposed",
+    "status": "PASS",
+    "actual": "{\"disabled\":true,\"aria\":null}"
+  },
+  {
+    "viewport": "1440",
+    "id": "KB-15 mark for review reachable",
+    "expected": "Mark for Review focusable",
+    "status": "PASS",
+    "actual": "Mark for Review"
+  },
+  {
+    "viewport": "1440",
+    "id": "KB-16 palette keyboard",
+    "expected": "Palette cell keyboard reachable + named",
+    "status": "PASS",
+    "actual": "Question 1: Current question"
+  },
+  {
+    "viewport": "1440",
+    "id": "KB-17 clear response works",
+    "expected": "Enter clears selected answer",
+    "status": "PASS",
+    "actual": "aria-pressed=false"
+  },
+  {
+    "viewport": "375",
+    "id": "KB-M1 options reachable",
+    "expected": "Option focusable on mobile",
+    "status": "PASS",
+    "actual": "Option A: Specific gravity tes"
+  },
+  {
+    "viewport": "375",
+    "id": "KB-M2 next works",
+    "expected": "Enter → Q2 on mobile",
+    "status": "PASS",
+    "actual": "q1"
+  },
+  {
+    "viewport": "375",
+    "id": "KB-M3 exit reachable",
+    "expected": "Exit practice focusable (aria-label)",
+    "status": "PASS",
+    "actual": "Exit practice"
+  },
+  {
+    "viewport": "375",
+    "id": "KB-M4 exit works",
+    "expected": "Enter on X → setup",
+    "status": "PASS",
+    "actual": "Configure Your Exam Configure Your Exam "
+  },
+  {
+    "viewport": "375",
+    "id": "KB-M5 start sim works",
+    "expected": "Enter starts exam on mobile",
+    "status": "PASS",
+    "actual": "no"
+  },
+  {
+    "viewport": "375",
+    "id": "KB-M6 questions btn",
+    "expected": "Questions button focusable",
+    "status": "PASS",
+    "actual": "Questions"
+  },
+  {
+    "viewport": "375",
+    "id": "KB-M7 drawer dialog semantics",
+    "expected": "Drawer is a dialog with accessible name",
+    "status": "PASS",
+    "actual": "{\"dialog\":true,\"modal\":\"true\",\"label\":\"Question palette\"}"
+  },
+  {
+    "viewport": "375",
+    "id": "KB-M8 drawer focus in",
+    "expected": "Focus moves into drawer when opened",
+    "status": "PASS",
+    "actual": "BUTTON \"Close question palette\""
+  },
+  {
+    "viewport": "375",
+    "id": "KB-M9 drawer palette keyboard",
+    "expected": "Palette cell reachable inside drawer",
+    "status": "PASS",
+    "actual": "Question 1: Current question"
+  },
+  {
+    "viewport": "375",
+    "id": "KB-M10 escape closes",
+    "expected": "Escape closes palette drawer",
+    "status": "PASS",
+    "actual": "open=false"
+  },
+  {
+    "viewport": "375",
+    "id": "KB-M11 palette jump works",
+    "expected": "Enter on Q5 jumps to Q5",
+    "status": "PASS",
+    "actual": "{\"cur\":5,\"tot\":25}"
+  },
+  {
+    "viewport": "375",
+    "id": "KB-M12 focus after jump",
+    "expected": "Focus returns to a sensible control after jump (not BODY)",
+    "status": "PASS",
+    "actual": "BUTTON \"Questions\""
+  },
+  {
+    "viewport": "375",
+    "id": "KB-M13 end exam reachable",
+    "expected": "End Exam focusable",
+    "status": "PASS",
+    "actual": "End exam"
+  },
+  {
+    "viewport": "375",
+    "id": "KB-M14 end exam works",
+    "expected": "Enter on End Exam returns to setup",
+    "status": "PASS",
+    "actual": "Configure Your Exam Configure Your Exam "
+  }
+]

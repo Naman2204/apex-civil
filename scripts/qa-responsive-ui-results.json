@@ -1,0 +1,38 @@
+[
+  {
+    "testId": "R-375-P-Q1",
+    "feature": "Practice Q1 @ 375px",
+    "status": "PASS",
+    "actual": "scrollW=375 innerW=375"
+  },
+  {
+    "testId": "R-375-P-FB",
+    "feature": "Practice feedback @ 375px",
+    "status": "PASS",
+    "actual": "scrollW=375 innerW=375"
+  },
+  {
+    "testId": "R-375-P-RES",
+    "feature": "Practice results @ 375px",
+    "status": "PASS",
+    "actual": "scrollW=375 innerW=375"
+  },
+  {
+    "testId": "R-375-E-INSTR",
+    "feature": "Exam instructions @ 375px",
+    "status": "PASS",
+    "actual": "scrollW=375 innerW=375"
+  },
+  {
+    "testId": "R-375-E-Q1",
+    "feature": "Exam Q1 @ 375px",
+    "status": "PASS",
+    "actual": "scrollW=375 innerW=375"
+  },
+  {
+    "testId": "R-375-E-RES",
+    "feature": "Exam results @ 375px",
+    "status": "PASS",
+    "actual": "scrollW=375 innerW=375"
+  }
+]

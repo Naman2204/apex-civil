@@ -42,3 +42,6 @@ next-env.d.ts
 
 /src/generated/prisma
 backups/
+
+# desktop app workspace database (not app source; must never be scanned/tracked)
+/.freebuff/

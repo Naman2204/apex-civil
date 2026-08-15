@@ -1,0 +1,3125 @@
+[
+  {
+    "testId": "LA-010",
+    "feature": "Dashboard Edit Goal",
+    "expected": "Navigates to Settings",
+    "actual": "settings",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "nav"
+  },
+  {
+    "testId": "LA-011",
+    "feature": "Dashboard Set Target Date",
+    "expected": "Navigates to Settings",
+    "actual": "settings",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "nav"
+  },
+  {
+    "testId": "LA-012",
+    "feature": "Dashboard View All Topics",
+    "expected": "Opens Topics view",
+    "actual": "topics",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "nav"
+  },
+  {
+    "testId": "LA-013",
+    "feature": "Dashboard View All (weak)",
+    "expected": "Opens Weak Topics",
+    "actual": "weak-topics",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "nav"
+  },
+  {
+    "testId": "LA-014",
+    "feature": "Dashboard topic card",
+    "expected": "Exam setup prefilled",
+    "actual": "setup",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "nav"
+  },
+  {
+    "testId": "LA-015",
+    "feature": "Exam Setup back arrow",
+    "expected": "Returns to dashboard",
+    "actual": "dashboard",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "nav"
+  },
+  {
+    "testId": "LA-016",
+    "feature": "Exam Setup Custom time removed",
+    "expected": "No dead Custom button",
+    "actual": "absent",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "nav"
+  },
+  {
+    "testId": "LA-017",
+    "feature": "Search 'highway'",
+    "expected": "Highway Engineering",
+    "actual": "none | dbg={\"val\":[\"highway\"],\"dropdowns\":[]}",
+    "status": "FAIL",
+    "severity": "HIGH",
+    "phase": "nav"
+  },
+  {
+    "testId": "LA-018",
+    "feature": "Search nonexistent",
+    "expected": "'No matching topics found.'",
+    "actual": "No matching topics found.",
+    "status": "PASS",
+    "severity": "MEDIUM",
+    "phase": "nav"
+  },
+  {
+    "testId": "LA-019",
+    "feature": "Topics view renders",
+    "expected": "Chapters + counts",
+    "actual": "rendered",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "nav"
+  },
+  {
+    "testId": "LA-020",
+    "feature": "Bookmarks empty state",
+    "expected": "'No bookmarks yet'",
+    "actual": "empty",
+    "status": "PASS",
+    "severity": "MEDIUM",
+    "phase": "nav"
+  },
+  {
+    "testId": "LA-021",
+    "feature": "Notifications dropdown opens",
+    "expected": "Dropdown + empty state",
+    "actual": "rendered",
+    "status": "PASS",
+    "severity": "MEDIUM",
+    "phase": "nav"
+  },
+  {
+    "testId": "LA-001",
+    "feature": "Authenticated dashboard renders",
+    "expected": "Sidebar + hero",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practic",
+    "status": "PASS",
+    "severity": "CRITICAL",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-002",
+    "feature": "Total questions dynamic",
+    "expected": "8,007",
+    "actual": "shown",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-003",
+    "feature": "Welcome greeting uses first name",
+    "expected": "Not literal 'Student' only",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practice Topics Weak Topics",
+    "status": "PASS",
+    "severity": "LOW",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-010",
+    "feature": "Dashboard Edit Goal",
+    "expected": "Navigates to Settings",
+    "actual": "settings",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-011",
+    "feature": "Dashboard Set Target Date",
+    "expected": "Navigates to Settings",
+    "actual": "settings",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-012",
+    "feature": "Dashboard View All Topics",
+    "expected": "Opens Topics view",
+    "actual": "topics",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-013",
+    "feature": "Dashboard View All (weak)",
+    "expected": "Opens Weak Topics",
+    "actual": "weak-topics",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-014",
+    "feature": "Dashboard topic card",
+    "expected": "Exam setup prefilled",
+    "actual": "setup",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-015",
+    "feature": "Exam Setup back arrow",
+    "expected": "Returns to dashboard",
+    "actual": "dashboard",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-016",
+    "feature": "Exam Setup Custom time removed",
+    "expected": "No dead Custom button",
+    "actual": "absent",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-017",
+    "feature": "Search 'highway'",
+    "expected": "Highway Engineering",
+    "actual": "Highway Engineering",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-018",
+    "feature": "Search nonexistent",
+    "expected": "'No matching topics found.'",
+    "actual": "No matching topics found.",
+    "status": "PASS",
+    "severity": "MEDIUM",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-019",
+    "feature": "Topics view renders",
+    "expected": "Chapters + counts",
+    "actual": "rendered",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-020",
+    "feature": "Bookmarks empty state",
+    "expected": "'No bookmarks yet'",
+    "actual": "empty",
+    "status": "PASS",
+    "severity": "MEDIUM",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-021",
+    "feature": "Notifications dropdown opens",
+    "expected": "Dropdown + empty state",
+    "actual": "rendered",
+    "status": "PASS",
+    "severity": "MEDIUM",
+    "phase": "all"
+  },
+  {
+    "testId": "LP-001",
+    "feature": "Quick Practice → setup",
+    "expected": "Configure Your Exam",
+    "actual": "setup",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LP-002",
+    "feature": "Config: Highway + 10Q",
+    "expected": "Summary updates",
+    "actual": "configured",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LP-003",
+    "feature": "Start practice exam",
+    "expected": "Q1/10 renders",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practic",
+    "status": "PASS",
+    "severity": "CRITICAL",
+    "phase": "all"
+  },
+  {
+    "testId": "LP-004",
+    "feature": "Answered all 10",
+    "expected": "Q10 reached + finish button",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practic",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LP-005",
+    "feature": "Finish practice → results",
+    "expected": "Results screen",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practice Topics Weak Topics Bookmarks Analytics",
+    "status": "PASS",
+    "severity": "CRITICAL",
+    "phase": "all"
+  },
+  {
+    "testId": "LP-006",
+    "feature": "Retake → clean setup",
+    "expected": "Configure Your Exam",
+    "actual": "setup",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LS-001",
+    "feature": "Simulate Exam → setup",
+    "expected": "Configure Your Exam",
+    "actual": "setup",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LS-002",
+    "feature": "Strict exam starts (timer)",
+    "expected": "Timer + Q1",
+    "actual": "timer 14:55",
+    "status": "PASS",
+    "severity": "CRITICAL",
+    "phase": "all"
+  },
+  {
+    "testId": "LS-003",
+    "feature": "Strict: answer + review + palette jump",
+    "expected": "Q5 reached",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practic",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LS-004",
+    "feature": "Strict submit → results",
+    "expected": "Results + negative marking",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practice Topics Weak Topics Bookmarks Analytics Simulate Exam Perfo",
+    "status": "PASS",
+    "severity": "CRITICAL",
+    "phase": "all"
+  },
+  {
+    "testId": "LR-001",
+    "feature": "Analytics loads (KPIs)",
+    "expected": "Accuracy + questions",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practice Topics Weak Topics",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LR-002",
+    "feature": "Analytics radar real data",
+    "expected": "Chapter names from answers",
+    "actual": "Highway present",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LR-003",
+    "feature": "Performance history rows",
+    "expected": "Attempts listed",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practice Topics Weak Topics Bookmarks Analytics",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LR-004",
+    "feature": "No misleading 'View Details'",
+    "expected": "Affordance removed",
+    "actual": "absent",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LR-005",
+    "feature": "Weak topics populated",
+    "expected": "Highway with accuracy",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practice Topics Weak Topics Bookmarks Analytics",
+    "status": "PASS",
+    "severity": "MEDIUM",
+    "phase": "all"
+  },
+  {
+    "testId": "LR-006",
+    "feature": "Bookmarked question listed",
+    "expected": "Q from practice",
+    "actual": "listed",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LR-007",
+    "feature": "Reveal Answer highlights correct letter",
+    "expected": "Emerald highlight on option",
+    "actual": "{\"greenCount\":1,\"sample\":\"D3, 1, 2\"}",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LR-008",
+    "feature": "Notifications show exam completion",
+    "expected": "'Exam Completed' item",
+    "actual": "item present",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LST-001",
+    "feature": "Settings loads",
+    "expected": "Goal + date + theme + danger zone",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practice Topics Weak Topics",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LST-002",
+    "feature": "Daily goal +",
+    "expected": "Value changes",
+    "actual": "value=50",
+    "status": "PASS",
+    "severity": "MEDIUM",
+    "phase": "all"
+  },
+  {
+    "testId": "LST-003",
+    "feature": "Save settings",
+    "expected": "Persists (DB check later)",
+    "actual": "clicked",
+    "status": "PASS",
+    "severity": "MEDIUM",
+    "phase": "all"
+  },
+  {
+    "testId": "LST-004",
+    "feature": "Reset Data two-step",
+    "expected": "Confirm first, delete second",
+    "actual": "confirm=true dialog=Your progress data has been reset.",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LST-005",
+    "feature": "Reset restores defaults",
+    "expected": "Goal back to 50",
+    "actual": "50",
+    "status": "PASS",
+    "severity": "MEDIUM",
+    "phase": "all"
+  },
+  {
+    "testId": "LST-006",
+    "feature": "Theme toggle",
+    "expected": "dark false→true",
+    "actual": "dark:false→true",
+    "status": "PASS",
+    "severity": "MEDIUM",
+    "phase": "all"
+  },
+  {
+    "testId": "LL-001",
+    "feature": "Session revoked (sign out)",
+    "expected": "Session revoke succeeds",
+    "actual": "revoke=200",
+    "status": "PASS",
+    "severity": "CRITICAL",
+    "phase": "all"
+  },
+  {
+    "testId": "LL-002",
+    "feature": "Protected route after logout",
+    "expected": "Redirect to /sign-in",
+    "actual": "/sign-in?redirect_url=http%3A%2F%2Flocalhost%3A3000%2Fdashboard",
+    "status": "PASS",
+    "severity": "CRITICAL",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-001",
+    "feature": "Authenticated dashboard renders",
+    "expected": "Sidebar + hero",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practic",
+    "status": "PASS",
+    "severity": "CRITICAL",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-002",
+    "feature": "Total questions dynamic",
+    "expected": "8,007",
+    "actual": "shown",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-003",
+    "feature": "Welcome greeting uses first name",
+    "expected": "Not literal 'Student' only",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practice Topics Weak Topics",
+    "status": "PASS",
+    "severity": "LOW",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-010",
+    "feature": "Dashboard Edit Goal",
+    "expected": "Navigates to Settings",
+    "actual": "settings",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-011",
+    "feature": "Dashboard Set Target Date",
+    "expected": "Navigates to Settings",
+    "actual": "settings",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-012",
+    "feature": "Dashboard View All Topics",
+    "expected": "Opens Topics view",
+    "actual": "topics",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-013",
+    "feature": "Dashboard View All (weak)",
+    "expected": "Opens Weak Topics",
+    "actual": "weak-topics",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-014",
+    "feature": "Dashboard topic card",
+    "expected": "Exam setup prefilled",
+    "actual": "setup",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-015",
+    "feature": "Exam Setup back arrow",
+    "expected": "Returns to dashboard",
+    "actual": "dashboard",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-016",
+    "feature": "Exam Setup Custom time removed",
+    "expected": "No dead Custom button",
+    "actual": "absent",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-017",
+    "feature": "Search 'highway'",
+    "expected": "Highway Engineering",
+    "actual": "Highway Engineering",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-018",
+    "feature": "Search nonexistent",
+    "expected": "'No matching topics found.'",
+    "actual": "No matching topics found.",
+    "status": "PASS",
+    "severity": "MEDIUM",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-019",
+    "feature": "Topics view renders",
+    "expected": "Chapters + counts",
+    "actual": "rendered",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-020",
+    "feature": "Bookmarks empty state",
+    "expected": "'No bookmarks yet'",
+    "actual": "empty",
+    "status": "PASS",
+    "severity": "MEDIUM",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-021",
+    "feature": "Notifications dropdown opens",
+    "expected": "Dropdown + empty state",
+    "actual": "rendered",
+    "status": "PASS",
+    "severity": "MEDIUM",
+    "phase": "all"
+  },
+  {
+    "testId": "LP-001",
+    "feature": "Quick Practice → setup",
+    "expected": "Configure Your Exam",
+    "actual": "setup",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LP-002",
+    "feature": "Config: Highway + 10Q",
+    "expected": "Summary updates",
+    "actual": "configured",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LP-003",
+    "feature": "Start practice exam",
+    "expected": "Q1/10 renders",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practic",
+    "status": "PASS",
+    "severity": "CRITICAL",
+    "phase": "all"
+  },
+  {
+    "testId": "LP-004",
+    "feature": "Answered all 10",
+    "expected": "Q10 reached + finish button",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practic",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LP-005",
+    "feature": "Finish practice → results",
+    "expected": "Results screen",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practice Topics Weak Topics Bookmarks Analytics",
+    "status": "PASS",
+    "severity": "CRITICAL",
+    "phase": "all"
+  },
+  {
+    "testId": "LP-006",
+    "feature": "Retake → clean setup",
+    "expected": "Configure Your Exam",
+    "actual": "setup",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LS-001",
+    "feature": "Simulate Exam → setup",
+    "expected": "Configure Your Exam",
+    "actual": "setup",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LS-002",
+    "feature": "Strict exam starts (timer)",
+    "expected": "Timer + Q1",
+    "actual": "timer 14:54",
+    "status": "PASS",
+    "severity": "CRITICAL",
+    "phase": "all"
+  },
+  {
+    "testId": "LS-003",
+    "feature": "Strict: answer + review + palette jump",
+    "expected": "Q5 reached",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practic",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LS-004",
+    "feature": "Strict submit → results",
+    "expected": "Results + negative marking",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practice Topics Weak Topics Bookmarks Analytics Simulate Exam Perfo",
+    "status": "PASS",
+    "severity": "CRITICAL",
+    "phase": "all"
+  },
+  {
+    "testId": "LR-001",
+    "feature": "Analytics loads (KPIs)",
+    "expected": "Accuracy + questions",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practice Topics Weak Topics",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LR-002",
+    "feature": "Analytics radar real data",
+    "expected": "Chapter names from answers",
+    "actual": "Highway present",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LR-003",
+    "feature": "Performance history rows",
+    "expected": "Attempts listed",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practice Topics Weak Topics Bookmarks Analytics",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LR-004",
+    "feature": "No misleading 'View Details'",
+    "expected": "Affordance removed",
+    "actual": "absent",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LR-005",
+    "feature": "Weak topics populated",
+    "expected": "Highway with accuracy",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practice Topics Weak Topics Bookmarks Analytics",
+    "status": "PASS",
+    "severity": "MEDIUM",
+    "phase": "all"
+  },
+  {
+    "testId": "LR-006",
+    "feature": "Bookmarked question listed",
+    "expected": "Q from practice",
+    "actual": "listed",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LR-007",
+    "feature": "Reveal Answer highlights correct letter",
+    "expected": "Emerald highlight on option",
+    "actual": "{\"greenCount\":1,\"sample\":\"A(A) and (B)\"}",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LR-008",
+    "feature": "Notifications show exam completion",
+    "expected": "'Exam Completed' item",
+    "actual": "item present",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LST-001",
+    "feature": "Settings loads",
+    "expected": "Goal + date + theme + danger zone",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practice Topics Weak Topics",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LST-002",
+    "feature": "Daily goal +",
+    "expected": "Value changes",
+    "actual": "value=50",
+    "status": "PASS",
+    "severity": "MEDIUM",
+    "phase": "all"
+  },
+  {
+    "testId": "LST-003",
+    "feature": "Save settings",
+    "expected": "Persists (DB check later)",
+    "actual": "clicked",
+    "status": "PASS",
+    "severity": "MEDIUM",
+    "phase": "all"
+  },
+  {
+    "testId": "LST-004",
+    "feature": "Reset Data two-step",
+    "expected": "Confirm first, delete second",
+    "actual": "confirm=true dialog=Your progress data has been reset.",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LST-005",
+    "feature": "Reset restores defaults",
+    "expected": "Goal back to 50",
+    "actual": "50",
+    "status": "PASS",
+    "severity": "MEDIUM",
+    "phase": "all"
+  },
+  {
+    "testId": "LST-006",
+    "feature": "Theme toggle",
+    "expected": "dark false→true",
+    "actual": "dark:false→true",
+    "status": "PASS",
+    "severity": "MEDIUM",
+    "phase": "all"
+  },
+  {
+    "testId": "LL-001",
+    "feature": "Session revoked (sign out)",
+    "expected": "Session revoke succeeds",
+    "actual": "revoke=200",
+    "status": "PASS",
+    "severity": "CRITICAL",
+    "phase": "all"
+  },
+  {
+    "testId": "LL-002",
+    "feature": "Protected route after logout",
+    "expected": "Redirect to /sign-in",
+    "actual": "/sign-in?redirect_url=http%3A%2F%2Flocalhost%3A3000%2Fdashboard",
+    "status": "PASS",
+    "severity": "CRITICAL",
+    "phase": "all"
+  },
+  {
+    "testId": "LP-001",
+    "feature": "Quick Practice → setup",
+    "expected": "Configure Your Exam",
+    "actual": "setup",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "practice"
+  },
+  {
+    "testId": "LP-002",
+    "feature": "Config: Highway + 10Q",
+    "expected": "Summary updates",
+    "actual": "configured",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "practice"
+  },
+  {
+    "testId": "LP-003",
+    "feature": "Start practice exam",
+    "expected": "Q1/10 renders",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practic",
+    "status": "PASS",
+    "severity": "CRITICAL",
+    "phase": "practice"
+  },
+  {
+    "testId": "LP-004",
+    "feature": "Answered all 10",
+    "expected": "Q10 reached + finish button",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practic",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "practice"
+  },
+  {
+    "testId": "LP-005",
+    "feature": "Finish practice → results",
+    "expected": "Results screen",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practice Topics Weak Topics Bookmarks Analytics",
+    "status": "PASS",
+    "severity": "CRITICAL",
+    "phase": "practice"
+  },
+  {
+    "testId": "LP-006",
+    "feature": "Retake → clean setup",
+    "expected": "Configure Your Exam",
+    "actual": "setup",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "practice"
+  },
+  {
+    "testId": "LS-001",
+    "feature": "Simulate Exam → setup",
+    "expected": "Configure Your Exam",
+    "actual": "setup",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "strict"
+  },
+  {
+    "testId": "LS-002a",
+    "feature": "Strict: instructions screen",
+    "expected": "EXAM INSTRUCTIONS + Start Simulation",
+    "actual": "instructions",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "strict"
+  },
+  {
+    "testId": "LS-002",
+    "feature": "Strict exam starts (timer)",
+    "expected": "Timer + Q1",
+    "actual": "timer 14:53",
+    "status": "PASS",
+    "severity": "CRITICAL",
+    "phase": "strict"
+  },
+  {
+    "testId": "LS-003",
+    "feature": "Strict: answer + review + palette jump",
+    "expected": "Q5 reached",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practic",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "strict"
+  },
+  {
+    "testId": "LS-004",
+    "feature": "Strict submit → results",
+    "expected": "Results + negative marking",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practice Topics Weak Topics Bookmarks Analytics Simulate Exam Perfo",
+    "status": "PASS",
+    "severity": "CRITICAL",
+    "phase": "strict"
+  },
+  {
+    "testId": "LP-001",
+    "feature": "Quick Practice → setup",
+    "expected": "Configure Your Exam",
+    "actual": "setup",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "practice"
+  },
+  {
+    "testId": "LP-002",
+    "feature": "Config: Highway + 10Q",
+    "expected": "Summary updates",
+    "actual": "configured",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "practice"
+  },
+  {
+    "testId": "LP-003",
+    "feature": "Start practice exam",
+    "expected": "Q1/10 renders",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practic",
+    "status": "PASS",
+    "severity": "CRITICAL",
+    "phase": "practice"
+  },
+  {
+    "testId": "LP-004",
+    "feature": "Answered all 10",
+    "expected": "Q10 reached + finish button",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practic",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "practice"
+  },
+  {
+    "testId": "LP-005",
+    "feature": "Finish practice → results",
+    "expected": "Results screen",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practice Topics Weak Topics Bookmarks Analytics",
+    "status": "PASS",
+    "severity": "CRITICAL",
+    "phase": "practice"
+  },
+  {
+    "testId": "LP-006",
+    "feature": "Retake → clean setup",
+    "expected": "Configure Your Exam",
+    "actual": "setup",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "practice"
+  },
+  {
+    "testId": "LS-001",
+    "feature": "Simulate Exam → setup",
+    "expected": "Configure Your Exam",
+    "actual": "setup",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "strict"
+  },
+  {
+    "testId": "LS-002a",
+    "feature": "Strict: instructions screen",
+    "expected": "EXAM INSTRUCTIONS + Start Simulation",
+    "actual": "instructions",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "strict"
+  },
+  {
+    "testId": "LS-002",
+    "feature": "Strict exam starts (timer)",
+    "expected": "Timer + Q1",
+    "actual": "timer 14:54",
+    "status": "PASS",
+    "severity": "CRITICAL",
+    "phase": "strict"
+  },
+  {
+    "testId": "LS-003",
+    "feature": "Strict: answer + review + palette jump",
+    "expected": "Q5 reached",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practic",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "strict"
+  },
+  {
+    "testId": "LS-004",
+    "feature": "Strict submit → results",
+    "expected": "Results + negative marking",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practice Topics Weak Topics Bookmarks Analytics Simulate Exam Perfo",
+    "status": "PASS",
+    "severity": "CRITICAL",
+    "phase": "strict"
+  },
+  {
+    "testId": "LA-001",
+    "feature": "Authenticated dashboard renders",
+    "expected": "Sidebar + hero",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practic",
+    "status": "PASS",
+    "severity": "CRITICAL",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-002",
+    "feature": "Total questions dynamic",
+    "expected": "8,007",
+    "actual": "shown",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-003",
+    "feature": "Welcome greeting uses first name",
+    "expected": "Not literal 'Student' only",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practice Topics Weak Topics",
+    "status": "PASS",
+    "severity": "LOW",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-010",
+    "feature": "Dashboard Edit Goal",
+    "expected": "Navigates to Settings",
+    "actual": "settings",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-011",
+    "feature": "Dashboard Set Target Date",
+    "expected": "Navigates to Settings",
+    "actual": "settings",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-012",
+    "feature": "Dashboard View All Topics",
+    "expected": "Opens Topics view",
+    "actual": "topics",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-013",
+    "feature": "Dashboard View All (weak)",
+    "expected": "Opens Weak Topics",
+    "actual": "weak-topics",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-014",
+    "feature": "Dashboard topic card",
+    "expected": "Exam setup prefilled",
+    "actual": "setup",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-015",
+    "feature": "Exam Setup back arrow",
+    "expected": "Returns to dashboard",
+    "actual": "dashboard",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-016",
+    "feature": "Exam Setup Custom time removed",
+    "expected": "No dead Custom button",
+    "actual": "absent",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-017",
+    "feature": "Search 'highway'",
+    "expected": "Highway Engineering",
+    "actual": "Highway Engineering",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-018",
+    "feature": "Search nonexistent",
+    "expected": "'No matching topics found.'",
+    "actual": "No matching topics found.",
+    "status": "PASS",
+    "severity": "MEDIUM",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-019",
+    "feature": "Topics view renders",
+    "expected": "Chapters + counts",
+    "actual": "rendered",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-020",
+    "feature": "Bookmarks empty state",
+    "expected": "'No bookmarks yet'",
+    "actual": "empty",
+    "status": "PASS",
+    "severity": "MEDIUM",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-021",
+    "feature": "Notifications dropdown opens",
+    "expected": "Dropdown + empty state",
+    "actual": "rendered",
+    "status": "PASS",
+    "severity": "MEDIUM",
+    "phase": "all"
+  },
+  {
+    "testId": "LP-001",
+    "feature": "Quick Practice → setup",
+    "expected": "Configure Your Exam",
+    "actual": "setup",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LP-002",
+    "feature": "Config: Highway + 10Q",
+    "expected": "Summary updates",
+    "actual": "configured",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LP-003",
+    "feature": "Start practice exam",
+    "expected": "Q1/10 renders",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practic",
+    "status": "PASS",
+    "severity": "CRITICAL",
+    "phase": "all"
+  },
+  {
+    "testId": "LP-004",
+    "feature": "Answered all 10",
+    "expected": "Q10 reached + finish button",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practic",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LP-005",
+    "feature": "Finish practice → results",
+    "expected": "Results screen",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practice Topics Weak Topics Bookmarks Analytics",
+    "status": "PASS",
+    "severity": "CRITICAL",
+    "phase": "all"
+  },
+  {
+    "testId": "LP-006",
+    "feature": "Retake → clean setup",
+    "expected": "Configure Your Exam",
+    "actual": "setup",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LS-001",
+    "feature": "Simulate Exam → setup",
+    "expected": "Configure Your Exam",
+    "actual": "setup",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LS-002a",
+    "feature": "Strict: instructions screen",
+    "expected": "EXAM INSTRUCTIONS + Start Simulation",
+    "actual": "instructions",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LS-002",
+    "feature": "Strict exam starts (timer)",
+    "expected": "Timer + Q1",
+    "actual": "timer 14:53",
+    "status": "PASS",
+    "severity": "CRITICAL",
+    "phase": "all"
+  },
+  {
+    "testId": "LS-003",
+    "feature": "Strict: answer + review + palette jump",
+    "expected": "Q5 reached",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practic",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LS-004",
+    "feature": "Strict submit → results",
+    "expected": "Results + negative marking",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practice Topics Weak Topics Bookmarks Analytics Simulate Exam Perfo",
+    "status": "PASS",
+    "severity": "CRITICAL",
+    "phase": "all"
+  },
+  {
+    "testId": "LR-001",
+    "feature": "Analytics loads (KPIs)",
+    "expected": "Accuracy + questions",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practice Topics Weak Topics",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LR-002",
+    "feature": "Analytics radar real data",
+    "expected": "Chapter names from answers",
+    "actual": "Highway present",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LR-003",
+    "feature": "Performance history rows",
+    "expected": "Attempts listed",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practice Topics Weak Topics Bookmarks Analytics",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LR-004",
+    "feature": "No misleading 'View Details'",
+    "expected": "Affordance removed",
+    "actual": "absent",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LR-005",
+    "feature": "Weak topics populated",
+    "expected": "Highway with accuracy",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practice Topics Weak Topics Bookmarks Analytics",
+    "status": "PASS",
+    "severity": "MEDIUM",
+    "phase": "all"
+  },
+  {
+    "testId": "LR-006",
+    "feature": "Bookmarked question listed",
+    "expected": "Q from practice",
+    "actual": "EMPTY",
+    "status": "FAIL",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LR-008",
+    "feature": "Notifications show exam completion",
+    "expected": "'Exam Completed' item",
+    "actual": "item present",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LST-001",
+    "feature": "Settings loads",
+    "expected": "Goal + date + theme + danger zone",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practice Topics Weak Topics",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LST-002",
+    "feature": "Daily goal +",
+    "expected": "Value changes",
+    "actual": "value=50",
+    "status": "PASS",
+    "severity": "MEDIUM",
+    "phase": "all"
+  },
+  {
+    "testId": "LST-003",
+    "feature": "Save settings",
+    "expected": "Persists (DB check later)",
+    "actual": "clicked",
+    "status": "PASS",
+    "severity": "MEDIUM",
+    "phase": "all"
+  },
+  {
+    "testId": "LST-004",
+    "feature": "Reset Data two-step",
+    "expected": "Confirm first, delete second",
+    "actual": "confirm=true dialog=Your progress data has been reset.",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LST-005",
+    "feature": "Reset restores defaults",
+    "expected": "Goal back to 50",
+    "actual": "50",
+    "status": "PASS",
+    "severity": "MEDIUM",
+    "phase": "all"
+  },
+  {
+    "testId": "LST-006",
+    "feature": "Theme toggle",
+    "expected": "dark false→true",
+    "actual": "dark:false→true",
+    "status": "PASS",
+    "severity": "MEDIUM",
+    "phase": "all"
+  },
+  {
+    "testId": "LL-001",
+    "feature": "Session revoked (sign out)",
+    "expected": "Session revoke succeeds",
+    "actual": "revoke=200",
+    "status": "PASS",
+    "severity": "CRITICAL",
+    "phase": "all"
+  },
+  {
+    "testId": "LL-002",
+    "feature": "Protected route after logout",
+    "expected": "Redirect to /sign-in",
+    "actual": "/sign-in?redirect_url=http%3A%2F%2Flocalhost%3A3000%2Fdashboard",
+    "status": "PASS",
+    "severity": "CRITICAL",
+    "phase": "all"
+  },
+  {
+    "testId": "LP-001",
+    "feature": "Quick Practice → setup",
+    "expected": "Configure Your Exam",
+    "actual": "setup",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "practice"
+  },
+  {
+    "testId": "LP-002",
+    "feature": "Config: Highway + 10Q",
+    "expected": "Summary updates",
+    "actual": "configured",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "practice"
+  },
+  {
+    "testId": "LP-003",
+    "feature": "Start practice exam",
+    "expected": "Q1/10 renders",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practic",
+    "status": "PASS",
+    "severity": "CRITICAL",
+    "phase": "practice"
+  },
+  {
+    "testId": "LP-004",
+    "feature": "Answered all 10",
+    "expected": "Q10 reached + finish button",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practic",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "practice"
+  },
+  {
+    "testId": "LP-005",
+    "feature": "Finish practice → results",
+    "expected": "Results screen",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practice Topics Weak Topics Bookmarks Analytics",
+    "status": "PASS",
+    "severity": "CRITICAL",
+    "phase": "practice"
+  },
+  {
+    "testId": "LP-006",
+    "feature": "Retake → clean setup",
+    "expected": "Configure Your Exam",
+    "actual": "setup",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "practice"
+  },
+  {
+    "testId": "LR-001",
+    "feature": "Analytics loads (KPIs)",
+    "expected": "Accuracy + questions",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practice Topics Weak Topics",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "review"
+  },
+  {
+    "testId": "LR-002",
+    "feature": "Analytics radar real data",
+    "expected": "Chapter names from answers",
+    "actual": "empty/placeholder",
+    "status": "FAIL",
+    "severity": "HIGH",
+    "phase": "review"
+  },
+  {
+    "testId": "LR-003",
+    "feature": "Performance history rows",
+    "expected": "Attempts listed",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practice Topics Weak Topics Bookmarks Analytics",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "review"
+  },
+  {
+    "testId": "LR-004",
+    "feature": "No misleading 'View Details'",
+    "expected": "Affordance removed",
+    "actual": "absent",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "review"
+  },
+  {
+    "testId": "LR-005",
+    "feature": "Weak topics populated",
+    "expected": "Highway with accuracy",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practice Topics Weak Topics Bookmarks Analytics",
+    "status": "FAIL",
+    "severity": "MEDIUM",
+    "phase": "review"
+  },
+  {
+    "testId": "LR-006",
+    "feature": "Bookmarked question listed",
+    "expected": "Q from practice",
+    "actual": "EMPTY",
+    "status": "FAIL",
+    "severity": "HIGH",
+    "phase": "review"
+  },
+  {
+    "testId": "LR-008",
+    "feature": "Notifications show exam completion",
+    "expected": "'Exam Completed' item",
+    "actual": "empty",
+    "status": "FAIL",
+    "severity": "HIGH",
+    "phase": "review"
+  },
+  {
+    "testId": "LA-001",
+    "feature": "Authenticated dashboard renders",
+    "expected": "Sidebar + hero",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practic",
+    "status": "PASS",
+    "severity": "CRITICAL",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-002",
+    "feature": "Total questions dynamic",
+    "expected": "8,007",
+    "actual": "shown",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-003",
+    "feature": "Welcome greeting uses first name",
+    "expected": "Not literal 'Student' only",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practice Topics Weak Topics",
+    "status": "PASS",
+    "severity": "LOW",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-010",
+    "feature": "Dashboard Edit Goal",
+    "expected": "Navigates to Settings",
+    "actual": "settings",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-011",
+    "feature": "Dashboard Set Target Date",
+    "expected": "Navigates to Settings",
+    "actual": "settings",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-012",
+    "feature": "Dashboard View All Topics",
+    "expected": "Opens Topics view",
+    "actual": "topics",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-013",
+    "feature": "Dashboard View All (weak)",
+    "expected": "Opens Weak Topics",
+    "actual": "weak-topics",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-014",
+    "feature": "Dashboard topic card",
+    "expected": "Exam setup prefilled",
+    "actual": "setup",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-015",
+    "feature": "Exam Setup back arrow",
+    "expected": "Returns to dashboard",
+    "actual": "dashboard",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-016",
+    "feature": "Exam Setup Custom time removed",
+    "expected": "No dead Custom button",
+    "actual": "absent",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-017",
+    "feature": "Search 'highway'",
+    "expected": "Highway Engineering",
+    "actual": "Highway Engineering",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-018",
+    "feature": "Search nonexistent",
+    "expected": "'No matching topics found.'",
+    "actual": "No matching topics found.",
+    "status": "PASS",
+    "severity": "MEDIUM",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-019",
+    "feature": "Topics view renders",
+    "expected": "Chapters + counts",
+    "actual": "rendered",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-020",
+    "feature": "Bookmarks empty state",
+    "expected": "'No bookmarks yet'",
+    "actual": "empty",
+    "status": "PASS",
+    "severity": "MEDIUM",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-021",
+    "feature": "Notifications dropdown opens",
+    "expected": "Dropdown + empty state",
+    "actual": "rendered",
+    "status": "PASS",
+    "severity": "MEDIUM",
+    "phase": "all"
+  },
+  {
+    "testId": "LP-001",
+    "feature": "Quick Practice → setup",
+    "expected": "Configure Your Exam",
+    "actual": "setup",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LP-002",
+    "feature": "Config: Highway + 10Q",
+    "expected": "Summary updates",
+    "actual": "configured",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LP-003",
+    "feature": "Start practice exam",
+    "expected": "Q1/10 renders",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practic",
+    "status": "PASS",
+    "severity": "CRITICAL",
+    "phase": "all"
+  },
+  {
+    "testId": "LP-004",
+    "feature": "Answered all 10",
+    "expected": "Q10 reached + finish button",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practic",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LP-005",
+    "feature": "Finish practice → results",
+    "expected": "Results screen",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practice Topics Weak Topics Bookmarks Analytics",
+    "status": "PASS",
+    "severity": "CRITICAL",
+    "phase": "all"
+  },
+  {
+    "testId": "LP-006",
+    "feature": "Retake → clean setup",
+    "expected": "Configure Your Exam",
+    "actual": "setup",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LS-001",
+    "feature": "Simulate Exam → setup",
+    "expected": "Configure Your Exam",
+    "actual": "setup",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LS-002a",
+    "feature": "Strict: instructions screen",
+    "expected": "EXAM INSTRUCTIONS + Start Simulation",
+    "actual": "instructions",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LS-002",
+    "feature": "Strict exam starts (timer)",
+    "expected": "Timer + Q1",
+    "actual": "timer 14:53",
+    "status": "PASS",
+    "severity": "CRITICAL",
+    "phase": "all"
+  },
+  {
+    "testId": "LS-003",
+    "feature": "Strict: answer + review + palette jump",
+    "expected": "Q5 reached",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practic",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LS-004",
+    "feature": "Strict submit → results",
+    "expected": "Results + negative marking",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practice Topics Weak Topics Bookmarks Analytics Simulate Exam Perfo",
+    "status": "PASS",
+    "severity": "CRITICAL",
+    "phase": "all"
+  },
+  {
+    "testId": "LR-001",
+    "feature": "Analytics loads (KPIs)",
+    "expected": "Accuracy + questions",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practice Topics Weak Topics",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LR-002",
+    "feature": "Analytics radar real data",
+    "expected": "Chapter names from answers",
+    "actual": "Highway present",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LR-003",
+    "feature": "Performance history rows",
+    "expected": "Attempts listed",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practice Topics Weak Topics Bookmarks Analytics",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LR-004",
+    "feature": "No misleading 'View Details'",
+    "expected": "Affordance removed",
+    "actual": "absent",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LR-005",
+    "feature": "Weak topics populated",
+    "expected": "Highway with accuracy",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practice Topics Weak Topics Bookmarks Analytics",
+    "status": "PASS",
+    "severity": "MEDIUM",
+    "phase": "all"
+  },
+  {
+    "testId": "LR-006",
+    "feature": "Bookmarked question listed",
+    "expected": "Q from practice",
+    "actual": "listed",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LR-007",
+    "feature": "Reveal Answer highlights correct letter",
+    "expected": "Emerald highlight on option",
+    "actual": "{\"greenCount\":1,\"sample\":\"BLIDAR gun\"}",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LR-008",
+    "feature": "Notifications show exam completion",
+    "expected": "'Exam Completed' item",
+    "actual": "item present",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LST-001",
+    "feature": "Settings loads",
+    "expected": "Goal + date + theme + danger zone",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practice Topics Weak Topics",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LST-002",
+    "feature": "Daily goal +",
+    "expected": "Value changes",
+    "actual": "value=50",
+    "status": "PASS",
+    "severity": "MEDIUM",
+    "phase": "all"
+  },
+  {
+    "testId": "LST-003",
+    "feature": "Save settings",
+    "expected": "Persists (DB check later)",
+    "actual": "clicked",
+    "status": "PASS",
+    "severity": "MEDIUM",
+    "phase": "all"
+  },
+  {
+    "testId": "LST-004",
+    "feature": "Reset Data two-step",
+    "expected": "Confirm first, delete second",
+    "actual": "confirm=true dialog=Your progress data has been reset.",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LST-005",
+    "feature": "Reset restores defaults",
+    "expected": "Goal back to 50",
+    "actual": "50",
+    "status": "PASS",
+    "severity": "MEDIUM",
+    "phase": "all"
+  },
+  {
+    "testId": "LST-006",
+    "feature": "Theme toggle",
+    "expected": "dark false→true",
+    "actual": "dark:false→true",
+    "status": "PASS",
+    "severity": "MEDIUM",
+    "phase": "all"
+  },
+  {
+    "testId": "LL-001",
+    "feature": "Session revoked (sign out)",
+    "expected": "Session revoke succeeds",
+    "actual": "revoke=200",
+    "status": "PASS",
+    "severity": "CRITICAL",
+    "phase": "all"
+  },
+  {
+    "testId": "LL-002",
+    "feature": "Protected route after logout",
+    "expected": "Redirect to /sign-in",
+    "actual": "/sign-in?redirect_url=http%3A%2F%2Flocalhost%3A3000%2Fdashboard",
+    "status": "PASS",
+    "severity": "CRITICAL",
+    "phase": "all"
+  },
+  {
+    "testId": "LP-001",
+    "feature": "Quick Practice → setup",
+    "expected": "Configure Your Exam",
+    "actual": "setup",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "practice"
+  },
+  {
+    "testId": "LP-002",
+    "feature": "Config: Highway + 10Q",
+    "expected": "Summary updates",
+    "actual": "configured",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "practice"
+  },
+  {
+    "testId": "LP-003",
+    "feature": "Start practice exam",
+    "expected": "Q1/10 renders",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practic",
+    "status": "PASS",
+    "severity": "CRITICAL",
+    "phase": "practice"
+  },
+  {
+    "testId": "LP-004",
+    "feature": "Answered all 10",
+    "expected": "Q10 reached + finish button",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practic",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "practice"
+  },
+  {
+    "testId": "LP-005",
+    "feature": "Finish practice → results",
+    "expected": "Results screen",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practice Topics Weak Topics Bookmarks Analytics",
+    "status": "PASS",
+    "severity": "CRITICAL",
+    "phase": "practice"
+  },
+  {
+    "testId": "LP-006",
+    "feature": "Retake → clean setup",
+    "expected": "Configure Your Exam",
+    "actual": "setup",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "practice"
+  },
+  {
+    "testId": "LS-001",
+    "feature": "Simulate Exam → setup",
+    "expected": "Configure Your Exam",
+    "actual": "setup",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "strict"
+  },
+  {
+    "testId": "LS-002a",
+    "feature": "Strict: instructions screen",
+    "expected": "EXAM INSTRUCTIONS + Start Simulation",
+    "actual": "instructions",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "strict"
+  },
+  {
+    "testId": "LS-002",
+    "feature": "Strict exam starts (timer)",
+    "expected": "Timer + Q1",
+    "actual": "timer 14:53",
+    "status": "PASS",
+    "severity": "CRITICAL",
+    "phase": "strict"
+  },
+  {
+    "testId": "LS-003",
+    "feature": "Strict: answer + review + palette jump",
+    "expected": "Q5 reached",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practic",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "strict"
+  },
+  {
+    "testId": "LS-004",
+    "feature": "Strict submit → results",
+    "expected": "Results + negative marking",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practice Topics Weak Topics Bookmarks Analytics Simulate Exam Perfo",
+    "status": "PASS",
+    "severity": "CRITICAL",
+    "phase": "strict"
+  },
+  {
+    "testId": "LP-001",
+    "feature": "Quick Practice → setup",
+    "expected": "Configure Your Exam",
+    "actual": "setup",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "practice"
+  },
+  {
+    "testId": "LP-002",
+    "feature": "Config: Highway + 10Q",
+    "expected": "Summary updates",
+    "actual": "configured",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "practice"
+  },
+  {
+    "testId": "LP-003",
+    "feature": "Start practice exam",
+    "expected": "Q1/10 renders",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practic",
+    "status": "PASS",
+    "severity": "CRITICAL",
+    "phase": "practice"
+  },
+  {
+    "testId": "LP-004",
+    "feature": "Answered all 10",
+    "expected": "Q10 reached + finish button",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practic",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "practice"
+  },
+  {
+    "testId": "LP-005",
+    "feature": "Finish practice → results",
+    "expected": "Results screen",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practice Topics Weak Topics Bookmarks Analytics",
+    "status": "PASS",
+    "severity": "CRITICAL",
+    "phase": "practice"
+  },
+  {
+    "testId": "LP-006",
+    "feature": "Retake → clean setup",
+    "expected": "Configure Your Exam",
+    "actual": "setup",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "practice"
+  },
+  {
+    "testId": "LP-001",
+    "feature": "Quick Practice → setup",
+    "expected": "Configure Your Exam",
+    "actual": "setup",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "practice"
+  },
+  {
+    "testId": "LP-002",
+    "feature": "Config: Highway + 10Q",
+    "expected": "Summary updates",
+    "actual": "configured",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "practice"
+  },
+  {
+    "testId": "LP-003",
+    "feature": "Start practice exam",
+    "expected": "Q1/10 renders",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practic",
+    "status": "PASS",
+    "severity": "CRITICAL",
+    "phase": "practice"
+  },
+  {
+    "testId": "LP-004",
+    "feature": "Answered all 10",
+    "expected": "Q10 reached + finish button",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practic",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "practice"
+  },
+  {
+    "testId": "LP-005",
+    "feature": "Finish practice → results",
+    "expected": "Results screen",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practice Topics Weak Topics Bookmarks Analytics",
+    "status": "PASS",
+    "severity": "CRITICAL",
+    "phase": "practice"
+  },
+  {
+    "testId": "LP-006",
+    "feature": "Retake → clean setup",
+    "expected": "Configure Your Exam",
+    "actual": "setup",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "practice"
+  },
+  {
+    "testId": "LS-001",
+    "feature": "Simulate Exam → setup",
+    "expected": "Configure Your Exam",
+    "actual": "setup",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "strict"
+  },
+  {
+    "testId": "LS-002a",
+    "feature": "Strict: instructions screen",
+    "expected": "EXAM INSTRUCTIONS + Start Simulation",
+    "actual": "instructions",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "strict"
+  },
+  {
+    "testId": "LS-002",
+    "feature": "Strict exam starts (timer)",
+    "expected": "Timer + Q1",
+    "actual": "timer 14:53",
+    "status": "PASS",
+    "severity": "CRITICAL",
+    "phase": "strict"
+  },
+  {
+    "testId": "LS-003",
+    "feature": "Strict: answer + review + palette jump",
+    "expected": "Q5 reached",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practic",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "strict"
+  },
+  {
+    "testId": "LS-004",
+    "feature": "Strict submit → results",
+    "expected": "Results + negative marking",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practice Topics Weak Topics Bookmarks Analytics Simulate Exam Perfo",
+    "status": "PASS",
+    "severity": "CRITICAL",
+    "phase": "strict"
+  },
+  {
+    "testId": "LP-001",
+    "feature": "Quick Practice → setup",
+    "expected": "Configure Your Exam",
+    "actual": "setup",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "practice"
+  },
+  {
+    "testId": "LP-002",
+    "feature": "Config: Highway + 10Q",
+    "expected": "Summary updates",
+    "actual": "configured",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "practice"
+  },
+  {
+    "testId": "LP-003",
+    "feature": "Start practice exam",
+    "expected": "Q1/10 renders",
+    "actual": "ApexCivil Quick Practice Highway Engineering 0 / 10 answered",
+    "status": "PASS",
+    "severity": "CRITICAL",
+    "phase": "practice"
+  },
+  {
+    "testId": "LP-004",
+    "feature": "Answered all 10",
+    "expected": "Q10 reached + finish button",
+    "actual": "ApexCivil Quick Practice Highway Engineering 10 / 10 answere",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "practice"
+  },
+  {
+    "testId": "LP-005",
+    "feature": "Finish practice → results",
+    "expected": "Results screen",
+    "actual": "Practice Completed! 🎉 Quick Practice · Highway Engineering 1 / 10 10% Accuracy 1 CORRECT 9 INCORREC",
+    "status": "PASS",
+    "severity": "CRITICAL",
+    "phase": "practice"
+  },
+  {
+    "testId": "LP-006",
+    "feature": "Retake → clean setup",
+    "expected": "Configure Your Exam",
+    "actual": "setup",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "practice"
+  },
+  {
+    "testId": "LS-001",
+    "feature": "Simulate Exam → setup",
+    "expected": "Configure Your Exam",
+    "actual": "setup",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "strict"
+  },
+  {
+    "testId": "LS-002a",
+    "feature": "Strict: instructions screen",
+    "expected": "EXAM INSTRUCTIONS + Start Simulation",
+    "actual": "instructions",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "strict"
+  },
+  {
+    "testId": "LS-002",
+    "feature": "Strict exam starts (timer)",
+    "expected": "Timer + Q1",
+    "actual": "timer 14:54",
+    "status": "PASS",
+    "severity": "CRITICAL",
+    "phase": "strict"
+  },
+  {
+    "testId": "LS-003",
+    "feature": "Strict: answer + review + palette jump",
+    "expected": "Q5 reached",
+    "actual": "ApexCivil Simulated Exam All Chapters +1.0 / -0.25 14:49 End",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "strict"
+  },
+  {
+    "testId": "LS-004",
+    "feature": "Strict submit → results",
+    "expected": "Results + negative marking",
+    "actual": "Exam Completed Simulated Exam · All Chapters (Mixed) 0 / 25 0% Score 0 CORRECT 1 INCORRECT 24 SKIPPED 00:12 TIME TAKEN P",
+    "status": "PASS",
+    "severity": "CRITICAL",
+    "phase": "strict"
+  },
+  {
+    "testId": "LP-001",
+    "feature": "Quick Practice → setup",
+    "expected": "Configure Your Exam",
+    "actual": "setup",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "practice"
+  },
+  {
+    "testId": "LP-002",
+    "feature": "Config: Highway + 10Q",
+    "expected": "Summary updates",
+    "actual": "configured",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "practice"
+  },
+  {
+    "testId": "LP-003",
+    "feature": "Start practice exam",
+    "expected": "Q1/10 renders",
+    "actual": "Quick Practice ApexCivil Quick Practice Highway Engineering ",
+    "status": "PASS",
+    "severity": "CRITICAL",
+    "phase": "practice"
+  },
+  {
+    "testId": "LP-004",
+    "feature": "Answered all 10",
+    "expected": "Q10 reached + finish button",
+    "actual": "Quick Practice ApexCivil Quick Practice Highway Engineering ",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "practice"
+  },
+  {
+    "testId": "LP-005",
+    "feature": "Finish practice → results",
+    "expected": "Results screen",
+    "actual": "Practice Results Practice Completed! 🎉 Quick Practice · Highway Engineering 1 / 10 10% Accuracy 1 C",
+    "status": "PASS",
+    "severity": "CRITICAL",
+    "phase": "practice"
+  },
+  {
+    "testId": "LP-006",
+    "feature": "Retake → clean setup",
+    "expected": "Configure Your Exam",
+    "actual": "setup",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "practice"
+  },
+  {
+    "testId": "LS-001",
+    "feature": "Simulate Exam → setup",
+    "expected": "Configure Your Exam",
+    "actual": "setup",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "strict"
+  },
+  {
+    "testId": "LS-002a",
+    "feature": "Strict: instructions screen",
+    "expected": "EXAM INSTRUCTIONS + Start Simulation",
+    "actual": "instructions",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "strict"
+  },
+  {
+    "testId": "LS-002",
+    "feature": "Strict exam starts (timer)",
+    "expected": "Timer + Q1",
+    "actual": "timer 14:53",
+    "status": "PASS",
+    "severity": "CRITICAL",
+    "phase": "strict"
+  },
+  {
+    "testId": "LS-003",
+    "feature": "Strict: answer + review + palette jump",
+    "expected": "Q5 reached",
+    "actual": "Simulated Exam ApexCivil Simulated Exam All Chapters +1.0 / ",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "strict"
+  },
+  {
+    "testId": "LS-004",
+    "feature": "Strict submit → results",
+    "expected": "Results + negative marking",
+    "actual": "Exam Results Exam Completed Simulated Exam · All Chapters (Mixed) 0 / 25 0% Score 0 CORRECT 1 INCORRECT 24 SKIPPED 00:13",
+    "status": "PASS",
+    "severity": "CRITICAL",
+    "phase": "strict"
+  },
+  {
+    "testId": "LA-001",
+    "feature": "Authenticated dashboard renders",
+    "expected": "Sidebar + hero",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practic",
+    "status": "PASS",
+    "severity": "CRITICAL",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-002",
+    "feature": "Total questions dynamic",
+    "expected": "8,007",
+    "actual": "shown",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-003",
+    "feature": "Welcome greeting uses first name",
+    "expected": "Not literal 'Student' only",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practice Topics Weak Topics",
+    "status": "PASS",
+    "severity": "LOW",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-010",
+    "feature": "Dashboard Edit Goal",
+    "expected": "Navigates to Settings",
+    "actual": "settings",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-011",
+    "feature": "Dashboard Set Target Date",
+    "expected": "Navigates to Settings",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practic",
+    "status": "FAIL",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-012",
+    "feature": "Dashboard View All Topics",
+    "expected": "Opens Topics view",
+    "actual": "topics",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-013",
+    "feature": "Dashboard View All (weak)",
+    "expected": "Opens Weak Topics",
+    "actual": "weak-topics",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-014",
+    "feature": "Dashboard topic card",
+    "expected": "Exam setup prefilled",
+    "actual": "setup",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-015",
+    "feature": "Exam Setup back arrow",
+    "expected": "Returns to dashboard",
+    "actual": "dashboard",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-016",
+    "feature": "Exam Setup Custom time removed",
+    "expected": "No dead Custom button",
+    "actual": "absent",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-017",
+    "feature": "Search 'highway'",
+    "expected": "Highway Engineering",
+    "actual": "Highway Engineering",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-018",
+    "feature": "Search nonexistent",
+    "expected": "'No matching topics found.'",
+    "actual": "No matching topics found.",
+    "status": "PASS",
+    "severity": "MEDIUM",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-019",
+    "feature": "Topics view renders",
+    "expected": "Chapters + counts",
+    "actual": "rendered",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-020",
+    "feature": "Bookmarks empty state",
+    "expected": "'No bookmarks yet'",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practic",
+    "status": "FAIL",
+    "severity": "MEDIUM",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-021",
+    "feature": "Notifications dropdown opens",
+    "expected": "Dropdown + empty state",
+    "actual": "rendered",
+    "status": "FAIL",
+    "severity": "MEDIUM",
+    "phase": "all"
+  },
+  {
+    "testId": "LP-001",
+    "feature": "Quick Practice → setup",
+    "expected": "Configure Your Exam",
+    "actual": "setup",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LP-002",
+    "feature": "Config: Highway + 10Q",
+    "expected": "Summary updates",
+    "actual": "configured",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LP-003",
+    "feature": "Start practice exam",
+    "expected": "Q1/10 renders",
+    "actual": "Quick Practice ApexCivil Quick Practice Highway Engineering ",
+    "status": "PASS",
+    "severity": "CRITICAL",
+    "phase": "all"
+  },
+  {
+    "testId": "LP-004",
+    "feature": "Answered all 10",
+    "expected": "Q10 reached + finish button",
+    "actual": "Quick Practice ApexCivil Quick Practice Highway Engineering ",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LP-005",
+    "feature": "Finish practice → results",
+    "expected": "Results screen",
+    "actual": "Practice Results Practice Completed! 🎉 Quick Practice · Highway Engineering 2 / 10 20% Accuracy 2 C",
+    "status": "PASS",
+    "severity": "CRITICAL",
+    "phase": "all"
+  },
+  {
+    "testId": "LP-006",
+    "feature": "Retake → clean setup",
+    "expected": "Configure Your Exam",
+    "actual": "setup",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LS-001",
+    "feature": "Simulate Exam → setup",
+    "expected": "Configure Your Exam",
+    "actual": "setup",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LS-002a",
+    "feature": "Strict: instructions screen",
+    "expected": "EXAM INSTRUCTIONS + Start Simulation",
+    "actual": "instructions",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LS-002",
+    "feature": "Strict exam starts (timer)",
+    "expected": "Timer + Q1",
+    "actual": "timer 14:54",
+    "status": "PASS",
+    "severity": "CRITICAL",
+    "phase": "all"
+  },
+  {
+    "testId": "LS-003",
+    "feature": "Strict: answer + review + palette jump",
+    "expected": "Q5 reached",
+    "actual": "Simulated Exam ApexCivil Simulated Exam All Chapters +1.0 / ",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LS-004",
+    "feature": "Strict submit → results",
+    "expected": "Results + negative marking",
+    "actual": "Exam Results Exam Completed Simulated Exam · All Chapters (Mixed) 0 / 25 0% Score 0 CORRECT 1 INCORRECT 24 SKIPPED 00:12",
+    "status": "PASS",
+    "severity": "CRITICAL",
+    "phase": "all"
+  },
+  {
+    "testId": "LR-001",
+    "feature": "Analytics loads (KPIs)",
+    "expected": "Accuracy + questions",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practice Topics Weak Topics",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LR-002",
+    "feature": "Analytics radar real data",
+    "expected": "Chapter names from answers",
+    "actual": "Highway present",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LR-003",
+    "feature": "Performance history rows",
+    "expected": "Attempts listed",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practice Topics Weak Topics Bookmarks Analytics",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LR-004",
+    "feature": "No misleading 'View Details'",
+    "expected": "Affordance removed",
+    "actual": "absent",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LR-005",
+    "feature": "Weak topics populated",
+    "expected": "Highway with accuracy",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practice Topics Weak Topics Bookmarks Analytics",
+    "status": "PASS",
+    "severity": "MEDIUM",
+    "phase": "all"
+  },
+  {
+    "testId": "LR-006",
+    "feature": "Bookmarked question listed",
+    "expected": "Q from practice",
+    "actual": "listed",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LR-007",
+    "feature": "Reveal Answer highlights correct letter",
+    "expected": "Emerald highlight on option",
+    "actual": "{\"greenCount\":1,\"sample\":\"DCompulsory Turn / R\"}",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LR-008",
+    "feature": "Notifications show exam completion",
+    "expected": "'Exam Completed' item",
+    "actual": "item present",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LST-001",
+    "feature": "Settings loads",
+    "expected": "Goal + date + theme + danger zone",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practice Topics Weak Topics",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LST-002",
+    "feature": "Daily goal +",
+    "expected": "Value changes",
+    "actual": "value=50",
+    "status": "PASS",
+    "severity": "MEDIUM",
+    "phase": "all"
+  },
+  {
+    "testId": "LST-003",
+    "feature": "Save settings",
+    "expected": "Persists (DB check later)",
+    "actual": "clicked",
+    "status": "PASS",
+    "severity": "MEDIUM",
+    "phase": "all"
+  },
+  {
+    "testId": "LST-004",
+    "feature": "Reset Data two-step",
+    "expected": "Confirm first, delete second",
+    "actual": "confirm=true dialog=Your progress data has been reset.",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "all"
+  },
+  {
+    "testId": "LST-005",
+    "feature": "Reset restores defaults",
+    "expected": "Goal back to 50",
+    "actual": "50",
+    "status": "PASS",
+    "severity": "MEDIUM",
+    "phase": "all"
+  },
+  {
+    "testId": "LST-006",
+    "feature": "Theme toggle",
+    "expected": "dark false→true",
+    "actual": "dark:false→true",
+    "status": "PASS",
+    "severity": "MEDIUM",
+    "phase": "all"
+  },
+  {
+    "testId": "LL-001",
+    "feature": "Session revoked (sign out)",
+    "expected": "Session revoke succeeds",
+    "actual": "revoke=200",
+    "status": "PASS",
+    "severity": "CRITICAL",
+    "phase": "all"
+  },
+  {
+    "testId": "LL-002",
+    "feature": "Protected route after logout",
+    "expected": "Redirect to /sign-in",
+    "actual": "/sign-in?redirect_url=http%3A%2F%2Flocalhost%3A3000%2Fdashboard",
+    "status": "PASS",
+    "severity": "CRITICAL",
+    "phase": "all"
+  },
+  {
+    "testId": "LA-010",
+    "feature": "Dashboard Edit Goal",
+    "expected": "Navigates to Settings",
+    "actual": "settings",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "nav"
+  },
+  {
+    "testId": "LA-011",
+    "feature": "Dashboard Set Target Date",
+    "expected": "Navigates to Settings",
+    "actual": "settings",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "nav"
+  },
+  {
+    "testId": "LA-012",
+    "feature": "Dashboard View All Topics",
+    "expected": "Opens Topics view",
+    "actual": "topics",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "nav"
+  },
+  {
+    "testId": "LA-013",
+    "feature": "Dashboard View All (weak)",
+    "expected": "Opens Weak Topics",
+    "actual": "weak-topics",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "nav"
+  },
+  {
+    "testId": "LA-014",
+    "feature": "Dashboard topic card",
+    "expected": "Exam setup prefilled",
+    "actual": "setup",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "nav"
+  },
+  {
+    "testId": "LA-015",
+    "feature": "Exam Setup back arrow",
+    "expected": "Returns to dashboard",
+    "actual": "dashboard",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "nav"
+  },
+  {
+    "testId": "LA-016",
+    "feature": "Exam Setup Custom time removed",
+    "expected": "No dead Custom button",
+    "actual": "absent",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "nav"
+  },
+  {
+    "testId": "LA-017",
+    "feature": "Search 'highway'",
+    "expected": "Highway Engineering",
+    "actual": "Highway Engineering",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "nav"
+  },
+  {
+    "testId": "LA-018",
+    "feature": "Search nonexistent",
+    "expected": "'No matching topics found.'",
+    "actual": "No matching topics found.",
+    "status": "PASS",
+    "severity": "MEDIUM",
+    "phase": "nav"
+  },
+  {
+    "testId": "LA-019",
+    "feature": "Topics view renders",
+    "expected": "Chapters + counts",
+    "actual": "rendered",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "nav"
+  },
+  {
+    "testId": "LA-020",
+    "feature": "Bookmarks empty state",
+    "expected": "'No bookmarks yet'",
+    "actual": "empty",
+    "status": "PASS",
+    "severity": "MEDIUM",
+    "phase": "nav"
+  },
+  {
+    "testId": "LA-021",
+    "feature": "Notifications dropdown opens",
+    "expected": "Dropdown + empty state",
+    "actual": "rendered",
+    "status": "PASS",
+    "severity": "MEDIUM",
+    "phase": "nav"
+  },
+  {
+    "testId": "LA-010",
+    "feature": "Dashboard Edit Goal",
+    "expected": "Navigates to Settings",
+    "actual": "settings",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "nav"
+  },
+  {
+    "testId": "LA-011",
+    "feature": "Dashboard Set Target Date",
+    "expected": "Navigates to Settings",
+    "actual": "settings",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "nav"
+  },
+  {
+    "testId": "LA-012",
+    "feature": "Dashboard View All Topics",
+    "expected": "Opens Topics view",
+    "actual": "topics",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "nav"
+  },
+  {
+    "testId": "LA-013",
+    "feature": "Dashboard View All (weak)",
+    "expected": "Opens Weak Topics",
+    "actual": "weak-topics",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "nav"
+  },
+  {
+    "testId": "LA-014",
+    "feature": "Dashboard topic card",
+    "expected": "Exam setup prefilled",
+    "actual": "setup",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "nav"
+  },
+  {
+    "testId": "LA-015",
+    "feature": "Exam Setup back arrow",
+    "expected": "Returns to dashboard",
+    "actual": "dashboard",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "nav"
+  },
+  {
+    "testId": "LA-016",
+    "feature": "Exam Setup Custom time removed",
+    "expected": "No dead Custom button",
+    "actual": "absent",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "nav"
+  },
+  {
+    "testId": "LA-017",
+    "feature": "Search 'highway'",
+    "expected": "Highway Engineering",
+    "actual": "Highway Engineering",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "nav"
+  },
+  {
+    "testId": "LA-018",
+    "feature": "Search nonexistent",
+    "expected": "'No matching topics found.'",
+    "actual": "No matching topics found.",
+    "status": "PASS",
+    "severity": "MEDIUM",
+    "phase": "nav"
+  },
+  {
+    "testId": "LA-019",
+    "feature": "Topics view renders",
+    "expected": "Chapters + counts",
+    "actual": "rendered",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "nav"
+  },
+  {
+    "testId": "LA-020",
+    "feature": "Bookmarks empty state",
+    "expected": "'No bookmarks yet'",
+    "actual": "empty",
+    "status": "PASS",
+    "severity": "MEDIUM",
+    "phase": "nav"
+  },
+  {
+    "testId": "LA-021",
+    "feature": "Notifications dropdown opens",
+    "expected": "Dropdown + empty state",
+    "actual": "rendered",
+    "status": "PASS",
+    "severity": "MEDIUM",
+    "phase": "nav"
+  },
+  {
+    "testId": "LP-001",
+    "feature": "Quick Practice → setup",
+    "expected": "Configure Your Exam",
+    "actual": "setup",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "practice"
+  },
+  {
+    "testId": "LP-002",
+    "feature": "Config: Highway + 10Q",
+    "expected": "Summary updates",
+    "actual": "configured",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "practice"
+  },
+  {
+    "testId": "LP-003",
+    "feature": "Start practice exam",
+    "expected": "Q1/10 renders",
+    "actual": "Quick Practice ApexCivil Quick Practice Highway Engineering ",
+    "status": "PASS",
+    "severity": "CRITICAL",
+    "phase": "practice"
+  },
+  {
+    "testId": "LP-004",
+    "feature": "Answered all 10",
+    "expected": "Q10 reached + finish button",
+    "actual": "Quick Practice ApexCivil Quick Practice Highway Engineering ",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "practice"
+  },
+  {
+    "testId": "LP-005",
+    "feature": "Finish practice → results",
+    "expected": "Results screen",
+    "actual": "Practice Results Practice Completed! 🎉 Quick Practice · Highway Engineering 2 / 10 20% Accuracy 2 C",
+    "status": "PASS",
+    "severity": "CRITICAL",
+    "phase": "practice"
+  },
+  {
+    "testId": "LP-006",
+    "feature": "Retake → clean setup",
+    "expected": "Configure Your Exam",
+    "actual": "setup",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "practice"
+  },
+  {
+    "testId": "LS-001",
+    "feature": "Simulate Exam → setup",
+    "expected": "Configure Your Exam",
+    "actual": "setup",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "strict"
+  },
+  {
+    "testId": "LS-002a",
+    "feature": "Strict: instructions screen",
+    "expected": "EXAM INSTRUCTIONS + Start Simulation",
+    "actual": "instructions",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "strict"
+  },
+  {
+    "testId": "LS-002",
+    "feature": "Strict exam starts (timer)",
+    "expected": "Timer + Q1",
+    "actual": "timer 14:55",
+    "status": "PASS",
+    "severity": "CRITICAL",
+    "phase": "strict"
+  },
+  {
+    "testId": "LS-003",
+    "feature": "Strict: answer + review + palette jump",
+    "expected": "Q5 reached",
+    "actual": "Simulated Exam ApexCivil Simulated Exam All Chapters +1.0 / ",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "strict"
+  },
+  {
+    "testId": "LS-004",
+    "feature": "Strict submit → results",
+    "expected": "Results + negative marking",
+    "actual": "Exam Results Exam Completed Simulated Exam · All Chapters (Mixed) 1 / 25 4% Score 1 CORRECT 0 INCORRECT 24 SKIPPED 00:11",
+    "status": "PASS",
+    "severity": "CRITICAL",
+    "phase": "strict"
+  },
+  {
+    "testId": "LR-001",
+    "feature": "Analytics loads (KPIs)",
+    "expected": "Accuracy + questions",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practice Topics Weak Topics",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "review"
+  },
+  {
+    "testId": "LR-002",
+    "feature": "Analytics radar real data",
+    "expected": "Chapter names from answers",
+    "actual": "Highway present",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "review"
+  },
+  {
+    "testId": "LR-003",
+    "feature": "Performance history rows",
+    "expected": "Attempts listed",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practice Topics Weak Topics Bookmarks Analytics",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "review"
+  },
+  {
+    "testId": "LR-004",
+    "feature": "No misleading 'View Details'",
+    "expected": "Affordance removed",
+    "actual": "absent",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "review"
+  },
+  {
+    "testId": "LR-005",
+    "feature": "Weak topics populated",
+    "expected": "Highway with accuracy",
+    "actual": "Apex Civil CIVIL ENGINEERING MASTERY Dashboard Quick Practice Topics Weak Topics Bookmarks Analytics",
+    "status": "PASS",
+    "severity": "MEDIUM",
+    "phase": "review"
+  },
+  {
+    "testId": "LR-006",
+    "feature": "Bookmarked question listed",
+    "expected": "Q from practice",
+    "actual": "listed",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "review"
+  },
+  {
+    "testId": "LR-007",
+    "feature": "Reveal Answer highlights correct letter",
+    "expected": "Emerald highlight on option",
+    "actual": "{\"greenCount\":1,\"sample\":\"DTo ensure that road\"}",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "review"
+  },
+  {
+    "testId": "LR-008",
+    "feature": "Notifications show exam completion",
+    "expected": "'Exam Completed' item",
+    "actual": "item present",
+    "status": "PASS",
+    "severity": "HIGH",
+    "phase": "review"
+  }
+]

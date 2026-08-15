@@ -1,0 +1,236 @@
+[
+  {
+    "id": "SEC-01a",
+    "feature": "getQuestionsForExam returns rows for legit params",
+    "status": "PASS",
+    "detail": "rows=3"
+  },
+  {
+    "id": "SEC-01b1",
+    "feature": "injection payload \"' OR 1=1 --\" is inert",
+    "status": "PASS",
+    "detail": "rows=0 status=200"
+  },
+  {
+    "id": "SEC-01b2",
+    "feature": "injection payload \"\\\" OR 1=1 --\" is inert",
+    "status": "PASS",
+    "detail": "rows=0 status=200"
+  },
+  {
+    "id": "SEC-01b3",
+    "feature": "injection payload \"x' OR '1'='1\" is inert",
+    "status": "PASS",
+    "detail": "rows=0 status=200"
+  },
+  {
+    "id": "SEC-01b4",
+    "feature": "injection payload \"'; DROP TABLE \\\"Question\\\"; --\" is inert",
+    "status": "PASS",
+    "detail": "rows=0 status=200"
+  },
+  {
+    "id": "SEC-01b5",
+    "feature": "injection payload \"' OR 1=1 --\" is inert",
+    "status": "PASS",
+    "detail": "rows=null status=500"
+  },
+  {
+    "id": "SEC-01b6",
+    "feature": "injection payload \"Hard'; DROP TABLE --\" is inert",
+    "status": "PASS",
+    "detail": "rows=null status=500"
+  },
+  {
+    "id": "SEC-01c1",
+    "feature": "limit 999999 rejected",
+    "status": "PASS",
+    "detail": "status=500"
+  },
+  {
+    "id": "SEC-01c2",
+    "feature": "limit 0 rejected",
+    "status": "PASS",
+    "detail": "status=500"
+  },
+  {
+    "id": "SEC-01c3",
+    "feature": "limit -5 rejected",
+    "status": "PASS",
+    "detail": "status=500"
+  },
+  {
+    "id": "SEC-01c4",
+    "feature": "limit \"5; DROP TABLE\" rejected",
+    "status": "PASS",
+    "detail": "status=500"
+  },
+  {
+    "id": "SEC-01d",
+    "feature": "over-long chapter rejected",
+    "status": "PASS",
+    "detail": "status=500"
+  },
+  {
+    "id": "SEC-01e",
+    "feature": "unauthenticated getQuestionsForExam fails",
+    "status": "PASS",
+    "detail": "status=500"
+  },
+  {
+    "id": "SEC-02a",
+    "feature": "victim starts own attempt",
+    "status": "PASS",
+    "detail": "cmsunjj4o00p"
+  },
+  {
+    "id": "SEC-02b",
+    "feature": "attacker cannot finish victim's attempt (IDOR)",
+    "status": "PASS",
+    "detail": "completedAt=null"
+  },
+  {
+    "id": "SEC-02c",
+    "feature": "attacker cannot finish via finishExamAttempt either",
+    "status": "PASS",
+    "detail": "completedAt=null"
+  },
+  {
+    "id": "SEC-02d",
+    "feature": "unauthenticated finish fails, attempt untouched",
+    "status": "PASS",
+    "detail": "status=500"
+  },
+  {
+    "id": "SEC-02e",
+    "feature": "victim finishes own attempt",
+    "status": "PASS",
+    "detail": "completedAt=set score=0 C0 W0 S5/5"
+  },
+  {
+    "id": "SEC-02f",
+    "feature": "C+W+S = total after finish",
+    "status": "PASS",
+    "detail": "0+0+5=5"
+  },
+  {
+    "id": "SEC-02g",
+    "feature": "re-finishing a completed attempt is a no-op",
+    "status": "PASS",
+    "detail": "score=0→0 answers=0→0"
+  },
+  {
+    "id": "SEC-02h",
+    "feature": "re-finish does not create duplicate notification",
+    "status": "PASS",
+    "detail": "22→22"
+  },
+  {
+    "id": "SEC-02i",
+    "feature": "concurrent finish produces single completion",
+    "status": "PASS",
+    "detail": "completedAt=set answerRows=0"
+  },
+  {
+    "id": "SEC-02j",
+    "feature": "concurrent finish does not duplicate answer rows",
+    "status": "PASS",
+    "detail": "answerRows=0"
+  },
+  {
+    "id": "SEC-03a",
+    "feature": "attacker cannot save answer to victim's attempt",
+    "status": "PASS",
+    "detail": "answerRows=0 status=500"
+  },
+  {
+    "id": "SEC-03b",
+    "feature": "client isCorrect=true ignored; server computes false",
+    "status": "PASS",
+    "detail": "isCorrect=false selected=A"
+  },
+  {
+    "id": "SEC-03c",
+    "feature": "client isCorrect=false ignored; server computes true",
+    "status": "PASS",
+    "detail": "isCorrect=true selected=B"
+  },
+  {
+    "id": "SEC-03d",
+    "feature": "no duplicate answer rows after re-save",
+    "status": "PASS",
+    "detail": "rows=1"
+  },
+  {
+    "id": "SEC-03e",
+    "feature": "answers cannot be modified after completion",
+    "status": "PASS",
+    "detail": "selected=B"
+  },
+  {
+    "id": "SEC-03f",
+    "feature": "C+W+S=total for completed attempt",
+    "status": "PASS",
+    "detail": "1+0+4=5"
+  },
+  {
+    "id": "SEC-04a",
+    "feature": "exam completion creates notification for session user",
+    "status": "PASS",
+    "detail": "userId=true"
+  },
+  {
+    "id": "SEC-04b",
+    "feature": "victim's finish does not notify attacker",
+    "status": "PASS",
+    "detail": "attacker notifs=0"
+  },
+  {
+    "id": "SEC-05a",
+    "feature": "DB stores answer B (not stale A)",
+    "status": "PASS",
+    "detail": "selected=A"
+  },
+  {
+    "id": "SEC-05b",
+    "feature": "DB isCorrect for q1 = false (server-computed)",
+    "status": "PASS",
+    "detail": "isCorrect=false"
+  },
+  {
+    "id": "SEC-05c",
+    "feature": "no duplicate row retained for changed answer",
+    "status": "PASS",
+    "detail": "rows=1"
+  },
+  {
+    "id": "SEC-05d",
+    "feature": "C+W+S = total",
+    "status": "PASS",
+    "detail": "C1 W2 S5 = 8"
+  },
+  {
+    "id": "SEC-05e",
+    "feature": "score matches formula from final answers",
+    "status": "PASS",
+    "detail": "score=13 expected=13"
+  },
+  {
+    "id": "SEC-05f",
+    "feature": "skipped questions have no answer rows",
+    "status": "PASS",
+    "detail": "rows=3 answered=3"
+  },
+  {
+    "id": "SEC-05g",
+    "feature": "no blank answer rows for skipped questions",
+    "status": "PASS",
+    "detail": "blankRows=0"
+  },
+  {
+    "id": "SEC-01f",
+    "feature": "injection bound as parameter → 0 rows; raw interpolation would match all (8007)",
+    "status": "PASS",
+    "detail": "bound=0 rawN=8007"
+  }
+]

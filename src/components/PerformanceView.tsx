@@ -1,111 +1,191 @@
 "use client";
-import React, { useEffect, useState } from 'react';
-import { Activity, Clock, Target, CheckCircle2, XCircle } from 'lucide-react';
-import { getExamHistory } from '../app/actions/analytics';
+import React, { useEffect, useState } from "react";
+import { Activity, CalendarDays, Clock, Layers, Trophy, ChevronDown } from "lucide-react";
+import { getExamHistory } from "../app/actions/analytics";
+import { EmptyState, Btn } from "./ui/primitives";
 
-export const PerformanceView: React.FC = () => {
-  const [history, setHistory] = useState<any[]>([]);
+interface HistoryRecord {
+  id: string;
+  date: string;
+  mode: string;
+  topic: string;
+  score: number;
+  total: number;
+  time: string;
+}
+
+/* Radial score ring (reference attempt-card treatment) */
+function ScoreRing({ pct, score, total, size = 64, stroke = 5 }: { pct: number; score: number; total: number; size?: number; stroke?: number }) {
+  const r = (size - stroke) / 2;
+  const c = 2 * Math.PI * r;
+  const p = Math.max(0, Math.min(100, pct));
+  const color = p >= 75 ? "#34d399" : p >= 50 ? "#fbbf24" : "#fb7185";
+  return (
+    <div className="relative shrink-0" style={{ width: size, height: size }}>
+      <svg viewBox={`0 0 ${size} ${size}`} className="w-full h-full -rotate-90">
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="rgba(148,163,184,0.15)" strokeWidth={stroke} />
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={r}
+          fill="none"
+          stroke={color}
+          strokeWidth={stroke}
+          strokeLinecap="round"
+          strokeDasharray={`${(p / 100) * c} ${c}`}
+          style={{ filter: `drop-shadow(0 0 6px ${color}66)` }}
+        />
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <span className="text-sm font-black text-app-text leading-none">{p}%</span>
+        <span className="text-[9px] font-bold text-app-faint mt-0.5">
+          {score}/{total}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+const selectCls =
+  "appearance-none bg-app-card/80 border border-app-border rounded-xl pl-4 pr-9 py-2.5 text-sm font-semibold text-app-muted focus:outline-none focus:border-accent/60 transition-colors cursor-pointer";
+
+export const PerformanceView: React.FC<{ onStartExam?: () => void }> = ({ onStartExam }) => {
+  const [history, setHistory] = useState<HistoryRecord[]>([]);
   const [loading, setLoading] = useState(true);
+  const [sort, setSort] = useState<"newest" | "oldest">("newest");
+  const [subject, setSubject] = useState("All");
 
   useEffect(() => {
+    let cancelled = false;
     async function fetchHistory() {
       try {
         const data = await getExamHistory();
-        setHistory(data);
+        if (!cancelled) setHistory(data as HistoryRecord[]);
       } catch (err) {
         console.error("Failed to fetch history:", err);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     }
     fetchHistory();
+    return () => { cancelled = true; };
   }, []);
 
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[50vh]">
+        <div className="w-12 h-12 rounded-2xl bg-accent-soft/60 text-accent-bright flex items-center justify-center animate-pulse mb-4">
+          <Activity className="w-6 h-6" />
+        </div>
+        <p className="text-sm text-app-muted font-medium">Loading performance history…</p>
+      </div>
+    );
+  }
+
+  const subjects = [...new Set(history.map(h => h.topic))].sort();
+  const filtered = history
+    .filter(h => subject === "All" || h.topic === subject)
+    .sort((a, b) => {
+      const ta = new Date(a.date).getTime() || 0;
+      const tb = new Date(b.date).getTime() || 0;
+      return sort === "newest" ? tb - ta : ta - tb;
+    });
+
   return (
-    <div className="space-y-6 w-full pb-12 animate-in fade-in duration-500">
-      
-      {/* Header */}
-      <div className="flex items-center justify-between mb-8">
-        <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-500/10 flex items-center justify-center transition-colors">
-            <Activity className="w-5 h-5 text-amber-500 dark:text-amber-400" />
-          </div>
-          <div>
-            <h2 className="text-2xl font-bold text-slate-900 dark:text-white transition-colors">Performance History</h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400 transition-colors">Review your past attempts and track improvements.</p>
-          </div>
-        </div>
+    <div className="w-full pb-12 space-y-6">
+      {/* Header — reference placement */}
+      <div>
+        <h1 className="text-2xl sm:text-[28px] font-extrabold tracking-tight text-app-text leading-tight">
+          Performance History
+        </h1>
+        <p className="text-sm text-app-muted mt-1">
+          Review your past attempts and track improvements.
+        </p>
       </div>
 
-      {/* History List */}
-      <div className="bg-white dark:bg-[#131627] border border-slate-200 dark:border-slate-800/80 rounded-2xl overflow-hidden transition-colors shadow-sm dark:shadow-none">
-        
-        <div className="grid grid-cols-12 gap-4 px-6 py-4 bg-slate-50 dark:bg-[#0A0C18] border-b border-slate-200 dark:border-slate-800/80 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider transition-colors">
-          <div className="col-span-4 md:col-span-3">Date</div>
-          <div className="col-span-4 md:col-span-3 hidden md:block">Topic</div>
-          <div className="col-span-3 md:col-span-2">Mode</div>
-          <div className="col-span-3 md:col-span-2 text-center">Score</div>
-          <div className="col-span-2 text-right hidden md:block">Time</div>
-        </div>
+      {history.length === 0 ? (
+        <EmptyState
+          icon={Trophy}
+          title="No attempts recorded"
+          message="Complete a practice or strict exam to start building your performance history."
+          action={<Btn onClick={onStartExam}>Take an Exam</Btn>}
+        />
+      ) : (
+        <>
+          {/* Sort / filter controls (reference placement) */}
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="relative">
+              <select value={sort} onChange={e => setSort(e.target.value as any)} className={selectCls}>
+                <option value="newest">Sort By Date</option>
+                <option value="oldest">Oldest First</option>
+              </select>
+              <ChevronDown className="w-4 h-4 text-app-faint absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            </div>
+            <div className="relative">
+              <select value={subject} onChange={e => setSubject(e.target.value)} className={selectCls}>
+                <option value="All">Filter By Subject</option>
+                {subjects.map(s => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
+              <ChevronDown className="w-4 h-4 text-app-faint absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            </div>
+          </div>
 
-        <div className="divide-y divide-slate-100 dark:divide-slate-800/50">
-          {history.map((record) => {
-            const percentage = Math.round((record.score / record.total) * 100);
-            const isGood = percentage >= 75;
-            
-            return (
-              <div key={record.id} className="grid grid-cols-12 gap-4 px-6 py-5 items-center transition-colors">
-                
-                {/* Date */}
-                <div className="col-span-4 md:col-span-3">
-                  <div className="text-sm font-bold text-slate-800 dark:text-slate-200 transition-colors">{record.date}</div>
-                  <div className="text-[10px] text-slate-500 md:hidden mt-0.5">{record.topic}</div>
-                </div>
-                
-                {/* Topic (Desktop) */}
-                <div className="col-span-4 md:col-span-3 hidden md:block">
-                  <div className="text-sm font-bold text-slate-700 dark:text-slate-300 truncate transition-colors">{record.topic}</div>
-                </div>
+          {/* Stacked attempt cards */}
+          <div className="space-y-4">
+            {filtered.length === 0 ? (
+              <EmptyState
+                icon={Activity}
+                title="No matches"
+                message={`No attempts for "${subject}". Try a different subject filter.`}
+                action={<Btn variant="secondary" onClick={() => setSubject("All")}>Show All</Btn>}
+              />
+            ) : (
+              filtered.map(record => {
+                const percentage = Math.round((record.score / record.total) * 100);
+                const strict = record.mode === "Strict Exam";
+                return (
+                  <div
+                    key={record.id}
+                    className="rounded-2xl p-[1px] bg-gradient-to-r from-purple-500/50 via-indigo-500/30 to-purple-500/50 shadow-[0_0_18px_rgba(139,92,246,0.14)]"
+                  >
+                    <div className="rounded-[15px] bg-[#0b0f1d] px-5 py-4 flex flex-wrap items-center gap-x-6 gap-y-4">
+                      <div className="flex items-center gap-2 w-36 shrink-0">
+                        <CalendarDays className="w-4 h-4 text-app-faint shrink-0" />
+                        <span className="text-sm font-bold text-app-text">{record.date}</span>
+                      </div>
 
-                {/* Mode */}
-                <div className="col-span-3 md:col-span-2">
-                  <span className={`inline-flex items-center px-2 py-1 rounded-md text-[10px] font-bold transition-colors ${
-                    record.mode === 'Strict Exam' ? 'bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
-                  }`}>
-                    {record.mode}
-                  </span>
-                </div>
+                      <ScoreRing pct={percentage} score={record.score} total={record.total} />
 
-                {/* Score */}
-                <div className="col-span-5 md:col-span-2 text-center flex flex-col items-center">
-                  <div className="flex items-center space-x-1.5">
-                    {isGood ? <CheckCircle2 className="w-4 h-4 text-emerald-500" /> : <Target className="w-4 h-4 text-amber-500" />}
-                    <span className={`text-lg font-black transition-colors ${isGood ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'}`}>
-                      {percentage}%
-                    </span>
+                      <div className="flex-1 min-w-[180px]">
+                        <span
+                          className={`inline-flex items-center px-3 py-1 rounded-full text-[11px] font-bold ${
+                            strict
+                              ? "bg-sky-500/15 text-sky-300 border border-sky-500/30"
+                              : "bg-purple-500/15 text-purple-300 border border-purple-500/30"
+                          }`}
+                        >
+                          {record.mode}
+                        </span>
+                        <div className="flex items-center gap-2 mt-2 text-sm text-app-muted min-w-0">
+                          <Layers className="w-4 h-4 text-app-faint shrink-0" />
+                          <span className="truncate">{record.topic}</span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-1.5 text-sm text-app-muted shrink-0">
+                        <Clock className="w-4 h-4 text-app-faint" />
+                        {record.time}
+                      </div>
+                    </div>
                   </div>
-                  <div className="text-[10px] text-slate-500">{record.score} / {record.total}</div>
-                </div>
-
-                {/* Time */}
-                <div className="col-span-2 text-right hidden md:flex items-center justify-end space-x-1 text-slate-500 dark:text-slate-400 transition-colors">
-                  <Clock className="w-3.5 h-3.5" />
-                  <span className="text-sm">{record.time}</span>
-                </div>
-
-                {/* Mobile time */}
-                <div className="col-span-12 md:hidden flex justify-between items-center mt-2 pt-2 border-t border-slate-100 dark:border-slate-800/30 transition-colors">
-                  <div className="flex items-center space-x-1 text-slate-500 dark:text-slate-400">
-                    <Clock className="w-3.5 h-3.5" />
-                    <span className="text-[10px]">{record.time}</span>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-      
+                );
+              })
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 };

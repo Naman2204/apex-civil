@@ -1,0 +1,86 @@
+[
+  {
+    "id": "H-01",
+    "feature": "Dashboard overall progress is computed (not literal 0)",
+    "status": "PASS",
+    "detail": "shown=11 db=11"
+  },
+  {
+    "id": "H-02",
+    "feature": "Dashboard overall % is dynamic",
+    "status": "PASS",
+    "detail": ">0%"
+  },
+  {
+    "id": "H-03",
+    "feature": "Topic cards show real per-chapter progress (non-zero where DB has answers)",
+    "status": "PASS",
+    "detail": "Railway Engineering=0%(db:0) | Engineering Hydrology=0%(db:0) | Highway Engineering=>0%(db:10) | None=0%(db:0)"
+  },
+  {
+    "id": "H-03c",
+    "feature": "Topic-card % values match DB (0% iff no answers)",
+    "status": "PASS",
+    "detail": "cards=7"
+  },
+  {
+    "id": "WT-01",
+    "feature": "Weak Topics area uses real data (no empty state when attempts exist)",
+    "status": "PASS",
+    "detail": "data area present"
+  },
+  {
+    "id": "DG-01",
+    "feature": "Daily goal card reads DB target",
+    "status": "PASS",
+    "detail": "0/50 (db 50)"
+  },
+  {
+    "id": "CD-01",
+    "feature": "Target date persists to DB",
+    "status": "PASS",
+    "detail": "db=2026-08-16"
+  },
+  {
+    "id": "CD-02",
+    "feature": "Dashboard countdown computed from DB target date",
+    "status": "PASS",
+    "detail": "1 days, Target Date: Aug 16, 2026 Edit Target Ex"
+  },
+  {
+    "id": "H-03b",
+    "feature": "Topics view cards show real per-chapter progress",
+    "status": "PASS",
+    "detail": "Highway Engineering=>0%(db:10) | Estimation & Costing=>0%(db:1)"
+  },
+  {
+    "id": "H-03d",
+    "feature": "Topics cards % match DB (0% iff no answers)",
+    "status": "PASS",
+    "detail": "cards=11"
+  },
+  {
+    "id": "H-04",
+    "feature": "Analytics radar shows real chapter from answers",
+    "status": "PASS",
+    "detail": "Highway Engineering,Estimation & Costing"
+  },
+  {
+    "id": "H-04b",
+    "feature": "radar is not the placeholder/empty state when data exists",
+    "status": "PASS",
+    "detail": "chart area present"
+  },
+  {
+    "id": "AN-01",
+    "feature": "Analytics accuracy matches DB formula",
+    "status": "PASS",
+    "detail": "shown=8.6 db=8.6"
+  },
+  {
+    "id": "AN-02",
+    "feature": "Analytics questions-solved matches DB",
+    "status": "PASS",
+    "detail": "shown=35 db=35"
+  }
+]

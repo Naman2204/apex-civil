@@ -1,7 +1,8 @@
 "use client";
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { MCQQuestion } from '../../types/mcq';
 import { ExamSetup, ExamConfig } from './ExamSetup';
+import { ExamInstructions } from './ExamInstructions';
 import { LiveExam } from './LiveExam';
 import { PracticeView } from './PracticeView';
 import { ExamResults } from './ExamResults';
@@ -14,6 +15,8 @@ interface ExamViewProps {
   onReturnHome: () => void;
   onFetchQuestions: (chapter: string, difficulty: string, limit: number) => Promise<MCQQuestion[]>;
   onSaveHistory?: (record: any) => Promise<void>; // Kept for backwards compatibility if needed, but not used now
+  /** Notifies the app shell that a dedicated question session started/ended. */
+  onExamModeChange?: (inSession: boolean) => void;
 }
 
 export const ExamView: React.FC<ExamViewProps> = ({ 
@@ -22,8 +25,9 @@ export const ExamView: React.FC<ExamViewProps> = ({
   prefilledChapter, 
   onReturnHome,
   onFetchQuestions,
+  onExamModeChange,
 }) => {
-  const [stage, setStage] = useState<'setup' | 'live' | 'results'>('setup');
+  const [stage, setStage] = useState<'setup' | 'instructions' | 'live' | 'results'>('setup');
   const [config, setConfig] = useState<ExamConfig | null>(null);
   const [examQuestions, setExamQuestions] = useState<MCQQuestion[]>([]);
   const [attemptId, setAttemptId] = useState<string>('');
@@ -32,6 +36,12 @@ export const ExamView: React.FC<ExamViewProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const startingRef = useRef(false);
   const finishingRef = useRef(false);
+
+  // Question-solving stages (instructions / live / results) run in the dedicated
+  // shell without the app's sidebar and header; the setup screen keeps them.
+  useEffect(() => {
+    onExamModeChange?.(stage !== 'setup');
+  }, [stage, onExamModeChange]);
 
   const handleStartExam = async (newConfig: ExamConfig) => {
     // Guard against double-click / repeated Start submissions.
@@ -47,16 +57,41 @@ export const ExamView: React.FC<ExamViewProps> = ({
         return;
       }
 
-      // Create an ExamAttempt in DB
-      const id = await startExamAttempt(newConfig.mode, newConfig.chapter, selected.length, newConfig.negativeMarking);
-      
       setConfig(newConfig);
       setExamQuestions(selected);
+
+      if (newConfig.mode === 'EXAM') {
+        // Show the instructions screen first; the attempt is created when the
+        // candidate starts the simulation (avoids abandoned attempts).
+        setStage('instructions');
+      } else {
+        // Practice mode: create the attempt immediately and begin.
+        const id = await startExamAttempt(newConfig.mode, newConfig.chapter, selected.length, newConfig.negativeMarking);
+        setAttemptId(id);
+        setStage('live');
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Failed to start session. Please try again.");
+    } finally {
+      setIsLoading(false);
+      startingRef.current = false;
+    }
+  };
+
+  const handleStartSimulation = async () => {
+    if (!config) return;
+    // Guard against double-click on "Start Simulation".
+    if (startingRef.current) return;
+    startingRef.current = true;
+    setIsLoading(true);
+    try {
+      const id = await startExamAttempt(config.mode, config.chapter, examQuestions.length, config.negativeMarking);
       setAttemptId(id);
       setStage('live');
     } catch (err) {
       console.error(err);
-      alert("Failed to start session. Please try again.");
+      alert("Failed to start simulation. Please try again.");
     } finally {
       setIsLoading(false);
       startingRef.current = false;
@@ -72,9 +107,14 @@ export const ExamView: React.FC<ExamViewProps> = ({
     
     if (config?.mode === 'EXAM') {
       try {
-        await finishExamAttemptBatch(attemptId, timeTakenSeconds, finalAnswers, examQuestions);
+        await finishExamAttemptBatch(attemptId, timeTakenSeconds, finalAnswers);
       } catch (err) {
+        // Surface the failure instead of silently advancing to results with
+        // an attempt that was never persisted (BUG-07).
         console.error("Failed to save exam attempt", err);
+        finishingRef.current = false; // allow the user to retry
+        alert("Failed to submit your exam. Please try again.");
+        return;
       }
     }
     
@@ -93,9 +133,24 @@ export const ExamView: React.FC<ExamViewProps> = ({
 
   return (
     <div className="min-h-full animate-in fade-in duration-300 relative">
+      {/* The dedicated shell hides the app chrome, so the document needs a
+          level-one heading for the question-solving stages. */}
+      {(stage === 'instructions' || stage === 'live' || stage === 'results') && (
+        <h1 className="sr-only">
+          {stage === 'instructions'
+            ? 'Exam Instructions'
+            : stage === 'results'
+            ? config?.mode === 'PRACTICE'
+              ? 'Practice Results'
+              : 'Exam Results'
+            : config?.mode === 'PRACTICE'
+            ? 'Quick Practice'
+            : 'Simulated Exam'}
+        </h1>
+      )}
       {isLoading && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm rounded-3xl">
-          <div className="text-xl font-bold text-indigo-600 dark:text-indigo-400 animate-pulse">Loading Questions...</div>
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-[#070914]/60 backdrop-blur-sm rounded-3xl">
+          <div className="text-xl font-bold text-[#c4a8ff] animate-pulse">Loading Questions...</div>
         </div>
       )}
 
@@ -109,6 +164,15 @@ export const ExamView: React.FC<ExamViewProps> = ({
         />
       )}
       
+      {stage === 'instructions' && config && (
+        <ExamInstructions
+          config={config}
+          questionCount={examQuestions.length}
+          onStart={handleStartSimulation}
+          onCancel={handleRetake}
+        />
+      )}
+
       {stage === 'live' && config && (
         config.mode === 'PRACTICE' ? (
           <PracticeView 

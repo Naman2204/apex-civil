@@ -1,32 +1,95 @@
 @import "tailwindcss";
 
-@custom-variant dark (&:where(.dark, .dark *));:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* The desktop app keeps a private workspace DB in .freebuff/ whose raw bytes
+   are not valid class candidates; exclude it so Tailwind never generates
+   malformed rules from it (build CSS parse error fix). */
+@source not "../../.freebuff";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ============================================================
+   ApexCivil design tokens — approved reference design system.
+   Deep-navy midnight surfaces, purple/violet primary, blue
+   secondary, muted slate text, strong white headings.
+   Utilities resolve against these vars at runtime so the light
+   and dark themes share one token vocabulary.
+   ============================================================ */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-app-deep: var(--app-deep);
+  --color-app-bg: var(--app-bg);
+  --color-app-sidebar: var(--app-sidebar);
+  --color-app-card: var(--app-card);
+  --color-app-card2: var(--app-card2);
+  --color-app-border: var(--app-border);
+  --color-app-border2: var(--app-border2);
+  --color-app-text: var(--app-text);
+  --color-app-muted: var(--app-muted);
+  --color-app-faint: var(--app-faint);
+  --color-accent: var(--accent);
+  --color-accent-bright: var(--accent-bright);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-deep: var(--accent-deep);
+  --color-app-blue: var(--app-blue);
+  --color-app-blue-soft: var(--app-blue-soft);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+:root {
+  --app-deep: #eef1f8;
+  --app-bg: #f5f7fc;
+  --app-sidebar: #ffffff;
+  --app-card: #ffffff;
+  --app-card2: #f2f5fb;
+  --app-border: #e4e9f4;
+  --app-border2: #cbd6ea;
+  --app-text: #101828;
+  --app-muted: #5a6a85;
+  --app-faint: #8c9ab5;
+  --accent: #6a3bf0;
+  --accent-bright: #7a4cfa;
+  --accent-soft: #efe9ff;
+  --accent-deep: #e3daff;
+  --app-blue: #2f6fed;
+  --app-blue-soft: #e8f0fe;
+  --background: #f5f7fc;
+  --foreground: #101828;
+}
+
+.dark {
+  --app-deep: #060912;
+  --app-bg: #0b0f1d;
+  --app-sidebar: #10152a;
+  --app-card: #141a2f;
+  --app-card2: #1b2340;
+  --app-border: #202a47;
+  --app-border2: #2c3a63;
+  --app-text: #f4f6fc;
+  --app-muted: #9ba6c2;
+  --app-faint: #606c8e;
+  --accent: #7040f0;
+  --accent-bright: #8a5cff;
+  --accent-soft: #221a4d;
+  --accent-deep: #181238;
+  --app-blue: #4c8dff;
+  --app-blue-soft: #152a4d;
+  --background: #0b0f1d;
+  --foreground: #f4f6fc;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--app-bg);
+  color: var(--app-text);
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
 /* Interactive controls should always look clickable. */
 button:not(:disabled):not([aria-disabled="true"]),
 [role="button"]:not([aria-disabled="true"]) {
   cursor: pointer;
+}
+
+/* Reference-style subtle scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--app-border2) transparent;
 }

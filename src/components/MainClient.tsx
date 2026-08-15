@@ -26,6 +26,11 @@ export function MainClient({ totalQuestions, chapterStats }: MainClientProps) {
   const [activePage, setActivePage] = useState<PageView>('dashboard');
   const [prefilledChapter, setPrefilledChapter] = useState<string | undefined>();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  // Dedicated exam shell: once a question-solving session starts, the normal
+  // app chrome (sidebar, header, search, notifications) is hidden so Practice
+  // and Simulate Exam feel like their own focused environment.
+  const [examSessionMode, setExamSessionMode] = useState(false);
+  const inExamSession = (activePage === 'exam' || activePage === 'quick-practice') && examSessionMode;
   
   const [isDarkMode, setIsDarkMode] = useState<boolean>(true); // Default dark to match server
   const [mounted, setMounted] = useState(false);
@@ -58,6 +63,7 @@ export function MainClient({ totalQuestions, chapterStats }: MainClientProps) {
     setActivePage(page);
     setPrefilledChapter(undefined);
     setMobileMenuOpen(false);
+    setExamSessionMode(false); // leave any in-progress session shell
   };
 
   const fetchQuestions = async (chapter: string, difficulty: string, limit: number) => {
@@ -77,6 +83,7 @@ export function MainClient({ totalQuestions, chapterStats }: MainClientProps) {
             prefilledChapter={prefilledChapter}
             onReturnHome={() => handleNavigate('dashboard')}
             onFetchQuestions={fetchQuestions}
+            onExamModeChange={setExamSessionMode}
           />
         );
       case 'bookmarks':
@@ -88,7 +95,7 @@ export function MainClient({ totalQuestions, chapterStats }: MainClientProps) {
       case 'analytics':
         return <AnalyticsView />;
       case 'performance':
-        return <PerformanceView />;
+        return <PerformanceView onStartExam={() => handleStartExam()} />;
       case 'settings':
         return <SettingsView isDarkMode={isDarkMode} onToggleDarkMode={() => setIsDarkMode(!isDarkMode)} />;
       default:
@@ -97,40 +104,46 @@ export function MainClient({ totalQuestions, chapterStats }: MainClientProps) {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#070914] text-slate-800 dark:text-slate-100 font-sans flex transition-colors duration-200 selection:bg-indigo-500/30">
+    <div className={`min-h-screen font-sans flex transition-colors duration-200 selection:bg-accent/30 ${
+      inExamSession ? 'bg-app-deep text-app-text' : 'bg-app-bg text-app-text'
+    }`}>
       
-      {/* Sidebar Navigation */}
-      <Sidebar 
-        activePage={activePage} 
-        onNavigate={handleNavigate} 
-        isDarkMode={isDarkMode} 
-        onToggleDarkMode={() => setIsDarkMode(!isDarkMode)} 
-      />
+      {/* Sidebar Navigation — hidden inside a question session */}
+      <div className={inExamSession ? 'hidden' : ''}>
+        <Sidebar 
+          activePage={activePage} 
+          onNavigate={handleNavigate} 
+          isDarkMode={isDarkMode} 
+          onToggleDarkMode={() => setIsDarkMode(!isDarkMode)} 
+        />
+      </div>
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto">
         
-        {/* Top Header */}
-        <Header
-          isDarkMode={isDarkMode}
-          mounted={mounted}
-          onToggleDarkMode={() => setIsDarkMode(!isDarkMode)}
-          onOpenMobileMenu={() => setMobileMenuOpen(true)}
-          onNavigate={handleNavigate}
-          onStartExam={handleStartExam}
-        />
+        {/* Top Header — hidden inside a question session */}
+        <div className={inExamSession ? 'hidden' : ''}>
+          <Header
+            isDarkMode={isDarkMode}
+            mounted={mounted}
+            onToggleDarkMode={() => setIsDarkMode(!isDarkMode)}
+            onOpenMobileMenu={() => setMobileMenuOpen(true)}
+            onNavigate={handleNavigate}
+            onStartExam={handleStartExam}
+          />
+        </div>
 
         {/* Page Content */}
-        <main className="flex-1 w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8 space-y-6 flex flex-col">
+        <main className="flex-1 w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-10 flex flex-col">
           {renderMainContent()}
         </main>
       </div>
 
       {/* Mobile Drawer Overlay */}
-      {mobileMenuOpen && (
+      {mobileMenuOpen && !inExamSession && (
         <div className="fixed inset-0 z-50 lg:hidden flex">
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setMobileMenuOpen(false)}></div>
-          <div className="relative bg-[#0A0C18] w-72 h-full shadow-2xl flex flex-col">
+          <div className="relative bg-app-sidebar w-72 h-full shadow-2xl flex flex-col">
             <div className="flex-1 overflow-y-auto">
               <Sidebar 
                 activePage={activePage} 

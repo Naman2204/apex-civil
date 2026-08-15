@@ -1,46 +1,65 @@
 "use client";
-import React, { useState, useEffect } from 'react';
-import { Settings, Moon, Sun, Target, Calendar, Save, ShieldCheck, Loader2, Trash2, AlertTriangle } from 'lucide-react';
-import { getUserSettings, updateUserSettings, resetUserData } from '../app/actions/settings';
+import React, { useState, useEffect } from "react";
+import { Moon, Sun, Target, Calendar, Save, ShieldCheck, Loader2, Trash2, AlertTriangle, User, Flame, CheckCircle2, BookOpen } from "lucide-react";
+import { getUserSettings, updateUserSettings, resetUserData } from "../app/actions/settings";
+import { getDashboardStats } from "../app/actions/dashboard";
+import { Btn } from "./ui/primitives";
+import { useUser } from "@clerk/nextjs";
 
 interface SettingsViewProps {
   isDarkMode: boolean;
   onToggleDarkMode: () => void;
 }
 
+type Tab = "general" | "goals" | "security";
+
+const TABS: { id: Tab; label: string }[] = [
+  { id: "general", label: "General" },
+  { id: "goals", label: "Study Goals" },
+  { id: "security", label: "Security" },
+];
+
 export const SettingsView: React.FC<SettingsViewProps> = ({ isDarkMode, onToggleDarkMode }) => {
+  const { user } = useUser();
+  const [tab, setTab] = useState<Tab>("goals");
   const [dailyGoal, setDailyGoal] = useState(50);
-  const [examDate, setExamDate] = useState('');
+  const [examDate, setExamDate] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [stats, setStats] = useState<any>(null);
 
   useEffect(() => {
+    let cancelled = false;
     async function load() {
       try {
-        const settings = await getUserSettings();
+        const [settings, dash] = await Promise.all([
+          getUserSettings(),
+          getDashboardStats().catch(() => null),
+        ]);
+        if (cancelled) return;
         setDailyGoal(settings.dailyGoal);
         if (settings.examTargetDate) {
-          // Format ISO date string to YYYY-MM-DD for the input
           const d = new Date(settings.examTargetDate);
           const yyyy = d.getFullYear();
-          const mm = String(d.getMonth() + 1).padStart(2, '0');
-          const dd = String(d.getDate()).padStart(2, '0');
+          const mm = String(d.getMonth() + 1).padStart(2, "0");
+          const dd = String(d.getDate()).padStart(2, "0");
           setExamDate(`${yyyy}-${mm}-${dd}`);
         }
+        setStats(dash);
       } catch (err) {
         console.error("Failed to load settings", err);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     }
     load();
+    return () => { cancelled = true; };
   }, []);
 
   const handleSave = async () => {
     setSaving(true);
     try {
       await updateUserSettings(dailyGoal, examDate || null);
-      // Optional: Add a success toast here
     } catch (err) {
       console.error("Failed to save settings", err);
     } finally {
@@ -53,25 +72,21 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ isDarkMode, onToggle
 
   const handleReset = async () => {
     if (!resetConfirming) {
-      // First click: ask for explicit confirmation.
       setResetConfirming(true);
       return;
     }
     setResetting(true);
     try {
       await resetUserData();
-      // Reload settings so the UI returns to the correct empty state.
       const settings = await getUserSettings();
       setDailyGoal(settings.dailyGoal);
-      setExamDate(settings.examTargetDate
-        ? settings.examTargetDate.slice(0, 10)
-        : '');
+      setExamDate(settings.examTargetDate ? settings.examTargetDate.slice(0, 10) : "");
       setResetConfirming(false);
-      alert('Your progress data has been reset.');
+      alert("Your progress data has been reset.");
     } catch (err) {
-      console.error('Failed to reset data', err);
+      console.error("Failed to reset data", err);
       setResetConfirming(false);
-      alert('Reset failed. Please try again.');
+      alert("Reset failed. Please try again.");
     } finally {
       setResetting(false);
     }
@@ -80,128 +95,197 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ isDarkMode, onToggle
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[50vh]">
-        <Loader2 className="w-12 h-12 text-indigo-500 animate-spin mb-4" />
-        <p className="text-slate-500 font-medium">Loading settings...</p>
+        <Loader2 className="w-12 h-12 text-accent-bright animate-spin mb-4" />
+        <p className="text-app-muted font-medium">Loading settings…</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6 w-full pb-12 animate-in fade-in duration-500">
-      
-      {/* Header */}
-      <div className="flex items-center space-x-3 mb-8">
-        <div className="w-10 h-10 rounded-xl bg-slate-200 dark:bg-slate-800 flex items-center justify-center transition-colors">
-          <Settings className="w-5 h-5 text-slate-600 dark:text-slate-300" />
-        </div>
-        <div>
-          <h2 className="text-2xl font-bold text-slate-900 dark:text-white transition-colors">Account Settings</h2>
-          <p className="text-xs text-slate-500 dark:text-slate-400 transition-colors">Manage your preferences and study goals.</p>
-        </div>
+    <div className="w-full pb-12 space-y-6">
+      {/* Header — reference placement */}
+      <div>
+        <h1 className="text-2xl sm:text-[28px] font-extrabold tracking-tight text-app-text leading-tight">
+          Account Settings
+        </h1>
+        <p className="text-sm text-app-muted mt-1">Manage your preferences and study goals.</p>
       </div>
 
-      <div className="bg-white dark:bg-[#131627] border border-slate-200 dark:border-slate-800/80 rounded-2xl p-6 sm:p-8 space-y-8 transition-colors shadow-sm dark:shadow-none">
-        
-        {/* Theme Preferences */}
-        <div className="space-y-4">
-          <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200 border-b border-slate-200 dark:border-slate-800 pb-2 transition-colors">Appearance</h3>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-semibold text-slate-900 dark:text-white transition-colors">Theme</p>
-              <p className="text-xs text-slate-500 transition-colors">Choose between light and dark mode for your study sessions.</p>
+      <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6 items-start">
+        {/* LEFT — Profile Overview */}
+        <div className="rounded-2xl border border-violet-500/25 bg-app-card/60 backdrop-blur p-6 flex flex-col items-center text-center">
+          <div className="relative w-20 h-20">
+            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-purple-500/50 to-indigo-500/50 blur-md" />
+            <div className="relative w-full h-full rounded-full bg-gradient-to-br from-purple-600 to-indigo-600 border border-purple-400/40 shadow-[0_0_24px_rgba(139,92,246,0.4)] flex items-center justify-center">
+              <User className="w-9 h-9 text-white" />
             </div>
-            <button
-              onClick={onToggleDarkMode}
-              className={`relative inline-flex h-8 w-14 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${isDarkMode ? 'bg-[#5c2dd5]' : 'bg-slate-300'}`}
-            >
-              <span className={`pointer-events-none inline-flex h-7 w-7 transform items-center justify-center rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${isDarkMode ? 'translate-x-6' : 'translate-x-0'}`}>
-                {isDarkMode ? <Moon className="h-3.5 w-3.5 text-[#5c2dd5]" /> : <Sun className="h-4 w-4 text-amber-500" />}
-              </span>
-            </button>
+          </div>
+          <p className="mt-4 text-lg font-extrabold text-app-text">
+            {user?.firstName || "Student"} {user?.lastName || ""}
+          </p>
+          <p className="text-xs text-app-muted mt-0.5">
+            {user?.primaryEmailAddress?.emailAddress || user?.emailAddresses?.[0]?.emailAddress || "Student"}
+          </p>
+          <div className="mt-1 flex items-center gap-1.5 text-[10px] font-bold text-emerald-400 uppercase tracking-wider">
+            <ShieldCheck className="w-3.5 h-3.5" /> Signed in
+          </div>
+
+          {/* Stats row (real data) */}
+          <div className="w-full mt-6 grid grid-cols-3 gap-2.5">
+            <div className="rounded-xl bg-[#0b0f1d] border border-app-border px-2 py-3">
+              <Flame className="w-4 h-4 text-amber-400 mx-auto" />
+              <p className="mt-1.5 text-sm font-black text-app-text">{stats?.streak?.currentStreak ?? 0}</p>
+              <p className="text-[9px] font-bold text-app-faint uppercase tracking-wide mt-0.5">Streak</p>
+            </div>
+            <div className="rounded-xl bg-[#0b0f1d] border border-app-border px-2 py-3">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400 mx-auto" />
+              <p className="mt-1.5 text-sm font-black text-app-text">{(stats?.totalAnswered ?? 0).toLocaleString()}</p>
+              <p className="text-[9px] font-bold text-app-faint uppercase tracking-wide mt-0.5">Solved</p>
+            </div>
+            <div className="rounded-xl bg-[#0b0f1d] border border-app-border px-2 py-3">
+              <BookOpen className="w-4 h-4 text-sky-400 mx-auto" />
+              <p className="mt-1.5 text-sm font-black text-app-text">{dailyGoal}</p>
+              <p className="text-[9px] font-bold text-app-faint uppercase tracking-wide mt-0.5">Goal Qs</p>
+            </div>
           </div>
         </div>
 
-        {/* Study Goals */}
-        <div className="space-y-4">
-          <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200 border-b border-slate-200 dark:border-slate-800 pb-2 transition-colors">Study Goals</h3>
-          
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <p className="text-sm font-semibold text-slate-900 dark:text-white flex items-center transition-colors">
-                <Target className="w-4 h-4 mr-2 text-indigo-500 dark:text-indigo-400" /> Daily Question Goal
-              </p>
-              <p className="text-xs text-slate-500 transition-colors">Set the number of questions you want to solve each day.</p>
-            </div>
-            <div className="flex items-center bg-slate-50 dark:bg-[#0A0C18] border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden transition-colors">
-              <button onClick={() => setDailyGoal(Math.max(10, dailyGoal - 10))} className="px-4 py-2 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors">-</button>
-              <div className="w-16 text-center text-sm font-bold text-slate-900 dark:text-white border-x border-slate-200 dark:border-slate-800 py-2 transition-colors">{dailyGoal}</div>
-              <button onClick={() => setDailyGoal(dailyGoal + 10)} className="px-4 py-2 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors">+</button>
-            </div>
+        {/* RIGHT — Settings card with tabs */}
+        <div className="rounded-2xl border border-violet-500/25 bg-app-card/60 backdrop-blur overflow-hidden">
+          {/* Tabs */}
+          <div className="flex border-b border-app-border px-6">
+            {TABS.map(t => (
+              <button
+                key={t.id}
+                onClick={() => setTab(t.id)}
+                className={`relative px-4 py-3.5 text-sm font-bold transition-colors ${
+                  tab === t.id ? "text-app-text" : "text-app-faint hover:text-app-muted"
+                }`}
+              >
+                {t.label}
+                {tab === t.id && (
+                  <span className="absolute inset-x-2 bottom-0 h-0.5 rounded-full bg-gradient-to-r from-purple-500 to-indigo-500" />
+                )}
+              </button>
+            ))}
           </div>
 
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-4">
-            <div>
-              <p className="text-sm font-semibold text-slate-900 dark:text-white flex items-center transition-colors">
-                <Calendar className="w-4 h-4 mr-2 text-amber-500 dark:text-amber-400" /> Target Exam Date
-              </p>
-              <p className="text-xs text-slate-500 transition-colors">Set this to see a countdown on your dashboard.</p>
-            </div>
-            <input 
-              type="date" 
-              value={examDate}
-              onChange={(e) => setExamDate(e.target.value)}
-              className="bg-slate-50 dark:bg-[#0A0C18] border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 transition-colors"
-            />
+          <div className="p-6 space-y-6">
+            {/* GENERAL */}
+            {tab === "general" && (
+              <>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-bold text-app-text">Theme</p>
+                    <p className="text-xs text-app-muted mt-0.5">Deep-navy dark mode matches the reference product.</p>
+                  </div>
+                  <button
+                    onClick={onToggleDarkMode}
+                    aria-label="Toggle dark mode"
+                    className={`relative inline-flex h-8 w-14 shrink-0 cursor-pointer rounded-full border border-app-border2 transition-colors ${isDarkMode ? "bg-accent" : "bg-app-card2"}`}
+                  >
+                    <span
+                      className={`pointer-events-none inline-flex h-6 w-6 items-center justify-center rounded-full bg-white shadow ring-0 transition-transform ${isDarkMode ? "translate-x-7" : "translate-x-1"}`}
+                    >
+                      {isDarkMode ? <Moon className="h-3.5 w-3.5 text-accent" /> : <Sun className="h-3.5 w-3.5 text-amber-500" />}
+                    </span>
+                  </button>
+                </div>
+              </>
+            )}
+
+            {/* STUDY GOALS */}
+            {tab === "goals" && (
+              <>
+                <h3 className="text-base font-extrabold text-app-text">Study Goals</h3>
+                <div className="space-y-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                      <p className="text-sm font-semibold text-app-text flex items-center gap-2">
+                        <Target className="w-4 h-4 text-accent-bright" /> Daily Question Goal
+                      </p>
+                      <p className="text-xs text-app-muted mt-0.5">Set your daily question target.</p>
+                    </div>
+                    <div className="flex items-center bg-app-deep border border-app-border rounded-xl overflow-hidden shrink-0">
+                      <button
+                        onClick={() => setDailyGoal(Math.max(10, dailyGoal - 10))}
+                        className="px-4 py-2 text-app-muted hover:text-app-text hover:bg-app-card transition-colors font-bold"
+                      >
+                        −
+                      </button>
+                      <div className="w-16 text-center text-sm font-bold text-app-text border-x border-app-border py-2">{dailyGoal}</div>
+                      <button
+                        onClick={() => setDailyGoal(dailyGoal + 10)}
+                        className="px-4 py-2 text-app-muted hover:text-app-text hover:bg-app-card transition-colors font-bold"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                      <p className="text-sm font-semibold text-app-text flex items-center gap-2">
+                        <Calendar className="w-4 h-4 text-sky-400" /> Target Exam Date
+                      </p>
+                      <p className="text-xs text-app-muted mt-0.5">Choose your target exam date.</p>
+                    </div>
+                    <input
+                      type="date"
+                      value={examDate}
+                      onChange={(e) => setExamDate(e.target.value)}
+                      className="bg-app-deep border border-app-border rounded-xl px-4 py-2 text-sm text-app-text focus:outline-none focus:border-accent/60 focus:ring-2 focus:ring-accent/15 transition-all shrink-0"
+                    />
+                  </div>
+                </div>
+
+                <div className="pt-5 flex justify-end border-t border-app-border mt-2">
+                  <Btn onClick={handleSave} disabled={saving}>
+                    {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                    {saving ? "Saving…" : "Save Changes"}
+                  </Btn>
+                </div>
+              </>
+            )}
+
+            {/* SECURITY */}
+            {tab === "security" && (
+              <div className="rounded-xl border border-rose-500/30 bg-rose-500/[0.04] p-5">
+                <h3 className="text-sm font-black text-rose-400 uppercase tracking-wider">Danger Zone</h3>
+                <div className="mt-3">
+                  <p className="text-sm font-semibold text-app-text">Reset Progress</p>
+                  <p className="text-xs text-app-muted mt-0.5">
+                    Permanently delete all your exam history and statistics. This cannot be undone.
+                  </p>
+                </div>
+                {resetConfirming && (
+                  <div className="flex items-start gap-2 p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/25 text-xs text-rose-300 leading-relaxed mt-4">
+                    <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+                    <span>This permanently deletes <strong>your</strong> exam attempts, answers, bookmarks, daily goals, streaks and notifications. Click the button again to confirm.</span>
+                  </div>
+                )}
+                <div className="mt-4">
+                  <Btn
+                    variant="danger"
+                    onClick={handleReset}
+                    disabled={resetting}
+                    className={resetConfirming ? "bg-rose-500 text-white hover:bg-rose-600 border-rose-500" : ""}
+                  >
+                    {resetting ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : resetConfirming ? (
+                      <AlertTriangle className="w-3.5 h-3.5" />
+                    ) : (
+                      <Trash2 className="w-3.5 h-3.5" />
+                    )}
+                    {resetting ? "Resetting…" : resetConfirming ? "Click again to confirm" : "Reset Data"}
+                  </Btn>
+                </div>
+              </div>
+            )}
           </div>
         </div>
-
-        {/* Danger Zone */}
-        <div className="space-y-4 pt-4">
-          <h3 className="text-sm font-bold text-rose-600 dark:text-rose-500 border-b border-slate-200 dark:border-slate-800 pb-2 transition-colors">Danger Zone</h3>
-          {resetConfirming && (
-            <div className="flex items-start space-x-2 p-3 rounded-xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-500/30 text-xs text-rose-700 dark:text-rose-300">
-              <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
-              <span>This permanently deletes <strong>your</strong> exam attempts, answers, bookmarks, daily goals, streaks and notifications. This cannot be undone. Click the button again to confirm.</span>
-            </div>
-          )}
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-semibold text-slate-800 dark:text-slate-300 transition-colors">Reset Progress</p>
-              <p className="text-xs text-slate-500 transition-colors">Permanently delete all your exam history and statistics.</p>
-            </div>
-            <button
-              onClick={handleReset}
-              disabled={resetting}
-              className={`px-4 py-2 text-xs font-bold rounded-lg border transition-colors ${resetConfirming
-                ? 'bg-rose-600 text-white border-rose-600 hover:bg-rose-700'
-                : 'bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-500 border-rose-200 dark:border-rose-500/20 hover:bg-rose-500 hover:text-white'}`}
-            >
-              {resetting ? (
-                <Loader2 className="w-3.5 h-3.5 animate-spin inline mr-1" />
-              ) : resetConfirming ? (
-                <AlertTriangle className="w-3.5 h-3.5 inline mr-1" />
-              ) : (
-                <Trash2 className="w-3.5 h-3.5 inline mr-1" />
-              )}
-              {resetting ? 'Resetting…' : resetConfirming ? 'Click again to confirm' : 'Reset Data'}
-            </button>
-          </div>
-        </div>
-        
-        {/* Save button */}
-        <div className="pt-6 flex justify-end">
-          <button 
-            onClick={handleSave} 
-            disabled={saving}
-            className={`flex items-center justify-center space-x-2 bg-indigo-600 dark:bg-[#5c2dd5] hover:bg-indigo-700 dark:hover:bg-[#4b22b6] text-white px-6 py-2.5 rounded-xl font-bold shadow-lg shadow-indigo-500/20 transition-all ${saving ? 'opacity-70 cursor-not-allowed' : ''}`}
-          >
-            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-            <span>{saving ? 'Saving...' : 'Save Changes'}</span>
-          </button>
-        </div>
-
       </div>
-
     </div>
   );
 };

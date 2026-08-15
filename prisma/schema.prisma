@@ -77,6 +77,7 @@ model AttemptAnswer {
   timeSpentSeconds Int         @default(0)
   wasFlagged       Boolean     @default(false)
 
+  @@unique([attemptId, questionId])
   @@index([attemptId])
   @@index([questionId])
 }

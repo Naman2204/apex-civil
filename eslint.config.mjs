@@ -2,6 +2,11 @@ import nextCoreWebVitals from "eslint-config-next/core-web-vitals";
 import nextTypescript from "eslint-config-next/typescript";
 
 const eslintConfig = [
+  {
+    // QA tooling under scripts/ is not part of the application and uses
+    // patterns (require, playwright CDP helpers) that app lint rules reject.
+    ignores: ["scripts/**"],
+  },
   ...nextCoreWebVitals,
   ...nextTypescript,
   {

@@ -1,0 +1,49 @@
+{
+  "accountEmail": "diyeti1080@hutdot.com",
+  "clerkUserId": "user_3Hv33WqTTn4Gqj8UYhgZzk503iF",
+  "dbUserId": "cmstblps4000004la131iadxl",
+  "createdAt": "2026-08-14T19:08:43.588Z",
+  "records": {
+    "users": 1,
+    "examAttempts": [
+      {
+        "id": "cmstc7zrx000004l04a8lqe7s",
+        "mode": "PRACTICE",
+        "topic": "Highway Engineering",
+        "total": 10,
+        "c": 1,
+        "w": 9,
+        "s": 0,
+        "score": 10,
+        "completed": true
+      },
+      {
+        "id": "cmstcnaa0000004icp28rqcyo",
+        "mode": "EXAM",
+        "topic": "All",
+        "total": 25,
+        "c": 2,
+        "w": 0,
+        "s": 23,
+        "score": 8,
+        "completed": true
+      }
+    ],
+    "attemptAnswers": 12,
+    "bookmarks": [
+      {
+        "id": "cmstcbz8e000304l07k6uda1y",
+        "questionId": "mcq-vis-p546-1786387769931-31"
+      }
+    ],
+    "notifications": 0,
+    "dailyGoals": [
+      {
+        "id": "cmstcrjnw000304icvm31wguo",
+        "target": 60,
+        "date": "2026-08-14T00:00:00.000Z"
+      }
+    ],
+    "userStreaks": 0
+  }
+}

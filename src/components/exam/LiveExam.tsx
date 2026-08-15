@@ -1,8 +1,21 @@
 "use client";
-import React, { useState, useEffect, useRef } from 'react';
-import { Clock, ArrowRight, ArrowLeft, CheckCircle2, AlertCircle } from 'lucide-react';
-import { MCQQuestion } from '../../types/mcq';
-import { ExamConfig } from './ExamSetup';
+import React, { useState, useEffect, useRef } from "react";
+import {
+  Clock,
+  ChevronRight,
+  X,
+  AlertTriangle,
+  CheckCircle2,
+  Eraser,
+  Flag,
+  LayoutGrid,
+  ChevronLeft,
+  ShieldAlert,
+} from "lucide-react";
+import { MCQQuestion } from "../../types/mcq";
+import { ExamConfig } from "./ExamSetup";
+import { AnswerOption } from "./AnswerOption";
+import { QuestionPalette } from "./QuestionPalette";
 
 interface LiveExamProps {
   questions: MCQQuestion[];
@@ -11,260 +24,342 @@ interface LiveExamProps {
   onCancel: () => void;
 }
 
+const formatTime = (seconds: number) => {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${m}:${s.toString().padStart(2, "0")}`;
+};
+
 export const LiveExam: React.FC<LiveExamProps> = ({ questions, config, onFinish, onCancel }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
-  const [timeLeft, setTimeLeft] = useState(config.timeLimitMinutes * 60);
-
   const [markedForReview, setMarkedForReview] = useState<Record<string, boolean>>({});
+  const [timeLeft, setTimeLeft] = useState(config.timeLimitMinutes * 60);
+  const [visited, setVisited] = useState<Set<number>>(() => new Set([0]));
   const [showMobilePalette, setShowMobilePalette] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const submittedRef = useRef(false);
+  const drawerCloseRef = useRef<HTMLButtonElement>(null);
+  const questionsBtnRef = useRef<HTMLButtonElement>(null);
 
-  // Timer effect
+  // Dialog keyboard handling: Escape closes the palette drawer, and opening it
+  // moves focus inside (close button); jumping from the drawer returns focus to
+  // the Questions control so keyboard users are never left at BODY.
+  useEffect(() => {
+    if (!showMobilePalette) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setShowMobilePalette(false);
+    };
+    window.addEventListener("keydown", onKey);
+    drawerCloseRef.current?.focus();
+    return () => window.removeEventListener("keydown", onKey);
+  }, [showMobilePalette]);
+
   const currentQ = questions[currentIndex];
   const isLastQuestion = currentIndex === questions.length - 1;
+  const isWarning = timeLeft < 60; // Less than 1 minute
+  const marking = config.negativeMarking || 0;
 
   const handleSubmit = () => {
     // Prevent duplicate submits from rapid clicks or repeated timer expiry.
     if (submittedRef.current) return;
     submittedRef.current = true;
     setSubmitting(true);
-    const timeTaken = (config.timeLimitMinutes * 60) - timeLeft;
+    const timeTaken = config.timeLimitMinutes * 60 - timeLeft;
     onFinish(answers, timeTaken);
   };
 
+  // Real countdown timer — auto-submits when it expires (existing behavior).
   useEffect(() => {
     if (timeLeft <= 0) {
       handleSubmit();
       return;
     }
-    const timer = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
+    const timer = setInterval(() => setTimeLeft((prev) => prev - 1), 1000);
     return () => clearInterval(timer);
-  }, [timeLeft, config.timeLimitMinutes, answers, onFinish]); // Added dependencies
+  }, [timeLeft, answers]);
+
+  // Track visited questions for the palette's "Not Visited" state.
+  useEffect(() => {
+    setVisited((prev) => (prev.has(currentIndex) ? prev : new Set(prev).add(currentIndex)));
+  }, [currentIndex]);
 
   const handleSelectOption = (qId: string, optionLabel: string) => {
-    setAnswers(prev => ({ ...prev, [qId]: optionLabel }));
+    setAnswers((prev) => ({ ...prev, [qId]: optionLabel }));
+  };
+
+  const handleClearResponse = () => {
+    setAnswers((prev) => {
+      const next = { ...prev };
+      delete next[currentQ.id];
+      return next;
+    });
   };
 
   const toggleMarkForReview = () => {
     const qId = questions[currentIndex].id;
-    setMarkedForReview(prev => ({ ...prev, [qId]: !prev[qId] }));
+    setMarkedForReview((prev) => ({ ...prev, [qId]: !prev[qId] }));
   };
 
-  const formatTime = (seconds: number) => {
-    const m = Math.floor(seconds / 60);
-    const s = seconds % 60;
-    return `${m}:${s.toString().padStart(2, '0')}`;
+  const jumpTo = (idx: number) => {
+    setCurrentIndex(idx);
+    if (window.innerWidth < 1024) {
+      setShowMobilePalette(false);
+      // Return focus to the Questions control after the drawer closes.
+      requestAnimationFrame(() => questionsBtnRef.current?.focus());
+    }
   };
 
-  const isWarning = timeLeft < 60; // Less than 1 minute
+  const chapterLabel = config.chapter === "All" ? "All Chapters" : config.chapter;
+
+  const palettePanel = (
+    <div className="space-y-5">
+      <QuestionPalette
+        questions={questions}
+        currentIndex={currentIndex}
+        answered={answers}
+        marked={markedForReview}
+        visited={visited}
+        onJump={jumpTo}
+      />
+      {/* Auto-submit notice */}
+      <div className="flex items-start gap-2.5 bg-amber-500/10 border border-amber-500/30 rounded-xl p-3.5">
+        <ShieldAlert className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+        <p className="text-[11px] text-amber-200/90 leading-relaxed">
+          The exam will be <span className="font-bold">automatically submitted</span> when the
+          timer expires.
+        </p>
+      </div>
+    </div>
+  );
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6 max-w-6xl mx-auto items-start relative">
-      
-      {/* Mobile Palette Toggle Button */}
-      <button 
-        onClick={() => setShowMobilePalette(true)}
-        className="lg:hidden fixed bottom-6 right-6 z-40 bg-indigo-600 text-white p-4 rounded-full shadow-2xl hover:bg-indigo-700 transition-colors flex items-center justify-center"
-      >
-        <span className="font-bold text-sm">Q {currentIndex + 1}/{questions.length}</span>
-      </button>
+    <div className="w-full pb-28 lg:pb-0">
+      <div className="flex flex-col lg:flex-row gap-5 xl:gap-6 items-start">
+        {/* ================= Main column ================= */}
+        <div className="flex-1 w-full space-y-5 min-w-0">
+          {/* ---------- Sticky header: brand · timer · scoring · end ---------- */}
+          <header className="sticky top-4 z-20 bg-[#131627]/95 backdrop-blur-xl border border-slate-800/80 rounded-2xl px-4 py-3 shadow-lg shadow-black/25">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <button
+                  type="button"
+                  onClick={onCancel}
+                  aria-label="End exam"
+                  className="w-8 h-8 rounded-lg bg-[#0A0C18] border border-slate-800 text-slate-400 hover:text-rose-400 hover:border-rose-500/40 flex items-center justify-center transition-colors shrink-0"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+                <div className="min-w-0">
+                  <div className="text-sm font-black text-white leading-none tracking-tight">
+                    Apex<span className="text-[#9b66ff]">Civil</span>
+                  </div>
+                  <div className="mt-1 flex items-center gap-1 text-[11px] text-slate-400 truncate">
+                    <span className="font-semibold text-slate-300 shrink-0">Simulated Exam</span>
+                    <ChevronRight className="w-3 h-3 shrink-0 text-slate-600" />
+                    <span className="truncate text-[#9b66ff] font-medium">{chapterLabel}</span>
+                  </div>
+                </div>
+              </div>
 
-      {/* Main Content Area */}
-      <div className="flex-1 space-y-6 w-full pb-24 lg:pb-0">
-        {/* Header / Timer */}
-        <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex items-center justify-between shadow-sm sticky top-4 z-10">
-          <div className="flex items-center space-x-4">
-            <button onClick={onCancel} className="text-xs font-semibold text-slate-500 hover:text-rose-500 transition-colors">
-              End Exam
-            </button>
-            <div className="h-6 w-px bg-slate-200 dark:bg-slate-700 hidden sm:block"></div>
-            <div className="hidden sm:block">
-              <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">
+              <div className="flex items-center gap-2 shrink-0">
+                {/* Scoring rules chip */}
+                <span className="hidden md:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[#0A0C18] border border-slate-800 text-[11px] font-bold text-slate-300">
+                  <span className="text-emerald-400">+1.0</span>
+                  <span className="text-slate-600">/</span>
+                  <span className="text-rose-400">-{marking.toFixed(2)}</span>
+                </span>
+
+                {/* Time remaining */}
+                <div
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border font-mono font-bold ${
+                    isWarning
+                      ? "bg-rose-500/15 border-rose-500/50 text-rose-300 animate-pulse"
+                      : "bg-[#0A0C18] border-slate-800 text-slate-100"
+                  }`}
+                  role="timer"
+                  aria-label={`Time remaining ${formatTime(timeLeft)}`}
+                >
+                  {isWarning ? <AlertTriangle className="w-3.5 h-3.5" /> : <Clock className="w-3.5 h-3.5 text-[#9b66ff]" />}
+                  <span>{formatTime(timeLeft)}</span>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={onCancel}
+                  className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-500/15 border border-rose-500/40 text-rose-300 text-xs font-bold hover:bg-rose-500/25 transition-colors"
+                >
+                  End Exam
+                </button>
+              </div>
+            </div>
+          </header>
+
+          {/* ---------- Question card ---------- */}
+          <div className="bg-[#131627] border border-slate-800/80 rounded-2xl p-5 sm:p-8 xl:p-10">
+            <div className="flex flex-wrap items-center gap-2 mb-5">
+              <span className="px-2.5 py-1 rounded-md bg-[#0A0C18] border border-slate-800 text-[10px] font-bold uppercase tracking-wider text-slate-400">
                 Question {currentIndex + 1} / {questions.length}
               </span>
+              <span className="px-2.5 py-1 rounded-md bg-[#0A0C18] border border-slate-800 text-[10px] font-bold uppercase tracking-wider text-[#9b66ff]">
+                {currentQ.difficulty || "Medium"}
+              </span>
+              <span className="px-2.5 py-1 rounded-md bg-[#0A0C18] border border-slate-800 text-[10px] font-bold uppercase tracking-wider text-slate-400 truncate max-w-[150px] sm:max-w-[240px]">
+                {currentQ.chapter || "General"}
+              </span>
+              {markedForReview[currentQ.id] && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-amber-500/15 border border-amber-500/40 text-[10px] font-bold uppercase tracking-wider text-amber-300">
+                  <Flag className="w-3 h-3" /> Marked
+                </span>
+              )}
+            </div>
+
+            <h2 className="text-lg sm:text-xl xl:text-2xl font-bold text-white leading-relaxed mb-7">
+              {currentQ.question}
+            </h2>
+
+            <div className="space-y-3" role="radiogroup" aria-label={`Question ${currentIndex + 1} options`}>
+              {currentQ.options.map((opt, optIdx) => (
+                <AnswerOption
+                  key={`${currentQ.id}-${opt.id}-${optIdx}`}
+                  label={opt.label}
+                  text={opt.text}
+                  selected={answers[currentQ.id] === opt.label}
+                  onSelect={() => handleSelectOption(currentQ.id, opt.label)}
+                />
+              ))}
+            </div>
+
+            {/* Clear Response · Mark for Review */}
+            <div className="mt-6 flex flex-wrap items-center gap-3 border-t border-slate-800/80 pt-5">
+              <button
+                type="button"
+                onClick={handleClearResponse}
+                disabled={!answers[currentQ.id]}
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[#0A0C18] border border-slate-700/80 text-slate-300 text-xs font-bold hover:border-slate-500 hover:text-white transition-colors disabled:opacity-35 min-h-[40px]"
+              >
+                <Eraser className="w-3.5 h-3.5" />
+                Clear Response
+              </button>
+              <button
+                type="button"
+                onClick={toggleMarkForReview}
+                aria-pressed={!!markedForReview[currentQ.id]}
+                className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border text-xs font-bold transition-colors min-h-[40px] ${
+                  markedForReview[currentQ.id]
+                    ? "bg-amber-500/15 border-amber-500/50 text-amber-300"
+                    : "bg-[#0A0C18] border-slate-700/80 text-slate-300 hover:border-amber-500/40 hover:text-amber-300"
+                }`}
+              >
+                <Flag className="w-3.5 h-3.5" />
+                {markedForReview[currentQ.id] ? "Unmark for Review" : "Mark for Review"}
+              </button>
             </div>
           </div>
 
-          <div className={`flex items-center space-x-2 px-3 py-1.5 rounded-lg border ${
-            isWarning 
-            ? 'bg-rose-50 border-rose-200 text-rose-600 dark:bg-rose-950/30 dark:border-rose-900/50 dark:text-rose-400 animate-pulse'
-            : 'bg-indigo-50 border-indigo-200 text-indigo-700 dark:bg-indigo-950/30 dark:border-indigo-900/50 dark:text-indigo-400'
-          }`}>
-            {isWarning ? <AlertCircle className="w-4 h-4" /> : <Clock className="w-4 h-4" />}
-            <span className="font-bold font-mono tracking-widest">{formatTime(timeLeft)}</span>
-          </div>
-        </div>
-
-        {/* Question Card */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-10 shadow-xl transition-colors">
-          <div className="flex items-center space-x-2 mb-6">
-            <span className="px-2 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded text-[10px] font-bold uppercase tracking-wider">
-              {currentQ.difficulty || 'Medium'}
-            </span>
-            <span className="px-2 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded text-[10px] font-bold uppercase tracking-wider truncate max-w-[150px] sm:max-w-[200px]">
-              {currentQ.chapter || 'No Chapter'}
-            </span>
-          </div>
-
-          <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 leading-relaxed mb-8">
-            {currentQ.question}
-          </h3>
-
-          <div className="space-y-3">
-            {currentQ.options.map((opt) => {
-              const isSelected = answers[currentQ.id] === opt.label;
-              return (
-                <button
-                  key={opt.id}
-                  onClick={() => handleSelectOption(currentQ.id, opt.label)}
-                  className={`w-full text-left p-4 rounded-2xl border-2 transition-all flex items-center space-x-4 group ${
-                    isSelected
-                      ? 'bg-indigo-50 dark:bg-indigo-900/20 border-indigo-500 text-indigo-900 dark:text-indigo-100 shadow-md transform scale-[1.01]'
-                      : 'bg-white dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-indigo-300 dark:hover:border-indigo-700 hover:bg-slate-50 dark:hover:bg-slate-800'
-                  }`}
-                >
-                  <span
-                    className={`w-8 h-8 rounded-xl text-sm font-bold flex items-center justify-center shrink-0 transition-colors ${
-                      isSelected 
-                      ? 'bg-indigo-600 text-white' 
-                      : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 group-hover:bg-indigo-100 dark:group-hover:bg-indigo-900/50 group-hover:text-indigo-600 dark:group-hover:text-indigo-400'
-                    }`}
-                  >
-                    {opt.label}
-                  </span>
-                  <span className="text-base font-medium">{opt.text}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Footer Navigation */}
-        <div className="flex flex-wrap gap-4 items-center justify-between pt-4">
-          <div className="flex space-x-2 sm:space-x-3 w-full sm:w-auto">
+          {/* ---------- Desktop bottom controls (lg+; below lg the sticky bar handles this) ---------- */}
+          <div className="hidden lg:flex items-center justify-between gap-3">
             <button
+              type="button"
               onClick={() => setCurrentIndex((prev) => Math.max(0, prev - 1))}
               disabled={currentIndex === 0}
-              className="flex-1 sm:flex-none inline-flex items-center justify-center space-x-1 sm:space-x-2 px-3 sm:px-5 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-xl text-xs sm:text-sm font-bold disabled:opacity-40 transition-colors"
+              className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[#0A0C18] border border-slate-700/80 text-slate-300 text-sm font-bold hover:border-[#5c2dd5] hover:text-white transition-colors disabled:opacity-35 min-h-[44px]"
             >
-              <ArrowLeft className="w-4 h-4" />
-              <span className="hidden sm:inline">Previous</span>
+              <ChevronLeft className="w-4 h-4" />
+              Previous
             </button>
-            <button
-              onClick={toggleMarkForReview}
-              className={`flex-1 sm:flex-none inline-flex items-center justify-center space-x-2 px-3 sm:px-5 py-3 border rounded-xl text-xs sm:text-sm font-bold transition-colors ${
-                markedForReview[currentQ.id]
-                ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-500 text-amber-700 dark:text-amber-400'
-                : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200'
-              }`}
-            >
-              <span>{markedForReview[currentQ.id] ? 'Unmark' : 'Review'}</span>
-            </button>
-          </div>
 
-          <div className="w-full sm:w-auto mt-2 sm:mt-0">
             {isLastQuestion ? (
               <button
+                type="button"
                 onClick={handleSubmit}
                 disabled={submitting}
-                className="w-full sm:w-auto inline-flex items-center justify-center space-x-2 px-8 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-emerald-500/30 transition-all hover:scale-105 disabled:opacity-60 disabled:hover:scale-100"
+                className="inline-flex items-center gap-2 px-8 py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white text-sm font-bold shadow-lg shadow-emerald-500/20 transition-all disabled:opacity-60 min-h-[44px]"
               >
-                <CheckCircle2 className="w-5 h-5" />
-                <span>{submitting ? 'Submitting…' : 'Submit Exam'}</span>
+                <CheckCircle2 className="w-4 h-4" />
+                {submitting ? "Submitting…" : "Submit Exam"}
               </button>
             ) : (
               <button
+                type="button"
                 onClick={() => setCurrentIndex((prev) => Math.min(questions.length - 1, prev + 1))}
-                className="w-full sm:w-auto inline-flex items-center justify-center space-x-2 px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-indigo-500/30 transition-all hover:scale-105"
+                className="inline-flex items-center gap-2 px-8 py-3 rounded-xl bg-[#8c32ff] hover:bg-[#7b24e6] text-white text-sm font-bold shadow-[0_0_20px_rgba(140,50,255,0.35)] transition-all active:scale-[0.98] min-h-[44px]"
               >
-                <span>Next Question</span>
-                <ArrowRight className="w-5 h-5" />
+                Next Question
+                <ChevronRight className="w-4 h-4" />
               </button>
             )}
           </div>
         </div>
+
+        {/* ================= Palette sidebar (desktop) ================= */}
+        <aside aria-label="Question palette" className="hidden lg:block w-72 xl:w-80 shrink-0 lg:sticky lg:top-4">
+          {palettePanel}
+        </aside>
       </div>
 
-      {/* Mobile Palette Overlay Background */}
-      {showMobilePalette && (
-        <div 
-          className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 lg:hidden"
-          onClick={() => setShowMobilePalette(false)}
-        />
-      )}
-
-      {/* Sidebar Palette */}
-      <div className={`
-        fixed lg:sticky top-0 right-0 h-[100dvh] lg:h-auto w-[85vw] sm:w-[320px] lg:w-72 shrink-0 
-        bg-white dark:bg-slate-900 border-l lg:border border-slate-200 dark:border-slate-800 
-        lg:rounded-3xl p-6 shadow-2xl lg:shadow-xl z-50 lg:z-10
-        transition-transform duration-300 ease-in-out
-        ${showMobilePalette ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'}
-        lg:top-4 overflow-y-auto
-      `}>
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">
-            Question Palette
-          </h3>
-          <button 
-            className="lg:hidden text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
-            onClick={() => setShowMobilePalette(false)}
+      {/* ================= Mobile/tablet: sticky bottom nav (< lg) ================= */}
+      <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 border-t border-slate-800 bg-[#0A0C18]/95 backdrop-blur-xl p-3 grid grid-cols-3 gap-2">
+        <button
+          type="button"
+          onClick={() => setCurrentIndex((prev) => Math.max(0, prev - 1))}
+          disabled={currentIndex === 0}
+          className="inline-flex items-center justify-center gap-1 rounded-xl bg-[#131627] border border-slate-700/80 text-slate-300 text-xs font-bold py-3 disabled:opacity-35 min-h-[44px]"
+        >
+          <ChevronLeft className="w-4 h-4" />
+          Prev
+        </button>
+        <button
+          ref={questionsBtnRef}
+          type="button"
+          onClick={() => setShowMobilePalette(true)}
+          className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#2a1758] border border-[#5c2dd5] text-[#c4a8ff] text-xs font-bold py-3 min-h-[44px]"
+        >
+          <LayoutGrid className="w-4 h-4" />
+          Questions
+        </button>
+        {isLastQuestion ? (
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={submitting}
+            className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 text-white text-xs font-bold py-3 disabled:opacity-60 min-h-[44px]"
           >
-            ✕
+            Submit
           </button>
-        </div>
-        
-        <div className="grid grid-cols-5 lg:grid-cols-5 gap-2 mb-6">
-          {questions.map((q, idx) => {
-            const isAnswered = !!answers[q.id];
-            const isMarked = markedForReview[q.id];
-            const isCurrent = idx === currentIndex;
-            
-            let btnClass = 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700'; // Default unanswered
-            
-            if (isMarked) {
-              btnClass = 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 border-amber-300 dark:border-amber-700 hover:bg-amber-200 dark:hover:bg-amber-900/60';
-            } else if (isAnswered) {
-              btnClass = 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 border-emerald-300 dark:border-emerald-700 hover:bg-emerald-200 dark:hover:bg-emerald-900/60';
-            }
-
-            if (isCurrent) {
-              btnClass += ' ring-2 ring-indigo-500 ring-offset-2 dark:ring-offset-slate-900';
-            }
-
-            return (
-              <button
-                key={q.id}
-                onClick={() => {
-                  setCurrentIndex(idx);
-                  if (window.innerWidth < 1024) setShowMobilePalette(false);
-                }}
-                className={`w-full aspect-square flex items-center justify-center rounded-lg text-xs font-bold border transition-all ${btnClass}`}
-              >
-                {idx + 1}
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Legend */}
-        <div className="space-y-2 text-xs font-medium text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
-          <div className="flex items-center space-x-2">
-            <div className="w-3 h-3 rounded-sm bg-emerald-100 dark:bg-emerald-900/40 border border-emerald-300 dark:border-emerald-700"></div>
-            <span>Answered</span>
-          </div>
-          <div className="flex items-center space-x-2">
-            <div className="w-3 h-3 rounded-sm bg-amber-100 dark:bg-amber-900/40 border border-amber-300 dark:border-amber-700"></div>
-            <span>Marked for Review</span>
-          </div>
-          <div className="flex items-center space-x-2">
-            <div className="w-3 h-3 rounded-sm bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"></div>
-            <span>Unanswered</span>
-          </div>
-        </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setCurrentIndex((prev) => Math.min(questions.length - 1, prev + 1))}
+            className="inline-flex items-center justify-center gap-1 rounded-xl bg-[#8c32ff] text-white text-xs font-bold py-3 min-h-[44px]"
+          >
+            Next
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        )}
       </div>
+
+      {/* ================= Mobile/tablet palette drawer (< lg) ================= */}
+      {showMobilePalette && (
+        <div role="dialog" aria-modal="true" aria-label="Question palette" className="fixed inset-0 z-50 lg:hidden">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowMobilePalette(false)} />
+          <div className="absolute right-0 top-0 h-full w-[85vw] max-w-[340px] bg-[#0F1120] border-l border-slate-800 shadow-2xl overflow-y-auto p-5 flex flex-col">
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-sm font-bold text-white" id="palette-drawer-title">Questions</h2>
+              <button
+                ref={drawerCloseRef}
+                type="button"
+                onClick={() => setShowMobilePalette(false)}
+                aria-label="Close question palette"
+                className="w-8 h-8 rounded-lg bg-[#131627] border border-slate-800 text-slate-400 flex items-center justify-center hover:text-white transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            {palettePanel}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
