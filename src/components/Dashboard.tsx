@@ -8,9 +8,10 @@ interface DashboardProps {
   totalQuestions: number;
   chapterStats: { name: string; count: number }[];
   onStartExam: (chapter?: string) => void;
+  onNavigate: (page: 'settings' | 'topics' | 'weak-topics') => void;
 }
 
-export const Dashboard: React.FC<DashboardProps> = ({ totalQuestions, chapterStats, onStartExam }) => {
+export const Dashboard: React.FC<DashboardProps> = ({ totalQuestions, chapterStats, onStartExam, onNavigate }) => {
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -116,7 +117,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ totalQuestions, chapterSta
                 {stats.dailyGoal?.completedQuestions} / {stats.dailyGoal?.targetQuestions} Questions
               </p>
               <p className="text-[10px] text-slate-500">Keep going to reach your target!</p>
-              <button className="text-[10px] text-indigo-500 font-semibold flex items-center mt-2 hover:text-indigo-400">
+              <button onClick={() => onNavigate('settings')} className="text-[10px] text-indigo-500 font-semibold flex items-center mt-2 hover:text-indigo-400">
                 <span className="mr-1">✎</span> Edit Goal
               </button>
             </div>
@@ -161,9 +162,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ totalQuestions, chapterSta
                 <h3 className="text-xs font-semibold">Overall Progress</h3>
               </div>
               <p className="text-sm font-bold text-slate-800 dark:text-slate-200 mb-1">
-                0 / {totalQuestions.toLocaleString()} Questions
+                {stats.totalAnswered || 0} / {totalQuestions.toLocaleString()} Questions
               </p>
-              <p className="text-[10px] text-slate-500">Start practicing to see progress!</p>
+              {stats.totalAnswered > 0 ? (
+                <p className="text-[10px] text-emerald-600 dark:text-emerald-400">Keep going — {Math.round(((stats.totalAnswered || 0) / Math.max(1, totalQuestions)) * 100)}% of the bank explored!</p>
+              ) : (
+                <p className="text-[10px] text-slate-500">Start practicing to see progress!</p>
+              )}
               {/* Wave line placeholder */}
               <div className="mt-3 h-4 w-full text-indigo-500/50">
                 <svg viewBox="0 0 100 20" preserveAspectRatio="none" className="w-full h-full stroke-current fill-none" strokeWidth="2">
@@ -172,7 +177,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ totalQuestions, chapterSta
               </div>
             </div>
             <div className="w-12 h-12 relative shrink-0 rounded-full border-4 border-slate-800 flex items-center justify-center ml-2">
-               <span className="text-[10px] font-bold">0%</span>
+               <span className="text-[10px] font-bold">{stats.totalAnswered > 0 ? Math.round(((stats.totalAnswered || 0) / Math.max(1, totalQuestions)) * 100) : 0}%</span>
             </div>
           </div>
 
@@ -189,7 +194,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ totalQuestions, chapterSta
                   <span className="text-sm font-bold text-slate-400">Days</span>
                 </div>
                 <p className="text-[10px] text-slate-500 mb-3">Target Date: {new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(stats.examTargetDate))}</p>
-                <button className="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-[11px] font-bold px-4 py-1.5 rounded-lg transition-colors">
+                <button onClick={() => onNavigate('settings')} className="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-[11px] font-bold px-4 py-1.5 rounded-lg transition-colors">
                   Edit Target
                 </button>
               </>
@@ -197,7 +202,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ totalQuestions, chapterSta
               <>
                 <p className="text-sm font-bold text-slate-800 dark:text-slate-200 mb-1">No exam date set.</p>
                 <p className="text-[10px] text-slate-500 mb-3">Set your target date and stay on track.</p>
-                <button className="bg-[#5c2dd5] hover:bg-[#4b22b6] text-white text-[11px] font-bold px-4 py-1.5 rounded-lg transition-colors">
+                <button onClick={() => onNavigate('settings')} className="bg-[#5c2dd5] hover:bg-[#4b22b6] text-white text-[11px] font-bold px-4 py-1.5 rounded-lg transition-colors">
                   Set Target Date
                 </button>
               </>
@@ -216,7 +221,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ totalQuestions, chapterSta
               <BookOpen className="w-4 h-4 text-slate-400" />
               <h3 className="text-base font-bold text-slate-200">Explore Topics</h3>
             </div>
-            <button className="text-xs font-semibold text-indigo-400 hover:text-indigo-300 flex items-center">
+            <button onClick={() => onNavigate('topics')} className="text-xs font-semibold text-indigo-400 hover:text-indigo-300 flex items-center">
               View All Topics <ArrowRight className="w-3 h-3 ml-1" />
             </button>
           </div>
@@ -224,11 +229,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ totalQuestions, chapterSta
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {chapterStats.slice(0, 7).map((chapter) => {
               const style = getChapterStyle(chapter.name);
+              const answered = stats?.answeredByChapter?.[chapter.name] || 0;
+              const pct = chapter.count > 0 ? Math.round((answered / chapter.count) * 100) : 0;
               return (
                 <button
                   key={chapter.name}
                   onClick={() => onStartExam(chapter.name)}
-                  className="bg-white dark:bg-[#131627] border border-slate-200 dark:border-slate-800/80 rounded-xl p-4 text-left hover:border-indigo-300 dark:hover:border-indigo-500/50 transition-colors group flex items-start space-x-4 shadow-sm dark:shadow-none"
+                  className="bg-white dark:bg-[#131627] border border-slate-200 dark:border-slate-800/80 rounded-xl p-4 text-left hover:border-indigo-300 dark:hover:border-indigo-500/50 transition-colors group flex items-start space-x-4 shadow-sm dark:shadow-none cursor-pointer"
                 >
                   {style.icon}
                   <div className="flex-1 min-w-0">
@@ -236,9 +243,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ totalQuestions, chapterSta
                     <p className="text-[10px] text-slate-500 mb-3">{chapter.count} Questions</p>
                     <div className="flex items-center space-x-2">
                       <div className="flex-1 bg-slate-100 dark:bg-[#0A0C18] rounded-full h-1">
-                        <div className={`h-1 rounded-full ${style.color}`} style={{ width: '0%' }}></div>
+                        <div className={`h-1 rounded-full ${style.color}`} style={{ width: `${Math.min(100, pct)}%` }}></div>
                       </div>
-                      <span className="text-[9px] text-slate-500 font-bold">0%</span>
+                      <span className="text-[9px] text-slate-500 font-bold">{pct}%</span>
                     </div>
                   </div>
                 </button>
@@ -247,6 +254,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ totalQuestions, chapterSta
             
             {/* View All Card */}
             <button
+              onClick={() => onNavigate('topics')}
               className="bg-white dark:bg-[#131627] border border-slate-200 dark:border-slate-800/80 rounded-xl p-4 text-left hover:border-indigo-300 dark:hover:border-indigo-500/50 transition-colors flex items-center justify-center space-x-3 shadow-sm dark:shadow-none"
             >
               <div className="flex space-x-1">
@@ -271,13 +279,20 @@ export const Dashboard: React.FC<DashboardProps> = ({ totalQuestions, chapterSta
               <AlertTriangle className="w-4 h-4 text-rose-500" />
               <h3 className="text-base font-bold text-slate-800 dark:text-slate-200 transition-colors">Weak Topics</h3>
             </div>
-            <button className="text-xs font-semibold text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300 transition-colors">View All →</button>
+            <button onClick={() => onNavigate('weak-topics')} className="text-xs font-semibold text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300 transition-colors">View All →</button>
           </div>
           
           {stats?.weakTopics && stats.weakTopics.length > 0 ? (
             <div className="bg-white dark:bg-[#131627] border border-slate-200 dark:border-slate-800/80 rounded-xl shadow-sm dark:shadow-none transition-colors overflow-hidden">
               {stats.weakTopics.map((topic: any, idx: number) => (
-                <div key={topic.topic} className={`p-4 flex items-center justify-between ${idx !== stats.weakTopics.length - 1 ? 'border-b border-slate-100 dark:border-slate-800/50' : ''}`}>
+                <div
+                  key={topic.topic}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => onStartExam(topic.topic)}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onStartExam(topic.topic); }}
+                  className={`p-4 flex items-center justify-between cursor-pointer hover:bg-slate-50 dark:hover:bg-white/[0.03] transition-colors ${idx !== stats.weakTopics.length - 1 ? 'border-b border-slate-100 dark:border-slate-800/50' : ''}`}
+                >
                   <div className="flex-1 pr-4">
                     <p className="text-sm font-bold text-slate-800 dark:text-slate-200 mb-1 truncate">{topic.topic}</p>
                     <div className="flex items-center space-x-2">
@@ -287,9 +302,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ totalQuestions, chapterSta
                       <span className="text-[10px] font-bold text-rose-500">{topic.accuracy}%</span>
                     </div>
                   </div>
-                  <button onClick={() => onStartExam(topic.topic)} className="shrink-0 p-2 text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 rounded-lg transition-colors">
+                  <span className="shrink-0 p-2 text-slate-400 group-hover:text-indigo-500 rounded-lg transition-colors">
                     <Play className="w-4 h-4" />
-                  </button>
+                  </span>
                 </div>
               ))}
             </div>

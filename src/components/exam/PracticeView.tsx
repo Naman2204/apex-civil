@@ -20,6 +20,7 @@ export const PracticeView: React.FC<PracticeViewProps> = ({ questions, config, a
   const [timeSpent, setTimeSpent] = useState<Record<string, number>>({});
   const [startTime, setStartTime] = useState<number>(() => Date.now());
   const [totalTimeTaken, setTotalTimeTaken] = useState(0);
+  const [submitting, setSubmitting] = useState(false);
 
   // Timer effect for total time
   useEffect(() => {
@@ -56,8 +57,14 @@ export const PracticeView: React.FC<PracticeViewProps> = ({ questions, config, a
   };
 
   const handleSubmit = async () => {
-    await finishExamAttempt(attemptId, totalTimeTaken);
-    onFinish(answers, totalTimeTaken);
+    if (submitting) return; // prevent double-submit on rapid clicks
+    setSubmitting(true);
+    try {
+      await finishExamAttempt(attemptId, totalTimeTaken);
+      onFinish(answers, totalTimeTaken);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleToggleBookmark = async () => {
@@ -180,10 +187,11 @@ export const PracticeView: React.FC<PracticeViewProps> = ({ questions, config, a
           {isLastQuestion ? (
             <button
               onClick={handleSubmit}
-              className="w-full sm:w-auto inline-flex items-center justify-center space-x-2 px-8 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-emerald-500/30 transition-all hover:scale-105"
+              disabled={submitting}
+              className="w-full sm:w-auto inline-flex items-center justify-center space-x-2 px-8 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-emerald-500/30 transition-all hover:scale-105 disabled:opacity-60 disabled:hover:scale-100"
             >
               <CheckCircle2 className="w-5 h-5" />
-              <span>Finish Practice</span>
+              <span>{submitting ? 'Finishing…' : 'Finish Practice'}</span>
             </button>
           ) : (
             <button

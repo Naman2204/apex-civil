@@ -23,17 +23,8 @@ export const AnalyticsView: React.FC = () => {
   }, []);
 
   const activityData = data?.activityData || [];
-  
-  // Note: Radar chart needs detailed subject breakdown.
-  // For now we'll use placeholder radar data since we only compute accuracy globally in getAnalyticsData.
-  const radarData = [
-    { subject: 'Structure', A: 120, fullMark: 150 },
-    { subject: 'Geo', A: 98, fullMark: 150 },
-    { subject: 'Water', A: 86, fullMark: 150 },
-    { subject: 'Env', A: 99, fullMark: 150 },
-    { subject: 'Transpo', A: 85, fullMark: 150 },
-    { subject: 'Survey', A: 65, fullMark: 150 },
-  ];
+  // Real per-chapter accuracy computed server-side from completed attempts.
+  const radarData = data?.radarData || [];
 
   return (
     <div className="space-y-6 w-full pb-12 animate-in fade-in duration-500">
@@ -113,16 +104,24 @@ export const AnalyticsView: React.FC = () => {
         {/* Radar Chart */}
         <div className="bg-white dark:bg-[#131627] border border-slate-200 dark:border-slate-800/80 rounded-2xl p-6 flex flex-col transition-colors shadow-sm dark:shadow-none">
           <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200 mb-2 transition-colors">Subject Mastery Radar</h3>
-          <div className="flex-1 min-h-[250px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <RadarChart cx="50%" cy="50%" outerRadius="70%" data={radarData}>
-                <PolarGrid stroke="#cbd5e1" className="dark:stroke-slate-800" />
-                <PolarAngleAxis dataKey="subject" tick={{ fill: '#64748b', fontSize: 10 }} />
-                <Radar name="Mastery" dataKey="A" stroke="#10b981" fill="#10b981" fillOpacity={0.2} />
-                <Tooltip contentStyle={{ backgroundColor: 'var(--tw-prose-body, #0A0C18)', borderColor: '#1e293b', borderRadius: '8px', color: '#fff' }} />
-              </RadarChart>
-            </ResponsiveContainer>
-          </div>
+          {radarData.length > 0 ? (
+            <div className="flex-1 min-h-[250px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <RadarChart cx="50%" cy="50%" outerRadius="70%" data={radarData}>
+                  <PolarGrid stroke="#cbd5e1" className="dark:stroke-slate-800" />
+                  <PolarAngleAxis dataKey="subject" tick={{ fill: '#64748b', fontSize: 10 }} />
+                  <Radar name="Mastery" dataKey="A" stroke="#10b981" fill="#10b981" fillOpacity={0.2} />
+                  <Tooltip contentStyle={{ backgroundColor: 'var(--tw-prose-body, #0A0C18)', borderColor: '#1e293b', borderRadius: '8px', color: '#fff' }} />
+                </RadarChart>
+              </ResponsiveContainer>
+            </div>
+          ) : (
+            <div className="flex-1 min-h-[250px] flex flex-col items-center justify-center text-center">
+              <Crosshair className="w-10 h-10 text-slate-300 dark:text-slate-600 mb-3" />
+              <p className="text-sm font-bold text-slate-600 dark:text-slate-300">No data yet</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 max-w-[220px] mt-1">Complete exams to see your subject-by-subject mastery.</p>
+            </div>
+          )}
         </div>
       </div>
 

@@ -16,9 +16,10 @@ interface ExamSetupProps {
   totalAvailable: number;
   onStartExam: (config: ExamConfig) => void;
   prefilledChapter?: string;
+  onBack?: () => void;
 }
 
-export const ExamSetup: React.FC<ExamSetupProps> = ({ availableChapters, totalAvailable, onStartExam, prefilledChapter }) => {
+export const ExamSetup: React.FC<ExamSetupProps> = ({ availableChapters, totalAvailable, onStartExam, prefilledChapter, onBack }) => {
   const [mode, setMode] = useState<'PRACTICE' | 'EXAM'>('PRACTICE');
   const [chapter, setChapter] = useState(prefilledChapter || 'All');
   const [difficulty, setDifficulty] = useState('All');
@@ -42,7 +43,11 @@ export const ExamSetup: React.FC<ExamSetupProps> = ({ availableChapters, totalAv
       
       {/* Header */}
       <div className="flex items-center space-x-3 mb-8">
-        <button className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 hover:text-white transition-colors">
+        <button
+          onClick={onBack}
+          aria-label="Back"
+          className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 hover:text-white transition-colors"
+        >
           <ArrowLeft className="w-4 h-4" />
         </button>
         <h2 className="text-xl font-bold text-white">Configure Your Exam</h2>
@@ -169,17 +174,17 @@ export const ExamSetup: React.FC<ExamSetupProps> = ({ availableChapters, totalAv
                 <span>Time Limit <span className="text-[10px] text-slate-500 font-normal ml-1">(for Strict Exam)</span></span>
               </label>
               <div className="flex bg-[#0A0C18] rounded-xl border border-slate-800 overflow-hidden">
-                {[5, 15, 30, 60, 'Custom'].map((mins) => (
+                {[5, 15, 30, 60].map((mins) => (
                   <button
                     key={mins}
-                    onClick={() => typeof mins === 'number' && setTimeLimit(mins)}
+                    onClick={() => setTimeLimit(mins)}
                     className={`flex-1 py-3 text-xs font-bold transition-all ${
                       timeLimit === mins
                       ? 'bg-[#2a1758] text-[#9b66ff]' 
                       : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-200'
                     }`}
                   >
-                    {mins} {typeof mins === 'number' ? 'min' : ''}
+                    {mins} min
                   </button>
                 ))}
               </div>

@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { MCQQuestion } from '../../types/mcq';
 import { ExamSetup, ExamConfig } from './ExamSetup';
 import { LiveExam } from './LiveExam';
@@ -30,8 +30,13 @@ export const ExamView: React.FC<ExamViewProps> = ({
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [timeTaken, setTimeTaken] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const startingRef = useRef(false);
+  const finishingRef = useRef(false);
 
   const handleStartExam = async (newConfig: ExamConfig) => {
+    // Guard against double-click / repeated Start submissions.
+    if (startingRef.current) return;
+    startingRef.current = true;
     setIsLoading(true);
     try {
       const selected = await onFetchQuestions(newConfig.chapter, newConfig.difficulty, newConfig.questionCount);
@@ -54,10 +59,14 @@ export const ExamView: React.FC<ExamViewProps> = ({
       alert("Failed to start session. Please try again.");
     } finally {
       setIsLoading(false);
+      startingRef.current = false;
     }
   };
 
   const handleFinishExam = async (finalAnswers: Record<string, string>, timeTakenSeconds: number) => {
+    // Guard against double-submit (double clicks, repeated timer auto-submit).
+    if (finishingRef.current) return;
+    finishingRef.current = true;
     setAnswers(finalAnswers);
     setTimeTaken(timeTakenSeconds);
     
@@ -79,6 +88,7 @@ export const ExamView: React.FC<ExamViewProps> = ({
     setAnswers({});
     setTimeTaken(0);
     setAttemptId('');
+    finishingRef.current = false; // allow the next attempt to finish normally
   };
 
   return (
@@ -95,6 +105,7 @@ export const ExamView: React.FC<ExamViewProps> = ({
           totalAvailable={totalAvailable} 
           onStartExam={handleStartExam} 
           prefilledChapter={prefilledChapter}
+          onBack={onReturnHome}
         />
       )}
       

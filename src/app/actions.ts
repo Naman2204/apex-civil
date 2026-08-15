@@ -1,7 +1,37 @@
 "use server";
 
+import { Prisma } from "@prisma/client";
 import { db } from "../lib/db";
 import { getOrCreateDbUser } from "../lib/auth";
+
+const VALID_DIFFICULTIES = ["All", "Easy", "Medium", "Hard"];
+const VALID_MODES = ["PRACTICE", "EXAM"];
+const MAX_QUESTIONS_PER_EXAM = 200;
+
+function validateChapter(chapter: string): string {
+  if (typeof chapter !== "string" || chapter.trim() === "") {
+    throw new Error("Invalid chapter");
+  }
+  if (chapter.length > 200) {
+    throw new Error("Invalid chapter");
+  }
+  return chapter;
+}
+
+function validateDifficulty(difficulty: string): string {
+  if (!VALID_DIFFICULTIES.includes(difficulty)) {
+    throw new Error("Invalid difficulty");
+  }
+  return difficulty;
+}
+
+function validateLimit(limit: number): number {
+  const safeLimit = Math.floor(Number(limit));
+  if (!Number.isFinite(safeLimit) || safeLimit < 1 || safeLimit > MAX_QUESTIONS_PER_EXAM) {
+    throw new Error("Invalid question count");
+  }
+  return safeLimit;
+}
 
 export async function getChapterStats() {
   const groups = await db.question.groupBy({
@@ -23,12 +53,24 @@ export async function getChapterStats() {
 export async function getQuestionsForExam(chapter: string, difficulty: string, limit: number) {
   await getOrCreateDbUser();
 
-  const questions = await db.$queryRawUnsafe<any[]>(
-    `SELECT * FROM "Question" WHERE ${
-      chapter !== 'All' ? `"chapter" = '${chapter}'` : '1=1'
-    } AND ${
-      difficulty !== 'All' ? `"difficulty" = '${difficulty}'` : '1=1'
-    } ORDER BY RANDOM() LIMIT ${limit}`
+  // Server-side validation — never trust client input.
+  const safeChapter = validateChapter(chapter);
+  const safeDifficulty = validateDifficulty(difficulty);
+  const safeLimit = validateLimit(limit);
+
+  // Parameterized query: no user input is ever interpolated into SQL.
+  // All values are passed as Prisma query parameters.
+  const conditions: Prisma.Sql[] = [];
+  if (safeChapter !== "All") {
+    conditions.push(Prisma.sql`"chapter" = ${safeChapter}`);
+  }
+  if (safeDifficulty !== "All") {
+    conditions.push(Prisma.sql`"difficulty" = ${safeDifficulty}`);
+  }
+  const where = conditions.length > 0 ? Prisma.sql`WHERE ${Prisma.join(conditions, " AND ")}` : Prisma.empty;
+
+  const questions = await db.$queryRaw<QuestionRow[]>(
+    Prisma.sql`SELECT * FROM "Question" ${where} ORDER BY RANDOM() LIMIT ${safeLimit}`
   );
 
   return questions.map(q => ({
@@ -36,24 +78,48 @@ export async function getQuestionsForExam(chapter: string, difficulty: string, l
     question: q.questionText,
     options: typeof q.options === 'string' ? JSON.parse(q.options) : q.options,
     correctAnswer: q.correctAnswer,
-    explanation: q.explanation,
-    difficulty: q.difficulty,
-    chapter: q.chapter,
+    explanation: q.explanation ?? undefined,
+    difficulty: q.difficulty as 'Easy' | 'Medium' | 'Hard' | undefined,
+    chapter: q.chapter ?? undefined,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   }));
 }
 
+interface QuestionRow {
+  id: string;
+  questionText: string;
+  options: unknown;
+  correctAnswer: string;
+  explanation: string | null;
+  difficulty: string;
+  chapter: string | null;
+}
+
 export async function startExamAttempt(mode: 'PRACTICE' | 'EXAM', chapter: string, totalQuestions: number, negativeMarkingPenalty?: number) {
+  // Server-side validation — never trust client input.
+  if (!VALID_MODES.includes(mode)) {
+    throw new Error("Invalid exam mode");
+  }
+  const safeChapter = validateChapter(chapter);
+  const safeTotal = Math.floor(Number(totalQuestions));
+  if (!Number.isFinite(safeTotal) || safeTotal < 1 || safeTotal > MAX_QUESTIONS_PER_EXAM) {
+    throw new Error("Invalid question count");
+  }
+  const safePenalty = Number(negativeMarkingPenalty) || 0;
+  if (safePenalty < 0 || safePenalty > 1) {
+    throw new Error("Invalid negative marking penalty");
+  }
+
   const user = await getOrCreateDbUser();
   const attempt = await db.examAttempt.create({
     data: {
       userId: user.id,
       mode,
-      topic: chapter,
-      totalQuestions,
-      negativeMarkingEnabled: negativeMarkingPenalty ? negativeMarkingPenalty > 0 : false,
-      negativeMarkingPenalty: negativeMarkingPenalty || 0,
+      topic: safeChapter === 'All' ? null : safeChapter,
+      totalQuestions: safeTotal,
+      negativeMarkingEnabled: safePenalty > 0,
+      negativeMarkingPenalty: safePenalty,
     }
   });
   return attempt.id;
@@ -63,10 +129,34 @@ export async function saveAttemptAnswer(
   attemptId: string, 
   questionId: string, 
   selectedAnswer: string, 
-  isCorrect: boolean, 
+  _isCorrect: boolean, // Deprecated: correctness is computed server-side and the client value is ignored.
   timeSpentSeconds: number
 ) {
-  // Find if an answer already exists
+  const user = await getOrCreateDbUser();
+
+  // Ownership check: the attempt must belong to the authenticated user.
+  const attempt = await db.examAttempt.findFirst({
+    where: { id: attemptId, userId: user.id },
+    select: { id: true, completedAt: true }
+  });
+  if (!attempt) {
+    throw new Error("Attempt not found");
+  }
+  // Do not mutate answers on an already-completed attempt.
+  if (attempt.completedAt) return;
+
+  const question = await db.question.findUnique({
+    where: { id: questionId },
+    select: { id: true, correctAnswer: true }
+  });
+  if (!question) {
+    throw new Error("Question not found");
+  }
+
+  // Correctness is determined by the server against the stored correct answer.
+  const computedCorrect = (selectedAnswer || "").trim().toUpperCase() === question.correctAnswer.trim().toUpperCase();
+
+  // Find if an answer already exists (scoped to this attempt)
   const existing = await db.attemptAnswer.findFirst({
     where: { attemptId, questionId }
   });
@@ -74,7 +164,7 @@ export async function saveAttemptAnswer(
   if (existing) {
     await db.attemptAnswer.update({
       where: { id: existing.id },
-      data: { selectedAnswer, isCorrect, timeSpentSeconds }
+      data: { selectedAnswer, isCorrect: computedCorrect, timeSpentSeconds }
     });
   } else {
     await db.attemptAnswer.create({
@@ -82,13 +172,13 @@ export async function saveAttemptAnswer(
         attemptId,
         questionId,
         selectedAnswer,
-        isCorrect,
+        isCorrect: computedCorrect,
         timeSpentSeconds
       }
     });
 
-    // Increment correct/wrong count on the attempt
-    if (isCorrect) {
+    // Increment correct/wrong count on the attempt using the server-computed value
+    if (computedCorrect) {
       await db.examAttempt.update({
         where: { id: attemptId },
         data: { correctCount: { increment: 1 } }
@@ -108,80 +198,165 @@ export async function finishExamAttemptBatch(
   answers: Record<string, string>,
   questions: any[]
 ) {
-  const attempt = await db.examAttempt.findUnique({ where: { id: attemptId } });
-  if (!attempt) return;
+  const user = await getOrCreateDbUser();
 
-  let correctCount = 0;
-  let wrongCount = 0;
-  
-  const attemptAnswersData = [];
+  // Everything runs in one transaction so a failure cannot leave the attempt
+  // claimed-but-incomplete. Ownership + idempotency: the claim update only
+  // matches an attempt owned by this user that is not completed yet, so
+  // exactly one concurrent caller wins and duplicates are impossible.
+  const finalized = await db.$transaction(async (tx) => {
+    const claimed = await tx.examAttempt.updateMany({
+      where: { id: attemptId, userId: user.id, completedAt: null },
+      data: { completedAt: new Date() }
+    });
+    if (claimed.count === 0) return null;
 
-  for (const q of questions) {
-    const selected = answers[q.id];
-    if (selected) {
-      const isCorrect = selected.toUpperCase() === q.correctAnswer.toUpperCase();
-      if (isCorrect) correctCount++;
-      else wrongCount++;
-      
-      attemptAnswersData.push({
-        attemptId,
-        questionId: q.id,
-        selectedAnswer: selected,
-        isCorrect,
-        timeSpentSeconds: 0 // In batch, we don't have individual times unless tracked
+    const attempt = await tx.examAttempt.findUnique({
+      where: { id: attemptId },
+      select: { id: true, mode: true, topic: true, totalQuestions: true, negativeMarkingEnabled: true, negativeMarkingPenalty: true }
+    });
+    if (!attempt) return null;
+
+    let correctCount = 0;
+    let wrongCount = 0;
+    
+    const attemptAnswersData = [];
+
+    for (const q of questions) {
+      const selected = answers[q.id];
+      if (selected) {
+        const isCorrect = selected.trim().toUpperCase() === q.correctAnswer.trim().toUpperCase();
+        if (isCorrect) correctCount++;
+        else wrongCount++;
+        
+        attemptAnswersData.push({
+          attemptId,
+          questionId: q.id,
+          selectedAnswer: selected,
+          isCorrect,
+          timeSpentSeconds: 0 // In batch, we don't have individual times unless tracked
+        });
+      }
+    }
+
+    // skippedCount must reconcile: correct + wrong + skipped === totalQuestions
+    const skippedCount = Math.max(0, attempt.totalQuestions - (correctCount + wrongCount));
+    
+    // Calculate score
+    let score = 0;
+    if (attempt.negativeMarkingEnabled && attempt.negativeMarkingPenalty) {
+      score = correctCount - (wrongCount * attempt.negativeMarkingPenalty);
+      score = Math.max(0, score);
+      score = (score / attempt.totalQuestions) * 100;
+    } else {
+      score = attempt.totalQuestions > 0 ? (correctCount / attempt.totalQuestions) * 100 : 0;
+    }
+
+    // Finalize the attempt with server-computed counts and score
+    await tx.examAttempt.update({
+      where: { id: attemptId },
+      data: {
+        timeTakenSeconds,
+        correctCount,
+        wrongCount,
+        skippedCount,
+        score: Math.round(score)
+      }
+    });
+
+    // Batch insert answers (deduped by question — one row per question)
+    const uniqueAnswers = attemptAnswersData.filter(
+      (a, i, arr) => arr.findIndex((x) => x.questionId === a.questionId) === i
+    );
+    if (uniqueAnswers.length > 0) {
+      await tx.attemptAnswer.createMany({
+        data: uniqueAnswers
       });
     }
-  }
 
-  const skippedCount = attempt.totalQuestions - (correctCount + wrongCount);
-  
-  // Calculate score
-  let score = 0;
-  if (attempt.negativeMarkingEnabled && attempt.negativeMarkingPenalty) {
-    score = correctCount - (wrongCount * attempt.negativeMarkingPenalty);
-    score = Math.max(0, score); // Avoid negative score if desired, or allow negative. Let's allow negative but maybe percentage is weird. 
-    // Actually typically competitive exams allow negative score. Let's just keep the raw score, but usually score is a percentage or raw marks.
-    // If score is percentage: 
-    score = (score / attempt.totalQuestions) * 100;
-  } else {
-    score = attempt.totalQuestions > 0 ? (correctCount / attempt.totalQuestions) * 100 : 0;
-  }
-
-  // Update ExamAttempt
-  await db.examAttempt.update({
-    where: { id: attemptId },
-    data: {
-      completedAt: new Date(),
-      timeTakenSeconds,
-      correctCount,
-      wrongCount,
-      skippedCount,
-      score: Math.round(score)
-    }
+    return { score: Math.round(score), topic: attempt.topic, mode: attempt.mode };
   });
 
-  // Batch insert answers
-  if (attemptAnswersData.length > 0) {
-    await db.attemptAnswer.createMany({
-      data: attemptAnswersData
-    });
-  }
+  if (!finalized) return;
+
+  // Notify the user about the completed exam (established event producer).
+  await db.notification.create({
+    data: {
+      userId: user.id,
+      title: "Exam Completed",
+      message: `You scored ${finalized.score}% in ${finalized.topic || "Mixed Chapters"} (${finalized.mode === "EXAM" ? "Strict Exam" : "Practice"}).`,
+    }
+  });
 }
 
 export async function finishExamAttempt(attemptId: string, timeTakenSeconds: number) {
-  const attempt = await db.examAttempt.findUnique({ where: { id: attemptId } });
-  if (!attempt) return;
+  const user = await getOrCreateDbUser();
 
-  const scorePercentage = attempt.totalQuestions > 0 
-    ? Math.round((attempt.correctCount / attempt.totalQuestions) * 100) 
-    : 0;
+  // Everything runs in one transaction so a failure cannot leave the attempt
+  // claimed-but-incomplete. Ownership + idempotency: the claim update only
+  // matches an attempt owned by this user that is not completed yet, so
+  // exactly one concurrent caller wins and duplicates are impossible.
+  const finalized = await db.$transaction(async (tx) => {
+    const claimed = await tx.examAttempt.updateMany({
+      where: { id: attemptId, userId: user.id, completedAt: null },
+      data: { completedAt: new Date() }
+    });
+    if (claimed.count === 0) return null;
 
-  await db.examAttempt.update({
-    where: { id: attemptId },
+    const attempt = await tx.examAttempt.findUnique({
+      where: { id: attemptId },
+      select: { id: true, topic: true, totalQuestions: true, negativeMarkingEnabled: true, negativeMarkingPenalty: true }
+    });
+    if (!attempt) return null;
+
+    // Recompute correctness server-side from the stored answers: the client
+    // is never authoritative. Unanswered questions count as skipped.
+    const savedAnswers = await tx.attemptAnswer.findMany({
+      where: { attemptId },
+      select: { selectedAnswer: true, question: { select: { correctAnswer: true } } }
+    });
+    let correctCount = 0;
+    let wrongCount = 0;
+    for (const a of savedAnswers) {
+      const sel = (a.selectedAnswer || "").trim();
+      if (!sel) continue; // unanswered counts as skipped
+      if (sel.toUpperCase() === a.question.correctAnswer.trim().toUpperCase()) correctCount++;
+      else wrongCount++;
+    }
+
+    // Reconcile counts server-side: correct + wrong + skipped MUST equal totalQuestions.
+    const skippedCount = Math.max(0, attempt.totalQuestions - (correctCount + wrongCount));
+
+    let score = 0;
+    if (attempt.negativeMarkingEnabled && attempt.negativeMarkingPenalty) {
+      score = Math.max(0, correctCount - (wrongCount * attempt.negativeMarkingPenalty));
+      score = (score / attempt.totalQuestions) * 100;
+    } else {
+      score = attempt.totalQuestions > 0 ? (correctCount / attempt.totalQuestions) * 100 : 0;
+    }
+
+    await tx.examAttempt.update({
+      where: { id: attemptId },
+      data: {
+        timeTakenSeconds,
+        correctCount,
+        wrongCount,
+        skippedCount,
+        score: Math.round(score)
+      }
+    });
+
+    return { score: Math.round(score), topic: attempt.topic };
+  });
+
+  if (!finalized) return;
+
+  // Notify the user about the completed exam (established event producer).
+  await db.notification.create({
     data: {
-      completedAt: new Date(),
-      timeTakenSeconds,
-      score: scorePercentage
+      userId: user.id,
+      title: "Exam Completed",
+      message: `You scored ${finalized.score}% in ${finalized.topic || "Mixed Chapters"} (Practice).`,
     }
   });
 }

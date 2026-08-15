@@ -67,7 +67,7 @@ export function MainClient({ totalQuestions, chapterStats }: MainClientProps) {
   const renderMainContent = () => {
     switch (activePage) {
       case 'dashboard':
-        return <Dashboard totalQuestions={totalQuestions} chapterStats={chapterStats} onStartExam={handleStartExam} />;
+        return <Dashboard totalQuestions={totalQuestions} chapterStats={chapterStats} onStartExam={handleStartExam} onNavigate={handleNavigate} />;
       case 'exam':
       case 'quick-practice':
         return (
@@ -92,7 +92,7 @@ export function MainClient({ totalQuestions, chapterStats }: MainClientProps) {
       case 'settings':
         return <SettingsView isDarkMode={isDarkMode} onToggleDarkMode={() => setIsDarkMode(!isDarkMode)} />;
       default:
-        return <Dashboard totalQuestions={totalQuestions} chapterStats={chapterStats} onStartExam={handleStartExam} />;
+        return <Dashboard totalQuestions={totalQuestions} chapterStats={chapterStats} onStartExam={handleStartExam} onNavigate={handleNavigate} />;
     }
   };
 

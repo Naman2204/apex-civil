@@ -22,10 +22,9 @@ export async function getDashboardStats() {
     dailyGoal = { id: '', userId: user.id, date: today, targetQuestions: 50, completedQuestions: 0 };
   }
 
-  // 3. Weak Topics (query AttemptAnswer)
-  // We'll get all attempt answers for this user and calculate accuracy per topic.
+  // 3. Weak Topics — from COMPLETED attempts only (abandoned attempts must not skew accuracy)
   const attempts = await db.examAttempt.findMany({
-    where: { userId: user.id },
+    where: { userId: user.id, completedAt: { not: null } },
     select: { topic: true, correctCount: true, totalQuestions: true }
   });
   
@@ -52,6 +51,20 @@ export async function getDashboardStats() {
     .sort((a, b) => a.accuracy - b.accuracy)
     .slice(0, 3);
 
+  // 3b. Real progress: distinct questions answered per chapter (from all answers),
+  // used by the Dashboard overall-progress and topic-card progress bars.
+  const answeredRows = await db.attemptAnswer.findMany({
+    where: { attempt: { userId: user.id } },
+    select: { questionId: true, question: { select: { chapter: true } } },
+    distinct: ['questionId']
+  });
+  const answeredByChapter: Record<string, number> = {};
+  for (const row of answeredRows) {
+    const ch = row.question.chapter || 'Uncategorized';
+    answeredByChapter[ch] = (answeredByChapter[ch] || 0) + 1;
+  }
+  const totalAnswered = answeredRows.length;
+
   // 4. Exam Countdown
   let daysRemaining = null;
   if (user.examTargetDate) {
@@ -64,6 +77,8 @@ export async function getDashboardStats() {
     dailyGoal,
     weakTopics,
     daysRemaining,
-    examTargetDate: user.examTargetDate
+    examTargetDate: user.examTargetDate,
+    answeredByChapter,
+    totalAnswered
   };
 }

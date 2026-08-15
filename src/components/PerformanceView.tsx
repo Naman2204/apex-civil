@@ -54,7 +54,7 @@ export const PerformanceView: React.FC = () => {
             const isGood = percentage >= 75;
             
             return (
-              <div key={record.id} className="grid grid-cols-12 gap-4 px-6 py-5 items-center hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors group cursor-pointer">
+              <div key={record.id} className="grid grid-cols-12 gap-4 px-6 py-5 items-center transition-colors">
                 
                 {/* Date */}
                 <div className="col-span-4 md:col-span-3">
@@ -93,13 +93,12 @@ export const PerformanceView: React.FC = () => {
                   <span className="text-sm">{record.time}</span>
                 </div>
 
-                {/* Mobile time & Arrow */}
+                {/* Mobile time */}
                 <div className="col-span-12 md:hidden flex justify-between items-center mt-2 pt-2 border-t border-slate-100 dark:border-slate-800/30 transition-colors">
                   <div className="flex items-center space-x-1 text-slate-500 dark:text-slate-400">
                     <Clock className="w-3.5 h-3.5" />
                     <span className="text-[10px]">{record.time}</span>
                   </div>
-                  <span className="text-[10px] text-indigo-500 dark:text-indigo-400 transition-colors">View Details &rarr;</span>
                 </div>
               </div>
             );

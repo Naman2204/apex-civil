@@ -244,7 +244,7 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Theme Toggle */}
           <button
             onClick={onToggleDarkMode}
-            className="p-2 rounded-xl text-slate-500 hover:bg-slate-200 dark:text-slate-400 dark:hover:bg-white/5 transition-colors hidden sm:block w-9 h-9 flex items-center justify-center"
+            className="p-2 rounded-xl text-slate-500 hover:bg-slate-200 dark:text-slate-400 dark:hover:bg-white/5 transition-colors w-9 h-9 flex items-center justify-center"
             title="Toggle dark mode"
           >
             {mounted && isDarkMode !== undefined && (

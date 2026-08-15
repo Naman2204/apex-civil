@@ -52,11 +52,14 @@ export async function markAllNotificationsRead() {
   return { success: true };
 }
 
-// Utility for creating notifications from other server actions
-export async function createNotification(userId: string, title: string, message: string) {
+// Utility for creating notifications for the authenticated user.
+// The user id is derived from the session — never from caller input — so a
+// caller can only ever create notifications for their own account.
+export async function createNotification(title: string, message: string) {
+  const user = await getOrCreateDbUser();
   await db.notification.create({
     data: {
-      userId,
+      userId: user.id,
       title,
       message,
     }

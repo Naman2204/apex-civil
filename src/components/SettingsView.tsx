@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { Settings, Moon, Sun, Target, Calendar, Save, ShieldCheck, Loader2 } from 'lucide-react';
-import { getUserSettings, updateUserSettings } from '../app/actions/settings';
+import { Settings, Moon, Sun, Target, Calendar, Save, ShieldCheck, Loader2, Trash2, AlertTriangle } from 'lucide-react';
+import { getUserSettings, updateUserSettings, resetUserData } from '../app/actions/settings';
 
 interface SettingsViewProps {
   isDarkMode: boolean;
@@ -45,6 +45,35 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ isDarkMode, onToggle
       console.error("Failed to save settings", err);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const [resetConfirming, setResetConfirming] = useState(false);
+  const [resetting, setResetting] = useState(false);
+
+  const handleReset = async () => {
+    if (!resetConfirming) {
+      // First click: ask for explicit confirmation.
+      setResetConfirming(true);
+      return;
+    }
+    setResetting(true);
+    try {
+      await resetUserData();
+      // Reload settings so the UI returns to the correct empty state.
+      const settings = await getUserSettings();
+      setDailyGoal(settings.dailyGoal);
+      setExamDate(settings.examTargetDate
+        ? settings.examTargetDate.slice(0, 10)
+        : '');
+      setResetConfirming(false);
+      alert('Your progress data has been reset.');
+    } catch (err) {
+      console.error('Failed to reset data', err);
+      setResetConfirming(false);
+      alert('Reset failed. Please try again.');
+    } finally {
+      setResetting(false);
     }
   };
 
@@ -129,13 +158,32 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ isDarkMode, onToggle
         {/* Danger Zone */}
         <div className="space-y-4 pt-4">
           <h3 className="text-sm font-bold text-rose-600 dark:text-rose-500 border-b border-slate-200 dark:border-slate-800 pb-2 transition-colors">Danger Zone</h3>
+          {resetConfirming && (
+            <div className="flex items-start space-x-2 p-3 rounded-xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-500/30 text-xs text-rose-700 dark:text-rose-300">
+              <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+              <span>This permanently deletes <strong>your</strong> exam attempts, answers, bookmarks, daily goals, streaks and notifications. This cannot be undone. Click the button again to confirm.</span>
+            </div>
+          )}
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-semibold text-slate-800 dark:text-slate-300 transition-colors">Reset Progress</p>
               <p className="text-xs text-slate-500 transition-colors">Permanently delete all your exam history and statistics.</p>
             </div>
-            <button className="px-4 py-2 bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-500 text-xs font-bold rounded-lg border border-rose-200 dark:border-rose-500/20 hover:bg-rose-500 hover:text-white transition-colors">
-              Reset Data
+            <button
+              onClick={handleReset}
+              disabled={resetting}
+              className={`px-4 py-2 text-xs font-bold rounded-lg border transition-colors ${resetConfirming
+                ? 'bg-rose-600 text-white border-rose-600 hover:bg-rose-700'
+                : 'bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-500 border-rose-200 dark:border-rose-500/20 hover:bg-rose-500 hover:text-white'}`}
+            >
+              {resetting ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin inline mr-1" />
+              ) : resetConfirming ? (
+                <AlertTriangle className="w-3.5 h-3.5 inline mr-1" />
+              ) : (
+                <Trash2 className="w-3.5 h-3.5 inline mr-1" />
+              )}
+              {resetting ? 'Resetting…' : resetConfirming ? 'Click again to confirm' : 'Reset Data'}
             </button>
           </div>
         </div>

@@ -6,8 +6,9 @@ import { getOrCreateDbUser } from "../../lib/auth";
 export async function getExamHistory() {
   const dbUser = await getOrCreateDbUser();
 
+  // History reflects completed exams only — abandoned attempts are not results.
   const attempts = await prisma.examAttempt.findMany({
-    where: { userId: dbUser.id },
+    where: { userId: dbUser.id, completedAt: { not: null } },
     orderBy: { startedAt: 'desc' },
     take: 20,
   });
@@ -37,10 +38,11 @@ export async function getExamHistory() {
 export async function getWeakTopics() {
   const dbUser = await getOrCreateDbUser();
 
-  // Fetch all answers for this user
+  // Fetch answers from completed attempts only, so abandoned exams do not
+  // skew weak-topic accuracy.
   const answers = await prisma.attemptAnswer.findMany({
     where: {
-      attempt: { userId: dbUser.id }
+      attempt: { userId: dbUser.id, completedAt: { not: null } }
     },
     include: {
       question: true
@@ -78,13 +80,15 @@ export async function getWeakTopics() {
 export async function getAnalyticsData() {
   const dbUser = await getOrCreateDbUser();
 
-  // Get attempts from last 7 days
+  // Get completed attempts from the last 7 days only — abandoned attempts
+  // must not pollute analytics.
   const oneWeekAgo = new Date();
   oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
   const attempts = await prisma.examAttempt.findMany({
     where: {
       userId: dbUser.id,
+      completedAt: { not: null },
       startedAt: { gte: oneWeekAgo }
     },
     include: {
@@ -132,10 +136,35 @@ export async function getAnalyticsData() {
   const overallAccuracy = totalQuestions > 0 ? ((totalCorrect / totalQuestions) * 100).toFixed(1) : "0.0";
   const avgTimePerQuestion = totalQuestions > 0 ? Math.round(totalTime / totalQuestions) : 0;
 
+  // Subject Mastery Radar — real per-chapter accuracy from completed answers.
+  const radarAnswers = await prisma.attemptAnswer.findMany({
+    where: {
+      attempt: { userId: dbUser.id, completedAt: { not: null } }
+    },
+    select: {
+      isCorrect: true,
+      question: { select: { chapter: true } }
+    }
+  });
+  const radarMap: Record<string, { correct: number; total: number }> = {};
+  radarAnswers.forEach((a) => {
+    const chapter = a.question.chapter || "Uncategorized";
+    if (!radarMap[chapter]) radarMap[chapter] = { correct: 0, total: 0 };
+    radarMap[chapter].total += 1;
+    if (a.isCorrect) radarMap[chapter].correct += 1;
+  });
+  const radarData = Object.entries(radarMap)
+    .map(([subject, s]) => ({
+      subject,
+      A: s.total > 0 ? Math.round((s.correct / s.total) * 100) : 0,
+    }))
+    .sort((a, b) => b.A - a.A);
+
   return {
     activityData,
     overallAccuracy,
     totalQuestions,
-    avgTimePerQuestion
+    avgTimePerQuestion,
+    radarData
   };
 }

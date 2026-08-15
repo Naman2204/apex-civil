@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Clock, ArrowRight, ArrowLeft, CheckCircle2, AlertCircle } from 'lucide-react';
 import { MCQQuestion } from '../../types/mcq';
 import { ExamConfig } from './ExamSetup';
@@ -18,12 +18,18 @@ export const LiveExam: React.FC<LiveExamProps> = ({ questions, config, onFinish,
 
   const [markedForReview, setMarkedForReview] = useState<Record<string, boolean>>({});
   const [showMobilePalette, setShowMobilePalette] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const submittedRef = useRef(false);
 
   // Timer effect
   const currentQ = questions[currentIndex];
   const isLastQuestion = currentIndex === questions.length - 1;
 
   const handleSubmit = () => {
+    // Prevent duplicate submits from rapid clicks or repeated timer expiry.
+    if (submittedRef.current) return;
+    submittedRef.current = true;
+    setSubmitting(true);
     const timeTaken = (config.timeLimitMinutes * 60) - timeLeft;
     onFinish(answers, timeTaken);
   };
@@ -162,10 +168,11 @@ export const LiveExam: React.FC<LiveExamProps> = ({ questions, config, onFinish,
             {isLastQuestion ? (
               <button
                 onClick={handleSubmit}
-                className="w-full sm:w-auto inline-flex items-center justify-center space-x-2 px-8 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-emerald-500/30 transition-all hover:scale-105"
+                disabled={submitting}
+                className="w-full sm:w-auto inline-flex items-center justify-center space-x-2 px-8 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-emerald-500/30 transition-all hover:scale-105 disabled:opacity-60 disabled:hover:scale-100"
               >
                 <CheckCircle2 className="w-5 h-5" />
-                <span>Submit Exam</span>
+                <span>{submitting ? 'Submitting…' : 'Submit Exam'}</span>
               </button>
             ) : (
               <button
