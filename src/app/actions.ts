@@ -34,19 +34,50 @@ function validateLimit(limit: number): number {
 }
 
 export async function getChapterStats() {
+  let dbUser;
+  try {
+    dbUser = await getOrCreateDbUser();
+  } catch (e) {
+    dbUser = null;
+  }
+
   const groups = await db.question.groupBy({
     by: ['chapter'],
     _count: { id: true }
   });
   
   const totalQuestions = await db.question.count();
+
+  const topicStats: Record<string, { correct: number; total: number }> = {};
+  
+  if (dbUser) {
+    const answers = await db.attemptAnswer.findMany({
+      where: { attempt: { userId: dbUser.id, completedAt: { not: null } } },
+      include: { question: true }
+    });
+    answers.forEach(ans => {
+      const topic = ans.question.chapter || ans.question.topic || 'Uncategorized';
+      if (!topicStats[topic]) topicStats[topic] = { correct: 0, total: 0 };
+      topicStats[topic].total += 1;
+      if (ans.isCorrect) topicStats[topic].correct += 1;
+    });
+  }
   
   return {
     totalQuestions,
-    chapters: groups.map(g => ({
-      name: g.chapter || 'Uncategorized',
-      count: g._count.id
-    }))
+    chapters: groups
+      .filter(g => g.chapter)
+      .map(g => {
+        const rawName = g.chapter!;
+        const name = rawName === 'None' ? 'Uncategorized' : rawName;
+        const stats = topicStats[rawName] || { correct: 0, total: 0 };
+        const accuracy = stats.total > 0 ? Math.round((stats.correct / stats.total) * 100) : 0;
+        return {
+          name,
+          count: g._count.id,
+          accuracy
+        };
+      })
   };
 }
 
@@ -62,7 +93,8 @@ export async function getQuestionsForExam(chapter: string, difficulty: string, l
   // All values are passed as Prisma query parameters.
   const conditions: Prisma.Sql[] = [];
   if (safeChapter !== "All") {
-    conditions.push(Prisma.sql`"chapter" = ${safeChapter}`);
+    const queryChapter = safeChapter === 'Uncategorized' ? 'None' : safeChapter;
+    conditions.push(Prisma.sql`"chapter" = ${queryChapter}`);
   }
   if (safeDifficulty !== "All") {
     conditions.push(Prisma.sql`"difficulty" = ${safeDifficulty}`);

@@ -27,7 +27,7 @@ export async function getExamHistory() {
       id: attempt.id,
       date,
       mode: attempt.mode === 'EXAM' ? 'Strict Exam' : 'Practice',
-      topic: attempt.topic || 'Mixed Chapters',
+      topic: attempt.topic ? (attempt.topic === 'None' ? 'Uncategorized' : attempt.topic) : 'Mixed Chapters',
       score: attempt.correctCount,
       total: attempt.totalQuestions,
       time: timeString,
@@ -53,7 +53,8 @@ export async function getWeakTopics() {
   const topicStats: Record<string, { correct: number; total: number }> = {};
   
   answers.forEach(ans => {
-    const topic = ans.question.chapter || ans.question.topic;
+    const rawTopic = ans.question.chapter || ans.question.topic || 'None';
+    const topic = rawTopic === 'None' ? 'Uncategorized' : rawTopic;
     if (!topicStats[topic]) {
       topicStats[topic] = { correct: 0, total: 0 };
     }

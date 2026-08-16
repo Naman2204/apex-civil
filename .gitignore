@@ -45,3 +45,9 @@ backups/
 
 # desktop app workspace database (not app source; must never be scanned/tracked)
 /.freebuff/
+# Stitch working files
+.stitch/
+stitch*.zip
+stitch/
+stitch (1)/
+stitch_apexcivil_exam_configuration_dashboard/
