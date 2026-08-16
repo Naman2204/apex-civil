@@ -20,9 +20,13 @@ function getDifficulty(accuracy: number): string {
   return 'Low';
 }
 
-function getWeightage(index: number): number {
-  const weights = [12, 15, 10, 10, 8, 8, 7, 6];
-  return weights[index] ?? 5;
+function getWeightage(count: number): number {
+  // Estimate weightage based on question count (higher count = higher weightage)
+  if (count >= 500) return 15;
+  if (count >= 300) return 12;
+  if (count >= 200) return 10;
+  if (count >= 100) return 8;
+  return 5;
 }
 
 /* Neon icon for each topic */
@@ -144,7 +148,7 @@ export const WeakTopicsView: React.FC<WeakTopicsViewProps> = ({ onStartExam }) =
           <div className="space-y-3">
             {weakTopics.map((topic, index) => {
               const difficulty = getDifficulty(topic.accuracy);
-              const weightage = getWeightage(index);
+              const weightage = getWeightage(topic.count);
               const style = DIFFICULTY_COLORS[difficulty];
               return (
                 <div

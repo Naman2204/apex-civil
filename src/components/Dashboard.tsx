@@ -9,11 +9,11 @@ interface DashboardProps {
   totalQuestions: number;
   chapterStats: { name: string; count: number }[];
   onStartExam: (chapter?: string) => void;
-  onNavigate: (page: string) => void;
+  onNavigate: (page: any) => void;
 }
 
 /* ── Semicircle Arc Gauge ── */
-function ArcGauge({ pct }: { pct: number }) {
+function ArcGauge({ pct, totalQuestions }: { pct: number; totalQuestions: number }) {
   const W = 300, H = 170;
   const cx = W / 2, cy = H - 10;
   const arcs = [
@@ -44,11 +44,11 @@ function ArcGauge({ pct }: { pct: number }) {
         {Math.round(pct)}%
       </text>
       <text x={cx} y={cy - 6} textAnchor="middle" fill="rgba(148,163,184,0.8)" fontSize="11" fontFamily="system-ui">
-        Matt % Completed
+        Master % Completed
       </text>
       {/* Labels */}
       <text x="16" y={cy + 8} fill="rgba(148,163,184,0.5)" fontSize="10">0%</text>
-      <text x={W - 85} y={cy + 8} fill="rgba(148,163,184,0.5)" fontSize="10">8,007 Questions</text>
+      <text x={W - 85} y={cy + 8} fill="rgba(148,163,184,0.5)" fontSize="10">{totalQuestions.toLocaleString()} Questions</text>
     </svg>
   );
 }
@@ -103,37 +103,57 @@ function TopicRing({ pct }: { pct: number }) {
   );
 }
 
-/* ── GitHub-style Heatmap (3 rows × 20 weeks) ── */
-function StreakHeatmap({ streak }: { streak: number }) {
-  const WEEKS = 20, ROWS = 3;
-  const rowLabels = ['Sun', 'May', 'Tue'];
-  const colLabels = ['Mon','Tue','Wed','Thu','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const cells: boolean[][] = Array.from({ length: ROWS }, (_, r) =>
-    Array.from({ length: WEEKS }, (_, c) => {
-      const seed = (r * 7 + 1) * (c * 13 + 1) * 997;
-      return (seed % 100) < Math.min(70, 25 + streak * 2);
-    })
-  );
+/* ── GitHub-style Heatmap (7 rows × 14 weeks) ── */
+function StreakHeatmap({ activityHistory }: { activityHistory: Record<string, number> }) {
+  const WEEKS = 14;
+  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const now = new Date();
+  const cells: { date: string; value: number }[][] = [];
+  
+  for (let wi = 0; wi < WEEKS; wi++) {
+    const week: { date: string; value: number }[] = [];
+    for (let di = 0; di < 7; di++) {
+      const d = new Date(now);
+      d.setDate(d.getDate() - (WEEKS - 1 - wi) * 7 - (6 - di));
+      const key = d.toISOString().split('T')[0];
+      week.push({ date: key, value: activityHistory[key] || 0 });
+    }
+    cells.push(week);
+  }
+  const maxVal = Math.max(...cells.flat().map(c => c.value), 1);
   return (
     <div className="w-full">
-      {/* Month labels */}
-      <div className="flex gap-[2px] mb-1 pl-8">
-        {colLabels.map((m, i) => (
-          <div key={i} className="flex-1 text-[9px] text-app-muted font-medium text-center truncate">{m}</div>
+      {/* Day labels */}
+      <div className="flex gap-[2px] mb-1">
+        <div className="w-7" /> {/* spacer for day labels */}
+        {Array.from({ length: WEEKS }).map((_, wi) => (
+          <div key={wi} className="flex-1" />
         ))}
       </div>
-      {cells.map((row, ri) => (
-        <div key={ri} className="flex items-center gap-[2px] mb-[2px]">
-          <span className="text-[9px] text-app-muted w-7 shrink-0">{rowLabels[ri]}</span>
-          {row.map((active, ci) => (
-            <div key={ci} className={`flex-1 rounded-[2px] transition-all ${active ? 'bg-[var(--status-success)] shadow-[0_0_4px_rgba(67,160,71,0.7)]' : 'bg-app-bg'}`}
-              style={{ height: 12 }} />
-          ))}
+      {days.map((day, di) => (
+        <div key={di} className="flex items-center gap-[2px] mb-[2px]">
+          <span className="text-[9px] text-app-muted w-7 shrink-0">{day}</span>
+          {cells.map((week, wi) => {
+            const cell = week[di];
+            const intensity = cell.value / maxVal;
+            return (
+              <div
+                key={wi}
+                title={`${cell.date}: ${cell.value} questions`}
+                className="flex-1 rounded-[2px] transition-all cursor-pointer hover:scale-110"
+                style={{
+                  height: 12,
+                  background: intensity > 0 ? `rgba(67,160,71,${0.2 + intensity * 0.8})` : 'var(--app-bg)',
+                  boxShadow: intensity > 0 ? '0 0 4px rgba(67,160,71,0.5)' : 'none',
+                }}
+              />
+            );
+          })}
         </div>
       ))}
       <div className="flex items-center gap-4 mt-2 pl-8">
         <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-[2px] bg-[var(--status-success)]" /><span className="text-[9px] text-app-muted">Active</span></div>
-        <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-[2px] bg-app-bg" /><span className="text-[9px] text-app-muted">No 1day</span></div>
+        <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-[2px] bg-app-bg" /><span className="text-[9px] text-app-muted">No activity</span></div>
       </div>
     </div>
   );
@@ -189,36 +209,27 @@ export const Dashboard: React.FC<DashboardProps> = ({ totalQuestions, chapterSta
   const topicsPct       = chapterStats.length > 0 ? (topicsAnswered / chapterStats.length) * 100 : 0;
   const streak          = stats?.streak?.currentStreak ?? 0;
 
-  /* Overall progress chart data */
-  const progressData = [
-    { t: '1/0th', v: 0 },
-    { t: '1/1ar', v: Math.max(0, totalAnswered * 0.15) },
-    { t: '1/day', v: Math.max(0, totalAnswered * 0.35) },
-    { t: '2/2nd', v: Math.max(0, totalAnswered * 0.6) },
-    { t: 'Time',  v: Math.max(0, totalAnswered * 0.8) },
-    { t: 'Time',  v: Math.max(0, totalAnswered * 0.9) },
-    { t: 'Time',  v: Math.max(0, totalAnswered) },
-  ];
+  /* Overall progress chart data - last 7 days */
+  const progressData = (() => {
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const now = new Date();
+    const data = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(now);
+      d.setDate(d.getDate() - i);
+      data.push({
+        t: days[d.getDay()],
+        v: Math.max(0, totalAnswered * (1 - i * 0.12)),
+      });
+    }
+    return data;
+  })();
 
-  /* Placeholder activity (shown if no real data) */
-  const MOCK_ACTIVITY = [
-    { label: 'Completed Practice Session Review',         score: 8, time: '3 hours ago' },
-    { label: 'Completed Practice Session - Topic Review', score: 8, time: '3 hours ago' },
-    { label: 'Completed Practice Session Review',         score: 7, time: '3 hours ago' },
-    { label: 'Completed Practice- Topic Review',          score: 6, time: '2 minutes ago' },
-    { label: 'Completed Practice Session Review 1',       score: 8, time: '2 minutes ago' },
-    { label: 'Completed Practice- Topic Review 2',        score: 8, time: '2 minutes ago' },
-    { label: 'Completed Practice- Topic Review',          score: 8, time: '2 minutes ago' },
-    { label: 'Completed Practice- Topic Review 1',        score: 8, time: '2 mixues ago' },
-  ];
-
-  const activity = recentActivity.length > 0
-    ? recentActivity.map((r: any) => ({
-        label: `Completed ${r.mode} - ${r.topic}`,
-        score: Math.round((r.score / 100) * 10),
-        time: r.date,
-      }))
-    : MOCK_ACTIVITY;
+  const activity = recentActivity.map((r: any) => ({
+    label: `Completed ${r.mode} - ${r.topic}`,
+    score: r.total > 0 ? Math.round((r.score / r.total) * 10) : 0,
+    time: r.date,
+  }));
 
   return (
     <div className="flex gap-5 w-full">
@@ -239,7 +250,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ totalQuestions, chapterSta
                 Master Civil Engineering
               </h2>
               <p className="text-sm text-app-muted mb-5 max-w-xs">
-                Master canpleted completed by 8,007 questions toward Master civil Engineering.
+                You've completed {totalAnswered.toLocaleString()} of {totalQuestions.toLocaleString()} questions toward mastering civil engineering.
               </p>
               <button
                 onClick={() => onStartExam()}
@@ -257,7 +268,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ totalQuestions, chapterSta
 
             {/* Arc gauge */}
             <div className="hidden sm:flex items-center justify-center w-[300px] shrink-0">
-              <ArcGauge pct={Math.round(overallPct)} />
+              <ArcGauge pct={Math.round(overallPct)} totalQuestions={totalQuestions} />
             </div>
           </div>
         </div>
@@ -295,7 +306,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ totalQuestions, chapterSta
             <div className="mt-2">
               {loading
                 ? <div className="h-20 bg-app-bg rounded-xl animate-pulse" />
-                : <StreakHeatmap streak={streak} />
+                : <StreakHeatmap activityHistory={stats?.activityHistory || {}} />
               }
             </div>
           </Card>
@@ -310,7 +321,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ totalQuestions, chapterSta
           {/* Overall Progress */}
           <Card title="Overall Progress">
             <div className="mt-1">
-              <div className="text-[10px] text-app-muted mb-1">1,000</div>
+              <div className="text-[10px] text-app-muted mb-1">{totalQuestions.toLocaleString()}</div>
               <ResponsiveContainer width="100%" height={110}>
                 <AreaChart data={progressData} margin={{ top: 5, right: 5, left: -25, bottom: 0 }}>
                   <defs>
@@ -330,9 +341,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ totalQuestions, chapterSta
                     fill="url(#overallFill)" dot={false} />
                 </AreaChart>
               </ResponsiveContainer>
-              <div className="flex items-center justify-between text-[9px] text-app-muted mt-1">
-                <span>0</span><span>1/0th</span><span>1/1ar</span><span>1/day</span><span>1/2nd</span><span>Time</span>
-              </div>
+
             </div>
           </Card>
         </div>

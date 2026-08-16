@@ -72,6 +72,17 @@ export async function getDashboardStats() {
     daysRemaining = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   }
 
+  // 5. Activity history for heatmap (last 14 weeks)
+  const activityHistory: Record<string, number> = {};
+  const allAttempts = await db.examAttempt.findMany({
+    where: { userId: user.id, completedAt: { not: null } },
+    select: { startedAt: true, totalQuestions: true }
+  });
+  for (const a of allAttempts) {
+    const dateKey = a.startedAt.toISOString().split('T')[0];
+    activityHistory[dateKey] = (activityHistory[dateKey] || 0) + a.totalQuestions;
+  }
+
   return {
     streak,
     dailyGoal,
@@ -79,6 +90,7 @@ export async function getDashboardStats() {
     daysRemaining,
     examTargetDate: user.examTargetDate,
     answeredByChapter,
-    totalAnswered
+    totalAnswered,
+    activityHistory
   };
 }
