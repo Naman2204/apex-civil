@@ -67,3 +67,10 @@ QA_REPORT.md
 ROUTE_AUDIT.md
 UI_CONTROL_MATRIX.md
 skills-lock.json
+
+# QA evidence and gallery files
+scripts/qa-evidence/
+scripts/qa-evidence-local/
+scripts/qa-evidence-ui/
+scripts/*.html
+scripts/*.png
