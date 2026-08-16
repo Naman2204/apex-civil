@@ -51,3 +51,19 @@ stitch*.zip
 stitch/
 stitch (1)/
 stitch_apexcivil_exam_configuration_dashboard/
+
+# Agent/IDE config directories
+.agents/
+.claude/
+.windsurf/
+
+# Audit/report markdown files
+AGENTS.md
+CLAUDE.md
+COMPLETE_UI_AUDIT.md
+DEAD_CONTROLS.md
+HARD_CODED_DATA_AUDIT.md
+QA_REPORT.md
+ROUTE_AUDIT.md
+UI_CONTROL_MATRIX.md
+skills-lock.json
