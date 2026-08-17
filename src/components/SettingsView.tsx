@@ -132,17 +132,17 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ isDarkMode, onToggle
 
           {/* Stats row (real data) */}
           <div className="w-full mt-6 grid grid-cols-3 gap-2.5">
-            <div className="rounded-xl bg-[#0b0f1d] border border-app-border px-2 py-3">
+            <div className="rounded-xl bg-app-bg border border-app-border px-2 py-3">
               <Flame className="w-4 h-4 text-amber-400 mx-auto" />
               <p className="mt-1.5 text-sm font-black text-app-text">{stats?.streak?.currentStreak ?? 0}</p>
               <p className="text-[9px] font-bold text-app-faint uppercase tracking-wide mt-0.5">Streak</p>
             </div>
-            <div className="rounded-xl bg-[#0b0f1d] border border-app-border px-2 py-3">
+            <div className="rounded-xl bg-app-bg border border-app-border px-2 py-3">
               <CheckCircle2 className="w-4 h-4 text-emerald-400 mx-auto" />
               <p className="mt-1.5 text-sm font-black text-app-text">{(stats?.totalAnswered ?? 0).toLocaleString()}</p>
               <p className="text-[9px] font-bold text-app-faint uppercase tracking-wide mt-0.5">Solved</p>
             </div>
-            <div className="rounded-xl bg-[#0b0f1d] border border-app-border px-2 py-3">
+            <div className="rounded-xl bg-app-bg border border-app-border px-2 py-3">
               <BookOpen className="w-4 h-4 text-sky-400 mx-auto" />
               <p className="mt-1.5 text-sm font-black text-app-text">{dailyGoal}</p>
               <p className="text-[9px] font-bold text-app-faint uppercase tracking-wide mt-0.5">Goal Qs</p>

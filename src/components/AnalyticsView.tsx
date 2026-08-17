@@ -26,7 +26,7 @@ function GlowMetric({
   const valCls = tone === "purple" ? "text-purple-400" : "text-sky-400";
   return (
     <div className={`rounded-2xl p-[1px] bg-gradient-to-r ${border}`}>
-      <div className="rounded-[15px] bg-[#0b0f1d] px-5 py-4 flex items-center gap-4">
+      <div className="rounded-[15px] bg-app-card px-5 py-4 flex items-center gap-4">
         <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${tone === "purple" ? "bg-purple-500/10 text-purple-400" : "bg-sky-500/10 text-sky-400"}`}>
           <Icon className="w-5 h-5" />
         </div>
@@ -120,7 +120,7 @@ export const AnalyticsView: React.FC = () => {
         {/* Row 2 — charts */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {/* Performance & Accuracy — last 7 days */}
-          <div className="lg:col-span-2 rounded-xl bg-[#0b0f1d] border border-app-border p-5">
+          <div className="lg:col-span-2 rounded-xl bg-app-card border border-app-border p-5">
             <h3 className="text-sm font-bold text-app-text">Performance &amp; Accuracy (Last 7 Days)</h3>
             {hasData ? (
               <div className="h-64 w-full mt-3">
@@ -156,7 +156,7 @@ export const AnalyticsView: React.FC = () => {
           </div>
 
           {/* Subject Mastery Radar */}
-          <div className="rounded-xl bg-[#0b0f1d] border border-app-border p-5 flex flex-col">
+          <div className="rounded-xl bg-app-card border border-app-border p-5 flex flex-col">
             <h3 className="text-sm font-bold text-app-text">Subject Mastery Radar</h3>
             {radarData.length > 0 ? (
               <div className="flex-1 min-h-[240px] mt-2">

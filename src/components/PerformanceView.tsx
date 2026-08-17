@@ -150,7 +150,7 @@ export const PerformanceView: React.FC<{ onStartExam?: () => void }> = ({ onStar
                     key={record.id}
                     className="rounded-2xl p-[1px] bg-gradient-to-r from-purple-500/50 via-indigo-500/30 to-purple-500/50 shadow-[0_0_18px_rgba(139,92,246,0.14)]"
                   >
-                    <div className="rounded-[15px] bg-[#0b0f1d] px-5 py-4 flex flex-wrap items-center gap-x-6 gap-y-4">
+                    <div className="rounded-[15px] bg-app-card px-5 py-4 flex flex-wrap items-center gap-x-6 gap-y-4">
                       <div className="flex items-center gap-2 w-36 shrink-0">
                         <CalendarDays className="w-4 h-4 text-app-faint shrink-0" />
                         <span className="text-sm font-bold text-app-text">{record.date}</span>

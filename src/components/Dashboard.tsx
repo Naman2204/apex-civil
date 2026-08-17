@@ -71,8 +71,8 @@ function GoalRing({ done, target }: { done: number; target: number }) {
           strokeWidth={stroke} strokeLinecap="round" strokeDasharray={`${(pct/100)*c} ${c}`} />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-2xl font-black text-white leading-none">{done}</span>
-        <span className="text-xs text-slate-400 font-bold">/{target}</span>
+        <span className="text-2xl font-black text-app-text leading-none">{done}</span>
+        <span className="text-xs text-app-muted font-bold">/{target}</span>
       </div>
     </div>
   );
@@ -96,8 +96,8 @@ function TopicRing({ pct }: { pct: number }) {
           strokeWidth={stroke} strokeLinecap="round" strokeDasharray={`${(p/100)*c} ${c}`} />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-3xl font-black text-white leading-none">{Math.round(p)}%</span>
-        <span className="text-xs text-slate-400 font-bold mt-1">Completed</span>
+        <span className="text-3xl font-black text-app-text leading-none">{Math.round(p)}%</span>
+        <span className="text-xs text-app-muted font-bold mt-1">Completed</span>
       </div>
     </div>
   );
@@ -274,7 +274,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ totalQuestions, chapterSta
         </div>
 
         {/* ── "Quick Access" label ── */}
-        <p className="text-xs font-bold text-slate-500 uppercase tracking-widest px-0.5">Quick Access</p>
+        <p className="text-xs font-bold text-app-muted uppercase tracking-widest px-0.5">Quick Access</p>
 
         {/* ── 2×2 Grid ── */}
         <div className="grid grid-cols-2 gap-5">
@@ -284,10 +284,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ totalQuestions, chapterSta
             <div className="flex items-center gap-5 mt-1">
               <GoalRing done={dailyDone} target={dailyTarget} />
               <div className="flex-1 min-w-0">
-                <p className="text-3xl font-black text-white">
-                  {dailyDone}<span className="text-xl text-slate-500 font-bold">/{dailyTarget}</span>
+                <p className="text-3xl font-black text-app-text">
+                  {dailyDone}<span className="text-xl text-app-muted font-bold">/{dailyTarget}</span>
                 </p>
-                <p className="text-xs text-slate-500 mt-1">Questions</p>
+                <p className="text-xs text-app-muted mt-1">Questions</p>
               </div>
             </div>
             {/* Bottom bar */}

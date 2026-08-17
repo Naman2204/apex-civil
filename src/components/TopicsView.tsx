@@ -51,8 +51,8 @@ function MasteryRing({ pct }: { pct: number }) {
         </defs>
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-sm font-black text-white leading-none">{Math.round(p)}%</span>
-        <span className="text-[8px] font-bold text-slate-500 uppercase tracking-wide mt-0.5">Mastery</span>
+        <span className="text-sm font-black text-app-text leading-none">{Math.round(p)}%</span>
+        <span className="text-[8px] font-bold text-app-muted uppercase tracking-wide mt-0.5">Mastery</span>
       </div>
     </div>
   );
@@ -82,17 +82,17 @@ export const TopicsView: React.FC<TopicsViewProps> = ({ chapterStats, onStartExa
     <div className="w-full pb-12 space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white leading-tight">
+        <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-app-text leading-tight">
           ApexCivil Topic Mastery Library
         </h1>
         <div className="relative mt-4 w-full max-w-xl">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-app-muted" />
           <input
             type="text"
             placeholder="Search topics & chapters..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-[#0f111e] border border-slate-800 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:border-indigo-500/60 focus:ring-2 focus:ring-indigo-500/15 transition-all"
+            className="w-full bg-app-card border border-app-border rounded-xl pl-10 pr-4 py-3 text-sm text-app-text placeholder:text-app-muted focus:outline-none focus:border-indigo-500/60 focus:ring-2 focus:ring-indigo-500/15 transition-all"
           />
         </div>
       </div>
@@ -113,7 +113,7 @@ export const TopicsView: React.FC<TopicsViewProps> = ({ chapterStats, onStartExa
             return (
               <div
                 key={chapter.name}
-                className={`group relative rounded-2xl bg-[#0f111e] border ${border} ${glow} p-5 transition-all hover:-translate-y-1 hover:brightness-110 cursor-pointer`}
+                className={`group relative rounded-2xl bg-app-card border ${border} ${glow} p-5 transition-all hover:-translate-y-1 hover:brightness-110 cursor-pointer`}
                 onClick={() => onStartExam(chapter.name)}
               >
                 <div className="flex items-start justify-between gap-3 mb-4">
@@ -125,10 +125,10 @@ export const TopicsView: React.FC<TopicsViewProps> = ({ chapterStats, onStartExa
                   <MasteryRing pct={pct} />
                 </div>
 
-                <h3 className="text-sm font-bold text-white leading-snug line-clamp-2 min-h-[38px]">
+                <h3 className="text-sm font-bold text-app-text leading-snug line-clamp-2 min-h-[38px]">
                   {chapter.name}
                 </h3>
-                <p className="text-[11px] text-slate-500 mt-1">{chapter.count.toLocaleString()} Questions Available</p>
+                <p className="text-[11px] text-app-muted mt-1">{chapter.count.toLocaleString()} Questions Available</p>
 
                 {/* Hover "Quick Study" button */}
                 <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">

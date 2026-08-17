@@ -34,7 +34,7 @@ function TopicIcon({ name, index }: { name: string; index: number }) {
   const colors = ['text-rose-400', 'text-purple-400', 'text-amber-400', 'text-cyan-400', 'text-emerald-400', 'text-sky-400'];
   const color = colors[index % colors.length];
   return (
-    <div className={`w-10 h-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center shrink-0 ${color}`}>
+    <div className={`w-10 h-10 rounded-lg bg-app-bg border border-app-border flex items-center justify-center shrink-0 ${color}`}>
       {index === 0 ? <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M7 21h10M12 21V3M3 7l9-4 9 4M3 17l9 4 9-4M3 12l9 4 9-4" /></svg>
        : index === 1 ? <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2" /><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16" /></svg>
        : index === 2 ? <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8 18L3 12l5-6M16 6l5 6-5 6M11 4l2 16" /></svg>
@@ -101,7 +101,7 @@ export const WeakTopicsView: React.FC<WeakTopicsViewProps> = ({ onStartExam }) =
         <div className="w-12 h-12 rounded-full bg-indigo-500/10 text-indigo-400 flex items-center justify-center animate-pulse mb-4">
           <Brain className="w-6 h-6" />
         </div>
-        <p className="text-sm text-slate-400 font-medium">Analyzing your performance…</p>
+        <p className="text-sm text-app-muted font-medium">Analyzing your performance…</p>
       </div>
     );
   }
@@ -114,10 +114,10 @@ export const WeakTopicsView: React.FC<WeakTopicsViewProps> = ({ onStartExam }) =
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_50%,rgba(6,182,212,0.1)_0%,transparent_60%)]" />
         <BrainHero />
         <div className="flex-1 min-w-0 relative z-10">
-          <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-black text-app-text tracking-tight">
             ApexCivil AI Weak Topic Analysis
           </h1>
-          <p className="text-sm text-slate-400 mt-1">AI-driven insight dashboard</p>
+          <p className="text-sm text-app-muted mt-1">AI-driven insight dashboard</p>
         </div>
         <button
           onClick={() => onStartExam()}
@@ -139,8 +139,8 @@ export const WeakTopicsView: React.FC<WeakTopicsViewProps> = ({ onStartExam }) =
       ) : (
         <>
           <div>
-            <h2 className="text-xl font-extrabold tracking-tight text-white">AI Recommendation</h2>
-            <p className="text-sm text-slate-400 mt-1">
+            <h2 className="text-xl font-extrabold tracking-tight text-app-text">AI Recommendation</h2>
+            <p className="text-sm text-app-muted mt-1">
               Focus on these specific sub-topics for maximum score improvement.
             </p>
           </div>
@@ -153,19 +153,19 @@ export const WeakTopicsView: React.FC<WeakTopicsViewProps> = ({ onStartExam }) =
               return (
                 <div
                   key={topic.name}
-                  className="rounded-2xl bg-[#0f111e] border border-slate-800/80 px-5 py-4 flex flex-col sm:flex-row sm:items-center gap-4 hover:border-slate-700 transition-colors"
+                  className="rounded-2xl bg-app-card border border-app-border px-5 py-4 flex flex-col sm:flex-row sm:items-center gap-4 hover:border-app-border-focus transition-colors"
                 >
                   <TopicIcon name={topic.name} index={index} />
 
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-[15px] font-bold text-white truncate mb-2">{topic.name}</h3>
+                    <h3 className="text-[15px] font-bold text-app-text truncate mb-2">{topic.name}</h3>
                     {/* Progress bar with % bubble */}
                     <div className="relative w-full h-2 bg-slate-800 rounded-full">
                       <div
                         className={`h-2 rounded-full bg-gradient-to-r ${style.bar} transition-all`}
                         style={{ width: `${topic.accuracy}%` }}
                       />
-                      <span className="absolute -top-5 text-[10px] font-bold text-white bg-slate-700 px-1.5 py-0.5 rounded"
+                      <span className="absolute -top-5 text-[10px] font-bold text-app-text bg-app-card border border-app-border px-1.5 py-0.5 rounded"
                         style={{ left: `${Math.min(topic.accuracy, 92)}%`, transform: 'translateX(-50%)' }}>
                         {topic.accuracy}%
                       </span>
@@ -174,16 +174,16 @@ export const WeakTopicsView: React.FC<WeakTopicsViewProps> = ({ onStartExam }) =
 
                   <div className="flex items-center gap-3 sm:gap-4 shrink-0 flex-wrap">
                     <div>
-                      <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Difficulty:</p>
+                      <p className="text-[10px] text-app-muted font-bold uppercase tracking-wider">Difficulty:</p>
                       <p className={`text-sm font-bold ${style.text}`}>{difficulty}</p>
                     </div>
                     <div>
-                      <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Weightage:</p>
-                      <p className="text-sm font-bold text-slate-300">{weightage}%</p>
+                      <p className="text-[10px] text-app-muted font-bold uppercase tracking-wider">Weightage:</p>
+                      <p className="text-sm font-bold text-app-text">{weightage}%</p>
                     </div>
                     <button
                       onClick={() => onStartExam(topic.name)}
-                      className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white text-sm font-bold transition-all"
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-app-card hover:bg-app-card-hover border border-app-border text-app-text text-sm font-bold transition-all"
                     >
                       <Zap className="w-3.5 h-3.5 text-indigo-400" />
                       Practice Now
