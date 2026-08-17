@@ -74,3 +74,6 @@ scripts/qa-evidence-local/
 scripts/qa-evidence-ui/
 scripts/*.html
 scripts/*.png
+
+# Zip archives
+*.zip

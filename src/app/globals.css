@@ -14,8 +14,12 @@
   --color-app-bg: var(--app-bg);
   --color-app-card: var(--app-card);
   --color-app-card-hover: var(--app-card-hover);
+  --color-app-card2: var(--app-card2);
   --color-app-border: var(--app-border);
+  --color-app-border2: var(--app-border2);
   --color-app-border-focus: var(--app-border-focus);
+  --color-app-deep: var(--app-deep);
+  --color-app-sidebar: var(--app-sidebar);
 
   --color-status-success: var(--status-success);
   --color-status-danger: var(--status-danger);
@@ -28,6 +32,13 @@
   --color-app-muted: var(--app-muted);
   --color-app-faint: var(--app-faint);
 
+  --color-accent: var(--accent);
+  --color-accent-bright: var(--accent-bright);
+  --color-accent-soft: var(--accent-soft);
+
+  --color-app-blue: var(--app-blue);
+  --color-app-blue-soft: var(--app-blue-soft);
+
   --color-primary-start: var(--primary-start);
   --color-primary-end: var(--primary-end);
 }
@@ -37,8 +48,12 @@
   --app-bg: #f5f7fc;
   --app-card: #ffffff;
   --app-card-hover: #f9fafb;
+  --app-card2: #f0f2f8;
   --app-border: #e4e9f4;
+  --app-border2: #d1d8e8;
   --app-border-focus: #534ab7;
+  --app-deep: #eef1f8;
+  --app-sidebar: #fafbfe;
 
   --status-success: #43A047;
   --status-danger: #E24B4A;
@@ -51,6 +66,13 @@
   --app-muted: #5a6a85;
   --app-faint: #8c9ab5;
 
+  --accent: #7C5CFC;
+  --accent-bright: #6C4EE0;
+  --accent-soft: #EDE9FE;
+
+  --app-blue: #3B82F6;
+  --app-blue-soft: #DBEAFE;
+
   --primary-start: #7C5CFC;
   --primary-end: #534AB7;
 }
@@ -60,8 +82,12 @@
   --app-bg: #0B0E17;
   --app-card: #12162A;
   --app-card-hover: #1A1F38;
+  --app-card2: #0E1120;
   --app-border: #262B45;
+  --app-border2: #353B58;
   --app-border-focus: #534AB7;
+  --app-deep: #080A12;
+  --app-sidebar: #0A0D18;
 
   --status-success: #43A047;
   --status-danger: #E24B4A;
@@ -73,6 +99,13 @@
   --app-text: #F5F5FA;
   --app-muted: #A8ACC4;
   --app-faint: #6E7292;
+
+  --accent: #7C5CFC;
+  --accent-bright: #9B7DFF;
+  --accent-soft: #2D1B69;
+
+  --app-blue: #3B82F6;
+  --app-blue-soft: #1E2A4A;
 
   --primary-start: #7C5CFC;
   --primary-end: #534AB7;
