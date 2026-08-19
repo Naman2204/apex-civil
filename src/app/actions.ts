@@ -352,13 +352,19 @@ export async function finishExamAttemptBatch(
   if (!finalized) return;
 
   // Notify the user about the completed exam (established event producer).
-  await db.notification.create({
-    data: {
-      userId: user.id,
-      title: "Exam Completed",
-      message: `You scored ${finalized.score}% in ${finalized.topic || "Mixed Chapters"} (${finalized.mode === "EXAM" ? "Strict Exam" : "Practice"}).`,
-    }
-  });
+  // Wrapped in try-catch so a notification failure never makes the user
+  // think the exam submission itself failed (the transaction already committed).
+  try {
+    await db.notification.create({
+      data: {
+        userId: user.id,
+        title: "Exam Completed",
+        message: `You scored ${finalized.score}% in ${finalized.topic || "Mixed Chapters"} (${finalized.mode === "EXAM" ? "Strict Exam" : "Practice"}).`,
+      }
+    });
+  } catch (e) {
+    console.error("Failed to create exam-completed notification", e);
+  }
 }
 
 export async function finishExamAttempt(attemptId: string, timeTakenSeconds: number) {
@@ -424,13 +430,19 @@ export async function finishExamAttempt(attemptId: string, timeTakenSeconds: num
   if (!finalized) return;
 
   // Notify the user about the completed exam (established event producer).
-  await db.notification.create({
-    data: {
-      userId: user.id,
-      title: "Exam Completed",
-      message: `You scored ${finalized.score}% in ${finalized.topic || "Mixed Chapters"} (Practice).`,
-    }
-  });
+  // Wrapped in try-catch so a notification failure never makes the user
+  // think the exam submission itself failed (the transaction already committed).
+  try {
+    await db.notification.create({
+      data: {
+        userId: user.id,
+        title: "Exam Completed",
+        message: `You scored ${finalized.score}% in ${finalized.topic || "Mixed Chapters"} (Practice).`,
+      }
+    });
+  } catch (e) {
+    console.error("Failed to create exam-completed notification", e);
+  }
 }
 
 export async function toggleBookmark(questionId: string) {

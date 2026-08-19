@@ -84,29 +84,38 @@ export async function getDashboardStats() {
     activityHistory[dateKey] = (activityHistory[dateKey] || 0) + a.totalQuestions;
   }
 
-  // 6. Daily progress for chart (last 7 days)
-  const dailyProgress: { date: string; count: number }[] = [];
+  // 6. Daily progress for chart (last 7 days) — single grouped query
+  //    instead of 7 sequential count queries.
   const now = new Date();
+  const sevenDaysAgo = new Date(now);
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
+  sevenDaysAgo.setHours(0, 0, 0, 0);
+  const endOfDay = new Date(now);
+  endOfDay.setHours(23, 59, 59, 999);
+
+  const rawProgress = await db.$queryRaw<{ date: string; count: bigint }[]>`
+    SELECT DATE(ae."startedAt") AS date, COUNT(*) AS count
+    FROM "AttemptAnswer" aa
+    JOIN "ExamAttempt" ae ON aa."attemptId" = ae.id
+    WHERE ae."userId" = ${user.id}
+      AND ae."completedAt" IS NOT NULL
+      AND ae."startedAt" >= ${sevenDaysAgo}
+      AND ae."startedAt" <= ${endOfDay}
+    GROUP BY DATE(ae."startedAt")
+  `;
+
+  // Build a full 7-day map so days with zero activity are still represented.
+  const progressMap: Record<string, number> = {};
+  for (const row of rawProgress) {
+    progressMap[String(row.date)] = Number(row.count);
+  }
+
+  const dailyProgress: { date: string; count: number }[] = [];
   for (let i = 6; i >= 0; i--) {
     const d = new Date(now);
     d.setDate(d.getDate() - i);
-    const dayStart = new Date(d);
-    dayStart.setHours(0, 0, 0, 0);
-    const dayEnd = new Date(d);
-    dayEnd.setHours(23, 59, 59, 999);
-    
-    const dayAnswers = await db.attemptAnswer.count({
-      where: {
-        // Progress belongs to when the learner attempted a question, not when
-        // the question was originally imported into the bank.
-        attempt: { userId: user.id, completedAt: { not: null }, startedAt: { gte: dayStart, lte: dayEnd } },
-      }
-    });
-    
-    dailyProgress.push({
-      date: dayStart.toISOString().split('T')[0],
-      count: dayAnswers
-    });
+    const dateKey = d.toISOString().split('T')[0];
+    dailyProgress.push({ date: dateKey, count: progressMap[dateKey] || 0 });
   }
 
   return {

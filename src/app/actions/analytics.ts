@@ -42,45 +42,29 @@ export async function getExamHistory() {
 export async function getWeakTopics() {
   const dbUser = await getOrCreateDbUser();
 
-  // Fetch answers from completed attempts only, so abandoned exams do not
-  // skew weak-topic accuracy.
-  const answers = await prisma.attemptAnswer.findMany({
-    where: {
-      attempt: { userId: dbUser.id, completedAt: { not: null } }
-    },
-    select: {
-      isCorrect: true,
-      question: { select: { chapter: true, topic: true } }
-    }
-  });
+  // Aggregate per-chapter/topic accuracy directly in SQL instead of fetching
+  // every AttemptAnswer row and grouping in JavaScript.
+  const rows = await prisma.$queryRaw<{ name: string; correct: bigint; total: bigint }[]>`
+    SELECT
+      COALESCE(NULLIF(q."chapter", 'None'), 'Uncategorized') AS name,
+      COUNT(*) FILTER (WHERE aa."isCorrect") AS correct,
+      COUNT(*) AS total
+    FROM "AttemptAnswer" aa
+    JOIN "ExamAttempt" ae ON aa."attemptId" = ae.id
+    JOIN "Question" q ON aa."questionId" = q.id
+    WHERE ae."userId" = ${dbUser.id}
+      AND ae."completedAt" IS NOT NULL
+    GROUP BY COALESCE(NULLIF(q."chapter", 'None'), 'Uncategorized')
+    HAVING COUNT(*) >= 5
+    ORDER BY (COUNT(*) FILTER (WHERE aa."isCorrect"))::float / COUNT(*) ASC
+    LIMIT 5
+  `;
 
-  // Group by chapter/topic
-  const topicStats: Record<string, { correct: number; total: number }> = {};
-  
-  answers.forEach(ans => {
-    const rawTopic = ans.question.chapter || ans.question.topic || 'None';
-    const topic = rawTopic === 'None' ? 'Uncategorized' : rawTopic;
-    if (!topicStats[topic]) {
-      topicStats[topic] = { correct: 0, total: 0 };
-    }
-    topicStats[topic].total += 1;
-    if (ans.isCorrect) {
-      topicStats[topic].correct += 1;
-    }
-  });
-
-  // Calculate accuracy and filter
-  const results = Object.entries(topicStats)
-    .filter(([_, stats]) => stats.total >= 5) // Only include if they've answered at least 5 questions in this topic
-    .map(([name, stats]) => ({
-      name,
-      accuracy: Math.round((stats.correct / stats.total) * 100),
-      count: stats.total
-    }))
-    .sort((a, b) => a.accuracy - b.accuracy) // Sort ascending (weakest first)
-    .slice(0, 5); // Top 5 weakest
-
-  return results;
+  return rows.map(r => ({
+    name: r.name,
+    accuracy: Math.round((Number(r.correct) / Number(r.total)) * 100),
+    count: Number(r.total),
+  }));
 }
 
 export async function getAnalyticsData() {
@@ -91,44 +75,56 @@ export async function getAnalyticsData() {
   const oneWeekAgo = new Date();
   oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
-  const attempts = await prisma.examAttempt.findMany({
-    where: {
-      userId: dbUser.id,
-      completedAt: { not: null },
-      startedAt: { gte: oneWeekAgo }
-    },
-    include: {
-      answers: true
-    }
-  });
-
-  // Lifetime KPI source. The seven-day query above powers the trend chart only;
-  // these totals must not be presented as lifetime values unless they include
-  // every completed attempt.
-  const lifetimeAttempts = await prisma.examAttempt.findMany({
-    where: { userId: dbUser.id, completedAt: { not: null } },
-    select: {
-      totalQuestions: true,
-      correctCount: true,
-      timeTakenSeconds: true,
-    },
-  });
-
   // Daily activity heatmap source (last 16 weeks + alignment slack).
   const dailyStart = new Date();
   dailyStart.setDate(dailyStart.getDate() - 140);
-  const dailyAttempts = await prisma.examAttempt.findMany({
-    where: {
-      userId: dbUser.id,
-      completedAt: { not: null },
-      startedAt: { gte: dailyStart }
-    },
-    select: {
-      startedAt: true,
-      totalQuestions: true,
-      correctCount: true,
-    }
-  });
+
+  // Run all four independent DB queries in parallel to reduce total latency.
+  const [attempts, lifetimeAttempts, dailyAttempts, radarAnswers] = await Promise.all([
+    // 7-day attempts with answers (for activityData chart)
+    prisma.examAttempt.findMany({
+      where: {
+        userId: dbUser.id,
+        completedAt: { not: null },
+        startedAt: { gte: oneWeekAgo }
+      },
+      include: {
+        answers: true
+      }
+    }),
+    // Lifetime KPI source — totals only, no rows needed.
+    prisma.examAttempt.findMany({
+      where: { userId: dbUser.id, completedAt: { not: null } },
+      select: {
+        totalQuestions: true,
+        correctCount: true,
+        timeTakenSeconds: true,
+      },
+    }),
+    // 140-day daily activity heatmap source.
+    prisma.examAttempt.findMany({
+      where: {
+        userId: dbUser.id,
+        completedAt: { not: null },
+        startedAt: { gte: dailyStart }
+      },
+      select: {
+        startedAt: true,
+        totalQuestions: true,
+        correctCount: true,
+      }
+    }),
+    // Radar chart answers (per-chapter accuracy from all completed attempts).
+    prisma.attemptAnswer.findMany({
+      where: {
+        attempt: { userId: dbUser.id, completedAt: { not: null } }
+      },
+      select: {
+        isCorrect: true,
+        question: { select: { chapter: true } }
+      }
+    }),
+  ]);
 
   const dailyMap: Record<string, { questions: number; correct: number }> = {};
   for (const attempt of dailyAttempts) {
@@ -186,15 +182,6 @@ export async function getAnalyticsData() {
   const avgTimePerQuestion = totalQuestions > 0 ? Math.round(totalTime / totalQuestions) : 0;
 
   // Subject Mastery Radar — real per-chapter accuracy from completed answers.
-  const radarAnswers = await prisma.attemptAnswer.findMany({
-    where: {
-      attempt: { userId: dbUser.id, completedAt: { not: null } }
-    },
-    select: {
-      isCorrect: true,
-      question: { select: { chapter: true } }
-    }
-  });
   const radarMap: Record<string, { correct: number; total: number }> = {};
   radarAnswers.forEach((a) => {
     const chapter = a.question.chapter || "Uncategorized";

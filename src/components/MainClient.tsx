@@ -1,19 +1,22 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { Dashboard } from './Dashboard';
 import { ExamView } from './exam/ExamView';
 import { BookmarksView } from './BookmarksView';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import { getQuestionsForExam } from '../app/actions';
-import { Layers, AlertTriangle, BarChart3, Activity, Settings } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 import { TopicsView } from './TopicsView';
-import { WeakTopicsView } from './WeakTopicsView';
-import { AnalyticsView } from './AnalyticsView';
-import { PerformanceView } from './PerformanceView';
 import { SettingsView } from './SettingsView';
+
+// Lazy-load heavy page components to avoid bundling recharts (~400KB)
+// and other large dependencies into the initial chunk.
+const WeakTopicsView = lazy(() => import('./WeakTopicsView').then(m => ({ default: m.WeakTopicsView })));
+const AnalyticsView = lazy(() => import('./AnalyticsView').then(m => ({ default: m.AnalyticsView })));
+const PerformanceView = lazy(() => import('./PerformanceView').then(m => ({ default: m.PerformanceView })));
 
 interface MainClientProps {
   totalQuestions: number;
@@ -51,6 +54,13 @@ export function MainClient({ totalQuestions, chapterStats }: MainClientProps) {
     return await getQuestionsForExam(chapter, difficulty, limit);
   };
 
+  const PageFallback = () => (
+    <div className="flex flex-col items-center justify-center min-h-[50vh]">
+      <Loader2 className="w-8 h-8 animate-spin mb-3" style={{ color: 'var(--accent)' }} />
+      <p className="text-sm font-medium" style={{ color: 'var(--app-muted)' }}>Loading…</p>
+    </div>
+  );
+
   const renderMainContent = () => {
     switch (activePage) {
       case 'dashboard':
@@ -72,11 +82,11 @@ export function MainClient({ totalQuestions, chapterStats }: MainClientProps) {
       case 'topics':
         return <TopicsView chapterStats={chapterStats} onStartExam={handleStartExam} />;
       case 'weak-topics':
-        return <WeakTopicsView onStartExam={handleStartExam} />;
+        return <Suspense fallback={<PageFallback />}><WeakTopicsView onStartExam={handleStartExam} /></Suspense>;
       case 'analytics':
-        return <AnalyticsView />;
+        return <Suspense fallback={<PageFallback />}><AnalyticsView /></Suspense>;
       case 'performance':
-        return <PerformanceView onStartExam={() => handleStartExam()} />;
+        return <Suspense fallback={<PageFallback />}><PerformanceView onStartExam={() => handleStartExam()} /></Suspense>;
       case 'settings':
         return <SettingsView />;
       default:
