@@ -193,6 +193,10 @@ jobs:
           npm start &
           sleep 5
           curl -f http://localhost:3000 || exit 1
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
 
       - name: 📈 Run Lighthouse
         uses: treosh/lighthouse-ci-action@v12
