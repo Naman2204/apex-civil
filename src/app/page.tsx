@@ -1,6 +1,6 @@
 import { MainClient } from "../components/MainClient";
 import { getChapterStats } from "./actions";
-import { SignInButton } from "@clerk/nextjs";
+
 import { auth } from "@clerk/nextjs/server";
 
 export const dynamic = "force-dynamic";
@@ -28,15 +28,15 @@ export default async function Home() {
             </div>
             
             <p className="text-slate-300 text-lg leading-relaxed">
-              Unlock access to over <strong className="text-white font-bold">8,000+</strong> meticulously curated Civil Engineering questions and track your performance.
+              Unlock access to over <strong className="text-white font-bold">{totalQuestions.toLocaleString()}+</strong> meticulously curated Civil Engineering questions and track your performance.
             </p>
             
             <div className="pt-4">
-              <SignInButton mode="modal">
+              <a href="/sign-in">
                 <button className="w-full bg-white hover:bg-slate-100 text-indigo-950 font-bold py-4 px-6 rounded-2xl transition-all shadow-[0_0_40px_rgba(255,255,255,0.1)] hover:shadow-[0_0_60px_rgba(255,255,255,0.3)] hover:-translate-y-1 text-lg">
                   Sign In to Continue
                 </button>
-              </SignInButton>
+              </a>
             </div>
           </div>
         </div>

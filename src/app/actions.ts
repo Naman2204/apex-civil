@@ -53,7 +53,7 @@ export async function getChapterStats() {
   if (dbUser) {
     const answers = await db.attemptAnswer.findMany({
       where: { attempt: { userId: dbUser.id, completedAt: { not: null } } },
-      include: { question: true }
+      select: { isCorrect: true, question: { select: { chapter: true, topic: true } } }
     });
     answers.forEach(ans => {
       const topic = ans.question.chapter || ans.question.topic || 'Uncategorized';

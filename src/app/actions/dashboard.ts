@@ -19,7 +19,8 @@ export async function getDashboardStats() {
     where: { userId_date: { userId: user.id, date: today } }
   });
   if (!dailyGoal) {
-    dailyGoal = { id: '', userId: user.id, date: today, targetQuestions: 50, completedQuestions: 0 };
+    const defaultTarget = Number(process.env.DEFAULT_DAILY_GOAL) || 30;
+    dailyGoal = { id: '', userId: user.id, date: today, targetQuestions: defaultTarget, completedQuestions: 0 };
   }
 
   // 3. Weak Topics — from COMPLETED attempts only (abandoned attempts must not skew accuracy)
@@ -83,6 +84,31 @@ export async function getDashboardStats() {
     activityHistory[dateKey] = (activityHistory[dateKey] || 0) + a.totalQuestions;
   }
 
+  // 6. Daily progress for chart (last 7 days)
+  const dailyProgress: { date: string; count: number }[] = [];
+  const now = new Date();
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(d.getDate() - i);
+    const dayStart = new Date(d);
+    dayStart.setHours(0, 0, 0, 0);
+    const dayEnd = new Date(d);
+    dayEnd.setHours(23, 59, 59, 999);
+    
+    const dayAnswers = await db.attemptAnswer.count({
+      where: {
+        // Progress belongs to when the learner attempted a question, not when
+        // the question was originally imported into the bank.
+        attempt: { userId: user.id, completedAt: { not: null }, startedAt: { gte: dayStart, lte: dayEnd } },
+      }
+    });
+    
+    dailyProgress.push({
+      date: dayStart.toISOString().split('T')[0],
+      count: dayAnswers
+    });
+  }
+
   return {
     streak,
     dailyGoal,
@@ -91,6 +117,7 @@ export async function getDashboardStats() {
     examTargetDate: user.examTargetDate,
     answeredByChapter,
     totalAnswered,
-    activityHistory
+    activityHistory,
+    dailyProgress
   };
 }

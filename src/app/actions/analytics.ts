@@ -23,10 +23,14 @@ export async function getExamHistory() {
     // Format Date (e.g. "Aug 10, 2026")
     const date = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).format(attempt.startedAt);
 
+    // Format time of day (e.g. "11:40 PM")
+    const timeOfDay = new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).format(attempt.startedAt);
+
     return {
       id: attempt.id,
       date,
-      mode: attempt.mode === 'EXAM' ? 'Strict Exam' : 'Practice',
+      timeOfDay,
+      mode: attempt.mode === 'EXAM' ? 'Mock Test' : 'Practice Mode',
       topic: attempt.topic ? (attempt.topic === 'None' ? 'Uncategorized' : attempt.topic) : 'Mixed Chapters',
       score: attempt.correctCount,
       total: attempt.totalQuestions,
@@ -44,8 +48,9 @@ export async function getWeakTopics() {
     where: {
       attempt: { userId: dbUser.id, completedAt: { not: null } }
     },
-    include: {
-      question: true
+    select: {
+      isCorrect: true,
+      question: { select: { chapter: true, topic: true } }
     }
   });
 
@@ -97,6 +102,49 @@ export async function getAnalyticsData() {
     }
   });
 
+  // Lifetime KPI source. The seven-day query above powers the trend chart only;
+  // these totals must not be presented as lifetime values unless they include
+  // every completed attempt.
+  const lifetimeAttempts = await prisma.examAttempt.findMany({
+    where: { userId: dbUser.id, completedAt: { not: null } },
+    select: {
+      totalQuestions: true,
+      correctCount: true,
+      timeTakenSeconds: true,
+    },
+  });
+
+  // Daily activity heatmap source (last 16 weeks + alignment slack).
+  const dailyStart = new Date();
+  dailyStart.setDate(dailyStart.getDate() - 140);
+  const dailyAttempts = await prisma.examAttempt.findMany({
+    where: {
+      userId: dbUser.id,
+      completedAt: { not: null },
+      startedAt: { gte: dailyStart }
+    },
+    select: {
+      startedAt: true,
+      totalQuestions: true,
+      correctCount: true,
+    }
+  });
+
+  const dailyMap: Record<string, { questions: number; correct: number }> = {};
+  for (const attempt of dailyAttempts) {
+    const key = attempt.startedAt.toISOString().slice(0, 10);
+    if (!dailyMap[key]) dailyMap[key] = { questions: 0, correct: 0 };
+    dailyMap[key].questions += attempt.totalQuestions;
+    dailyMap[key].correct += attempt.correctCount;
+  }
+  const dailyActivity = Object.entries(dailyMap)
+    .map(([date, stats]) => ({
+      date,
+      questions: stats.questions,
+      correct: stats.correct,
+    }))
+    .sort((a, b) => a.date.localeCompare(b.date));
+
   // Calculate Activity Data (per day)
   const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   const activityMap: Record<string, { questions: number, correct: number }> = {};
@@ -128,7 +176,7 @@ export async function getAnalyticsData() {
   let totalCorrect = 0;
   let totalTime = 0;
 
-  attempts.forEach(att => {
+  lifetimeAttempts.forEach(att => {
     totalQuestions += att.totalQuestions;
     totalCorrect += att.correctCount;
     totalTime += att.timeTakenSeconds;
@@ -166,6 +214,7 @@ export async function getAnalyticsData() {
     overallAccuracy,
     totalQuestions,
     avgTimePerQuestion,
-    radarData
+    radarData,
+    dailyActivity,
   };
 }

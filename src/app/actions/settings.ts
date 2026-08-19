@@ -15,11 +15,12 @@ export async function getUserSettings() {
   });
 
   if (!dailyGoal) {
+    const defaultTarget = Number(process.env.DEFAULT_DAILY_GOAL) || 30;
     dailyGoal = await db.dailyGoal.create({
       data: {
         userId: user.id,
         date: today,
-        targetQuestions: 50,
+        targetQuestions: defaultTarget,
         completedQuestions: 0
       }
     });

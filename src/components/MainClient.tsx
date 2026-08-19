@@ -32,26 +32,7 @@ export function MainClient({ totalQuestions, chapterStats }: MainClientProps) {
   const [examSessionMode, setExamSessionMode] = useState(false);
   const inExamSession = (activePage === 'exam' || activePage === 'quick-practice') && examSessionMode;
   
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(true); // Default dark to match server
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-    const saved = localStorage.getItem('theme');
-    if (saved === 'light' || (!saved && window.matchMedia('(prefers-color-scheme: light)').matches)) {
-      setIsDarkMode(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (isDarkMode) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    }
-  }, [isDarkMode]);
+      const isTopicsPage = activePage === 'topics';
 
   const handleStartExam = (chapter?: string) => {
     setPrefilledChapter(chapter);
@@ -97,36 +78,30 @@ export function MainClient({ totalQuestions, chapterStats }: MainClientProps) {
       case 'performance':
         return <PerformanceView onStartExam={() => handleStartExam()} />;
       case 'settings':
-        return <SettingsView isDarkMode={isDarkMode} onToggleDarkMode={() => setIsDarkMode(!isDarkMode)} />;
+        return <SettingsView />;
       default:
         return <Dashboard totalQuestions={totalQuestions} chapterStats={chapterStats} onStartExam={handleStartExam} onNavigate={handleNavigate} />;
     }
   };
 
   return (
-    <div className={`min-h-screen font-sans flex transition-colors duration-200 selection:bg-accent/30 ${
-      inExamSession ? 'bg-app-deep text-app-text' : 'bg-app-bg text-app-text'
-    }`}>
+    <div className="min-h-screen font-sans flex transition-colors duration-200"
+      style={{ background: inExamSession ? 'var(--app-deep)' : 'var(--app-bg)', color: 'var(--app-text)' }}>
       
       {/* Sidebar Navigation — hidden inside a question session */}
       <div className={inExamSession ? 'hidden' : ''}>
         <Sidebar 
           activePage={activePage} 
           onNavigate={handleNavigate} 
-          isDarkMode={isDarkMode} 
-          onToggleDarkMode={() => setIsDarkMode(!isDarkMode)} 
         />
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto">
+      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden" style={{ background: 'var(--app-bg)' }}>
         
         {/* Top Header — hidden inside a question session */}
         <div className={inExamSession ? 'hidden' : ''}>
           <Header
-            isDarkMode={isDarkMode}
-            mounted={mounted}
-            onToggleDarkMode={() => setIsDarkMode(!isDarkMode)}
             onOpenMobileMenu={() => setMobileMenuOpen(true)}
             onNavigate={handleNavigate}
             onStartExam={handleStartExam}
@@ -134,7 +109,9 @@ export function MainClient({ totalQuestions, chapterStats }: MainClientProps) {
         </div>
 
         {/* Page Content */}
-        <main className="flex-1 w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-10 flex flex-col">
+        <main className={isTopicsPage
+          ? 'flex-1 w-full min-h-0 overflow-y-auto'
+          : 'flex-1 w-full min-h-0 overflow-y-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8'}>
           {renderMainContent()}
         </main>
       </div>
@@ -148,9 +125,7 @@ export function MainClient({ totalQuestions, chapterStats }: MainClientProps) {
               <Sidebar 
                 activePage={activePage} 
                 onNavigate={handleNavigate} 
-                isDarkMode={isDarkMode} 
-                onToggleDarkMode={() => setIsDarkMode(!isDarkMode)}
-                className="flex w-full"
+                    className="flex w-full"
               />
             </div>
           </div>

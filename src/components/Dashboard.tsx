@@ -1,9 +1,10 @@
 "use client";
 import React, { useEffect, useState } from 'react';
-import { Play, Target, Flame, AlertTriangle, ClipboardList, CheckCircle2, MoreHorizontal } from 'lucide-react';
+import { Play, CheckCircle2, MoreHorizontal, Bookmark, Clock, Brain } from 'lucide-react';
 import { getDashboardStats } from '../app/actions/dashboard';
 import { getExamHistory } from '../app/actions/analytics';
-import { AreaChart, Area, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
+import { AreaChart, Area, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, RadarChart, PolarGrid, PolarAngleAxis, Radar } from 'recharts';
+import { getAnalyticsData } from '../app/actions/analytics';
 
 interface DashboardProps {
   totalQuestions: number;
@@ -12,67 +13,27 @@ interface DashboardProps {
   onNavigate: (page: any) => void;
 }
 
-/* ── Semicircle Arc Gauge ── */
-function ArcGauge({ pct, totalQuestions }: { pct: number; totalQuestions: number }) {
-  const W = 300, H = 170;
-  const cx = W / 2, cy = H - 10;
-  const arcs = [
-    { r: 120, color: '#a855f7', width: 12 },
-    { r: 98,  color: '#3b82f6', width: 12 },
-    { r: 76,  color: '#06b6d4', width: 12 },
-  ];
-  function arc(r: number, deg: number) {
-    const start = -Math.PI;
-    const end = start + (Math.PI * Math.min(deg, 179.8) / 180);
-    const sx = cx + r * Math.cos(start), sy = cy + r * Math.sin(start);
-    const ex = cx + r * Math.cos(end),   ey = cy + r * Math.sin(end);
-    const lg = deg > 180 ? 1 : 0;
-    return `M ${sx} ${sy} A ${r} ${r} 0 ${lg} 1 ${ex} ${ey}`;
-  }
-  const degs = [pct * 1.8, pct * 1.5, pct * 1.2];
-  return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="w-full max-w-[300px]">
-      {arcs.map((a, i) => (
-        <g key={i}>
-          <path d={arc(a.r, 180)} stroke="rgba(255,255,255,0.06)" strokeWidth={a.width} fill="none" strokeLinecap="round" />
-          <path d={arc(a.r, degs[i])} stroke={a.color} strokeWidth={a.width} fill="none" strokeLinecap="round"
-            style={{ filter: `drop-shadow(0 0 8px ${a.color}88)` }} />
-        </g>
-      ))}
-      {/* Center text */}
-      <text x={cx} y={cy - 24} textAnchor="middle" fill="white" fontSize="36" fontWeight="900" fontFamily="system-ui">
-        {Math.round(pct)}%
-      </text>
-      <text x={cx} y={cy - 6} textAnchor="middle" fill="rgba(148,163,184,0.8)" fontSize="11" fontFamily="system-ui">
-        Master % Completed
-      </text>
-      {/* Labels */}
-      <text x="16" y={cy + 8} fill="rgba(148,163,184,0.5)" fontSize="10">0%</text>
-      <text x={W - 85} y={cy + 8} fill="rgba(148,163,184,0.5)" fontSize="10">{totalQuestions.toLocaleString()} Questions</text>
-    </svg>
-  );
-}
-
 /* ── Donut ring for Daily Goal ── */
 function GoalRing({ done, target }: { done: number; target: number }) {
   const pct = target > 0 ? Math.min(100, (done / target) * 100) : 0;
-  const size = 120, stroke = 12, r = (size - stroke) / 2, c = 2 * Math.PI * r;
+  const size = 130, stroke = 14, r = (size - stroke) / 2, c = 2 * Math.PI * r;
   return (
-    <div className="relative shrink-0" style={{ width: size, height: size }}>
+    <div className="relative shrink-0 mx-auto" style={{ width: size, height: size }}>
       <svg viewBox={`0 0 ${size} ${size}`} className="w-full h-full -rotate-90">
         <defs>
-          <linearGradient id="gGoal" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#3b82f6" />
-            <stop offset="100%" stopColor="#06b6d4" />
+          <linearGradient id="gGoal2" x1="0%" y1="0%" x2="100%">
+            <stop offset="0%" stopColor="var(--status-warning)" />
+            <stop offset="100%" stopColor="var(--accent)" />
           </linearGradient>
         </defs>
-        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="rgba(59,130,246,0.12)" strokeWidth={stroke} />
-        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="url(#gGoal)"
-          strokeWidth={stroke} strokeLinecap="round" strokeDasharray={`${(pct/100)*c} ${c}`} />
+        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="var(--app-border)" strokeWidth={stroke} />
+        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="url(#gGoal2)"
+          strokeWidth={stroke} strokeLinecap="round" strokeDasharray={`${(pct/100)*c} ${c}`}
+          style={{ filter: 'drop-shadow(0 0 8px var(--neon-gold))' }} />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-2xl font-black text-app-text leading-none">{done}</span>
-        <span className="text-xs text-app-muted font-bold">/{target}</span>
+        <span className="text-3xl font-black leading-none" style={{ color: 'var(--app-text)' }}>{done}</span>
+        <span className="text-sm font-bold" style={{ color: 'var(--accent)' }}>/{target}</span>
       </div>
     </div>
   );
@@ -86,100 +47,41 @@ function TopicRing({ pct }: { pct: number }) {
     <div className="relative shrink-0 mx-auto" style={{ width: size, height: size }}>
       <svg viewBox={`0 0 ${size} ${size}`} className="w-full h-full -rotate-90">
         <defs>
-          <linearGradient id="gTopic" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#3b82f6" />
-            <stop offset="100%" stopColor="#06b6d4" />
+          <linearGradient id="gTopic2" x1="0%" y1="0%" x2="100%">
+            <stop offset="0%" stopColor="var(--accent)" />
+            <stop offset="100%" stopColor="var(--status-success)" />
           </linearGradient>
         </defs>
-        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="rgba(59,130,246,0.12)" strokeWidth={stroke} />
-        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="url(#gTopic)"
-          strokeWidth={stroke} strokeLinecap="round" strokeDasharray={`${(p/100)*c} ${c}`} />
+        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="var(--app-border)" strokeWidth={stroke} />
+        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="url(#gTopic2)"
+          strokeWidth={stroke} strokeLinecap="round" strokeDasharray={`${(p/100)*c} ${c}`}
+          style={{ filter: 'drop-shadow(0 0 8px var(--neon-teal))' }} />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-3xl font-black text-app-text leading-none">{Math.round(p)}%</span>
-        <span className="text-xs text-app-muted font-bold mt-1">Completed</span>
+        <span className="text-3xl font-black leading-none" style={{ color: 'var(--app-text)' }}>{Math.round(p)}%</span>
+        <span className="text-xs font-bold mt-1" style={{ color: 'var(--status-success)' }}>Completed</span>
       </div>
     </div>
   );
 }
 
-/* ── GitHub-style Heatmap (7 rows × 14 weeks) ── */
-function StreakHeatmap({ activityHistory }: { activityHistory: Record<string, number> }) {
-  const WEEKS = 14;
-  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-  const now = new Date();
-  const cells: { date: string; value: number }[][] = [];
-  
-  for (let wi = 0; wi < WEEKS; wi++) {
-    const week: { date: string; value: number }[] = [];
-    for (let di = 0; di < 7; di++) {
-      const d = new Date(now);
-      d.setDate(d.getDate() - (WEEKS - 1 - wi) * 7 - (6 - di));
-      const key = d.toISOString().split('T')[0];
-      week.push({ date: key, value: activityHistory[key] || 0 });
-    }
-    cells.push(week);
-  }
-  const maxVal = Math.max(...cells.flat().map(c => c.value), 1);
+function NeonCard({ children, className = '', color = 'blue' }: { children: React.ReactNode; className?: string; color?: 'purple' | 'blue' | 'cyan' }) {
+  // Use Blueprint styles via bp-card and extra neon logic if needed
   return (
-    <div className="w-full">
-      {/* Day labels */}
-      <div className="flex gap-[2px] mb-1">
-        <div className="w-7" /> {/* spacer for day labels */}
-        {Array.from({ length: WEEKS }).map((_, wi) => (
-          <div key={wi} className="flex-1" />
-        ))}
-      </div>
-      {days.map((day, di) => (
-        <div key={di} className="flex items-center gap-[2px] mb-[2px]">
-          <span className="text-[9px] text-app-muted w-7 shrink-0">{day}</span>
-          {cells.map((week, wi) => {
-            const cell = week[di];
-            const intensity = cell.value / maxVal;
-            return (
-              <div
-                key={wi}
-                title={`${cell.date}: ${cell.value} questions`}
-                className="flex-1 rounded-[2px] transition-all cursor-pointer hover:scale-110"
-                style={{
-                  height: 12,
-                  background: intensity > 0 ? `rgba(67,160,71,${0.2 + intensity * 0.8})` : 'var(--app-bg)',
-                  boxShadow: intensity > 0 ? '0 0 4px rgba(67,160,71,0.5)' : 'none',
-                }}
-              />
-            );
-          })}
-        </div>
-      ))}
-      <div className="flex items-center gap-4 mt-2 pl-8">
-        <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-[2px] bg-[var(--status-success)]" /><span className="text-[9px] text-app-muted">Active</span></div>
-        <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-[2px] bg-app-bg" /><span className="text-[9px] text-app-muted">No activity</span></div>
-      </div>
+    <div className={`bp-card backdrop-blur-sm ${className}`}>
+      {children}
     </div>
   );
 }
 
-/* ── Card wrapper identical to reference ── */
-function Card({ title, children, className = '' }: { title: string; children: React.ReactNode; className?: string }) {
-  return (
-    <div className={`rounded-2xl bg-app-card border border-app-border flex flex-col ${className}`}>
-      <div className="flex items-center justify-between px-5 pt-4 pb-2">
-        <h3 className="text-sm font-bold text-app-text">{title}</h3>
-        <button className="text-app-muted hover:text-app-text transition-colors">
-          <MoreHorizontal className="w-4 h-4" />
-        </button>
-      </div>
-      <div className="flex-1 px-5 pb-5">{children}</div>
-    </div>
-  );
-}
-
-/* ── Score badge in Recent Activity ── */
+/* ── Score badge ── */
 function ScoreBadge({ score }: { score: number }) {
-  const color = score >= 8 ? 'bg-[var(--status-success)]' : score >= 6 ? 'bg-[var(--status-info)]' : 'bg-[var(--status-warning)]';
+  const color = score >= 8 ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
+              : score >= 6 ? 'bg-blue-500/20 text-blue-400 border-blue-500/30'
+              : 'bg-amber-500/20 text-amber-400 border-amber-500/30';
   return (
-    <span className={`text-[9px] font-black text-white px-1.5 py-0.5 rounded ${color}`}>
-      Score {score}
+    <span className={`text-[9px] font-black px-1.5 py-0.5 rounded border ${color}`}>
+      {score * 10}%
     </span>
   );
 }
@@ -187,183 +89,242 @@ function ScoreBadge({ score }: { score: number }) {
 export const Dashboard: React.FC<DashboardProps> = ({ totalQuestions, chapterStats, onStartExam, onNavigate }) => {
   const [stats, setStats] = useState<any>(null);
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
+  const [analytics, setAnalytics] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetch() {
       try {
-        const [s, h] = await Promise.all([getDashboardStats(), getExamHistory().catch(() => [])]);
+        const [s, h, a] = await Promise.all([
+          getDashboardStats(),
+          getExamHistory().catch(() => []),
+          getAnalyticsData().catch(() => null)
+        ]);
         setStats(s);
-        setRecentActivity((h as any[]).slice(0, 8));
+        setRecentActivity((h as any[]).slice(0, 10));
+        setAnalytics(a);
       } catch (e) { console.error("Failed to fetch stats", e); }
       finally { setLoading(false); }
     }
     fetch();
   }, []);
 
-  const totalAnswered   = stats?.totalAnswered ?? 0;
-  const overallPct      = totalQuestions > 0 ? (totalAnswered / totalQuestions) * 100 : 0;
-  const dailyDone       = stats?.dailyGoal?.completedQuestions ?? 0;
-  const dailyTarget     = stats?.dailyGoal?.targetQuestions ?? 50;
-  const topicsAnswered  = Object.keys(stats?.answeredByChapter || {}).length;
-  const topicsPct       = chapterStats.length > 0 ? (topicsAnswered / chapterStats.length) * 100 : 0;
-  const streak          = stats?.streak?.currentStreak ?? 0;
+  const totalAnswered  = stats?.totalAnswered ?? 0;
+  const overallPct     = totalQuestions > 0 ? (totalAnswered / totalQuestions) * 100 : 0;
+  const dailyDone      = stats?.dailyGoal?.completedQuestions ?? 0;
+  const dailyTarget    = stats?.dailyGoal?.targetQuestions ?? 50;
+  const topicsAnswered = Object.keys(stats?.answeredByChapter || {}).length;
+  const topicsPct      = chapterStats.length > 0 ? (topicsAnswered / chapterStats.length) * 100 : 0;
+  const radarData      = analytics?.radarData ?? [];
 
-  /* Overall progress chart data - last 7 days */
+  /* Daily progress chart — last 7 days */
   const progressData = (() => {
     const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    const now = new Date();
-    const data = [];
-    for (let i = 6; i >= 0; i--) {
-      const d = new Date(now);
-      d.setDate(d.getDate() - i);
-      data.push({
-        t: days[d.getDay()],
-        v: Math.max(0, totalAnswered * (1 - i * 0.12)),
+    if (stats?.dailyProgress) {
+      return stats.dailyProgress.map((d: { date: string; count: number }) => {
+        const date = new Date(d.date);
+        return { t: days[date.getDay()], v: d.count };
       });
     }
-    return data;
+    const now = new Date();
+    return Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(now);
+      d.setDate(d.getDate() - (6 - i));
+      return { t: days[d.getDay()], v: 0 };
+    });
   })();
 
   const activity = recentActivity.map((r: any) => ({
-    label: `Completed ${r.mode} - ${r.topic}`,
+    label: `${r.mode === 'Mock Test' ? 'Completed' : 'Attempted'} '${r.topic}' ${r.mode === 'Mock Test' ? 'Module' : 'Quiz'}`,
     score: r.total > 0 ? Math.round((r.score / r.total) * 10) : 0,
-    time: r.date,
+    time: r.time || r.date,
+    topic: r.topic,
+    mode: r.mode,
   }));
 
+  const activityIcons = [
+    { color: 'bg-emerald-500', label: 'completed' },
+    { color: 'bg-purple-500', label: 'attempted' },
+    { color: 'bg-cyan-500', label: 'viewed' },
+  ];
+
   return (
-    <div className="flex gap-5 w-full">
+    <div className="flex gap-4 w-full min-h-full">
 
       {/* ─── Main column ─── */}
-      <div className="flex-1 min-w-0 space-y-5 min-w-0">
+      <div className="flex-1 min-w-0 space-y-4">
 
         {/* ── Hero Banner ── */}
-        <div className="relative overflow-hidden rounded-2xl"
-          style={{ background: 'linear-gradient(135deg, #1a0a3a 0%, #0f1a40 50%, #0a1628 100%)' }}>
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_70%_50%,rgba(99,102,241,0.2)_0%,transparent_55%)]" />
-          <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center gap-6 p-7">
+        <div className="relative min-h-[320px] overflow-hidden rounded-2xl"
+          style={{ background: 'var(--app-card2)', border: '1px solid var(--app-border)' }}>
+          {/* Animated grid overlay */}
+          <div className="absolute inset-0 opacity-[0.04]"
+            style={{ backgroundImage: 'linear-gradient(var(--app-text) 1px,transparent 1px),linear-gradient(90deg,var(--app-text) 1px,transparent 1px)', backgroundSize: '40px 40px' }} />
+          {/* Shimmer line */}
+          <div className="absolute top-0 left-0 right-0 h-px" style={{ background: 'linear-gradient(to right, transparent, var(--accent), transparent)' }} />
 
+          <div className="relative z-10 flex min-h-[320px] flex-col sm:flex-row items-start sm:items-center gap-6 p-8 sm:p-10">
             {/* Text side */}
             <div className="flex-1 min-w-0">
-              <p className="text-[11px] font-semibold text-app-muted mb-1">Progress Arcs</p>
-              <h2 className="text-2xl font-black text-white leading-tight mb-2">
-                Master Civil Engineering
+              <p className="text-[11px] font-bold mb-2 uppercase tracking-widest" style={{ color: 'var(--accent)' }}>Progress Arcs</p>
+              <h2 className="text-4xl sm:text-5xl font-black leading-tight mb-3" style={{ color: 'var(--app-text)' }}>
+                Master Civil<br/>Engineering
               </h2>
-              <p className="text-sm text-app-muted mb-5 max-w-xs">
+              <p className="text-sm mb-6 max-w-xs leading-relaxed" style={{ color: 'var(--app-muted)' }}>
                 You've completed {totalAnswered.toLocaleString()} of {totalQuestions.toLocaleString()} questions toward mastering civil engineering.
               </p>
               <button
                 onClick={() => onStartExam()}
-                className="inline-flex items-center gap-2 bg-[#2d4a8a] hover:bg-[#3b5fad] text-white text-sm font-bold px-5 py-2.5 rounded-lg transition-all"
+                className="inline-flex items-center gap-2 text-sm font-bold px-7 py-3.5 rounded-xl transition-all hover:scale-[1.02]"
+                style={{ background: 'linear-gradient(135deg, var(--primary-start), var(--primary-end))', color: '#fff', boxShadow: '0 0 30px var(--neon-blue)' }}
               >
-                Learn More
+                <Play className="w-6 h-6 fill-current" />
+                Continue Practice
               </button>
-              {/* Dots indicator */}
-              <div className="flex gap-1.5 mt-6">
-                <div className="w-6 h-1.5 rounded-full bg-[#3b82f6]" />
-                <div className="w-3 h-1.5 rounded-full bg-white/20" />
-                <div className="w-3 h-1.5 rounded-full bg-white/20" />
-              </div>
             </div>
 
-            {/* Arc gauge */}
-            <div className="hidden sm:flex items-center justify-center w-[300px] shrink-0">
-              <ArcGauge pct={Math.round(overallPct)} totalQuestions={totalQuestions} />
+            {/* Bridge Banner Illustration */}
+            <div className="hidden sm:flex items-center justify-end flex-1 pl-6">
+              <img 
+                src="/bridge_banner.png" 
+                alt="Engineering Mastery" 
+                className="w-full max-w-[550px] object-cover rounded-2xl shadow-2xl scale-110 origin-right"
+                style={{ boxShadow: '0 0 40px var(--neon-purple, rgba(168,85,247,0.3))' }}
+              />
             </div>
           </div>
         </div>
 
-        {/* ── "Quick Access" label ── */}
-        <p className="text-xs font-bold text-app-muted uppercase tracking-widest px-0.5">Quick Access</p>
+        {/* ── Quick Access label ── */}
+        <p className="text-[10px] font-bold uppercase tracking-[0.25em] px-0.5" style={{ color: 'var(--accent)' }}>Quick Access Grid</p>
 
-        {/* ── 2×2 Grid ── */}
-        <div className="grid grid-cols-2 gap-5">
+        {/* ── 2×2 Quick Access Grid ── */}
+        <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-4 gap-4">
+
+          {/* Subject Mastery */}
+          <NeonCard color="purple" className="p-5">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-bold" style={{ color: 'var(--app-text)' }}>Subject Mastery</h3>
+              <button className="transition-colors" style={{ color: 'var(--app-faint)' }}><MoreHorizontal className="w-4 h-4" /></button>
+            </div>
+            {radarData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={190}>
+                <RadarChart data={radarData.slice(0, 6)}>
+                  <PolarGrid stroke="var(--app-border)" />
+                  <PolarAngleAxis dataKey="subject" tick={{ fill: 'var(--app-muted)', fontSize: 9 }} />
+                  <Radar dataKey="A" stroke="var(--accent)" fill="var(--accent)" fillOpacity={0.22}
+                    dot={{ r: 3, fill: 'var(--accent-bright)', filter: 'drop-shadow(0 0 4px var(--neon-blue))' }} />
+                </RadarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-[190px] flex items-center justify-center text-center text-sm" style={{ color: 'var(--app-faint)' }}>
+                Complete practice sessions to see subject mastery.
+              </div>
+            )}
+          </NeonCard>
 
           {/* Daily Goal */}
-          <Card title="Daily Goal">
-            <div className="flex items-center gap-5 mt-1">
+          <NeonCard color="purple" className="p-5">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-bold" style={{ color: 'var(--app-text)' }}>Daily Goal</h3>
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold"
+                style={{ background: 'var(--accent-soft)', border: '1px solid var(--app-border)', color: 'var(--status-warning)' }}>
+                🔥 Active
+              </span>
+            </div>
+            <div className="flex flex-col items-center gap-3 mt-1">
               <GoalRing done={dailyDone} target={dailyTarget} />
-              <div className="flex-1 min-w-0">
-                <p className="text-3xl font-black text-app-text">
-                  {dailyDone}<span className="text-xl text-app-muted font-bold">/{dailyTarget}</span>
-                </p>
-                <p className="text-xs text-app-muted mt-1">Questions</p>
+              <div className="text-center">
+                <p className="text-3xl font-black" style={{ color: 'var(--app-text)' }}>{dailyDone}<span className="text-xl font-bold" style={{ color: 'var(--app-muted)' }}>/{dailyTarget}</span></p>
+                <p className="text-xs mt-1" style={{ color: 'var(--app-faint)' }}>Questions Solved Today</p>
               </div>
             </div>
-            {/* Bottom bar */}
-            <div className="flex items-center justify-between text-[11px] text-app-muted mt-4">
-              <span>Questions</span>
-              <span>{dailyDone}/{dailyTarget}</span>
+            <div className="mt-4 flex items-center justify-between text-[11px] mb-1.5" style={{ color: 'var(--app-faint)' }}>
+              <span>0</span><span>{dailyTarget}</span>
             </div>
-            <div className="mt-1.5 w-full h-2 bg-app-bg rounded-full">
-              <div className="h-2 rounded-full bg-gradient-to-r from-[#3b82f6] to-[#06b6d4] transition-all"
-                style={{ width: `${Math.min(100, dailyTarget > 0 ? (dailyDone/dailyTarget)*100 : 0)}%` }} />
+            <div className="w-full h-1.5 rounded-full" style={{ background: 'var(--app-border)' }}>
+              <div className="h-1.5 rounded-full transition-all"
+                style={{ background: 'linear-gradient(to right, var(--status-warning), var(--accent))', width: `${Math.min(100, dailyTarget > 0 ? (dailyDone/dailyTarget)*100 : 0)}%`, boxShadow: '0 0 8px var(--neon-gold)' }} />
             </div>
-          </Card>
-
-          {/* Streak */}
-          <Card title="Streak">
-            <div className="mt-2">
-              {loading
-                ? <div className="h-20 bg-app-bg rounded-xl animate-pulse" />
-                : <StreakHeatmap activityHistory={stats?.activityHistory || {}} />
-              }
-            </div>
-          </Card>
+            <p className="text-[10px] text-center mt-1" style={{ color: 'var(--app-faint)' }}>0 Questions</p>
+          </NeonCard>
 
           {/* Topic Review */}
-          <Card title="Topic Review">
-            <div className="flex flex-col items-center mt-1">
+          <NeonCard color="cyan" className="p-5">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-bold" style={{ color: 'var(--app-text)' }}>Topic Review</h3>
+              <button className="transition-colors" style={{ color: 'var(--app-faint)' }}><MoreHorizontal className="w-4 h-4" /></button>
+            </div>
+            <div className="flex flex-col items-center gap-3 mt-1">
               <TopicRing pct={topicsPct} />
+              <div className="text-center">
+                <p className="text-xl font-black" style={{ color: 'var(--app-text)' }}>{topicsAnswered}<span className="text-sm font-bold" style={{ color: 'var(--app-muted)' }}>/{chapterStats.length}</span></p>
+                <p className="text-xs mt-1" style={{ color: 'var(--app-faint)' }}>Topics Covered</p>
+              </div>
             </div>
-          </Card>
+          </NeonCard>
 
-          {/* Overall Progress */}
-          <Card title="Overall Progress">
-            <div className="mt-1">
-              <div className="text-[10px] text-app-muted mb-1">{totalQuestions.toLocaleString()}</div>
-              <ResponsiveContainer width="100%" height={110}>
-                <AreaChart data={progressData} margin={{ top: 5, right: 5, left: -25, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="overallFill" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.3} />
-                      <stop offset="100%" stopColor="#06b6d4" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid stroke="var(--app-border)" strokeDasharray="3 3" vertical={false} />
-                  <XAxis dataKey="t" tick={{ fill: 'var(--app-muted)', fontSize: 9 }} tickLine={false} axisLine={false} />
-                  <YAxis tick={{ fill: 'var(--app-muted)', fontSize: 9 }} tickLine={false} axisLine={false} />
-                  <Tooltip
-                    contentStyle={{ background: 'var(--app-bg)', border: '1px solid var(--app-border)', borderRadius: 8, color: 'var(--app-text)' }}
-                    formatter={(v: any) => [v, 'Questions']}
-                  />
-                  <Area type="monotone" dataKey="v" stroke="#06b6d4" strokeWidth={2}
-                    fill="url(#overallFill)" dot={false} />
-                </AreaChart>
-              </ResponsiveContainer>
-
+          {/* Performance Trends */}
+          <NeonCard color="blue" className="p-5">
+            <div className="flex items-center justify-between mb-1">
+              <h3 className="text-sm font-bold" style={{ color: 'var(--app-text)' }}>Performance Trends</h3>
+              <span className="text-[10px]" style={{ color: 'var(--app-faint)' }}>Questions Solved vs Accuracy %</span>
             </div>
-          </Card>
+            <ResponsiveContainer width="100%" height={200}>
+              <AreaChart data={progressData} margin={{ top: 10, right: 5, left: -28, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="perfFill" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="var(--accent)" stopOpacity={0.5} />
+                    <stop offset="60%" stopColor="var(--status-success)" stopOpacity={0.2} />
+                    <stop offset="100%" stopColor="var(--status-success)" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid stroke="var(--app-border)" strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="t" tick={{ fill: 'var(--app-muted)', fontSize: 9 }} tickLine={false} axisLine={false} />
+                <YAxis tick={{ fill: 'var(--app-muted)', fontSize: 9 }} tickLine={false} axisLine={false} />
+                <Tooltip
+                  contentStyle={{ background: 'var(--app-card)', border: '1px solid var(--app-border)', borderRadius: 8, color: 'var(--app-text)' }}
+                  formatter={(v: any) => [v, 'Questions']}
+                />
+                <Area type="monotone" dataKey="v" stroke="var(--accent)" strokeWidth={2.5}
+                  fill="url(#perfFill)" dot={{ r: 3, fill: 'var(--accent)', filter: 'drop-shadow(0 0 4px var(--neon-blue))' }} />
+              </AreaChart>
+            </ResponsiveContainer>
+          </NeonCard>
         </div>
       </div>
 
       {/* ─── Recent Activity sidebar ─── */}
-      <div className="w-[270px] shrink-0 hidden xl:block min-w-[270px]">
-        <div className="rounded-2xl bg-app-card border border-app-border sticky top-[72px]">
-          <div className="px-4 py-4 border-b border-app-border">
-            <h3 className="text-sm font-bold text-app-text">Recent Activity</h3>
+      <div className="w-[280px] shrink-0 hidden xl:block">
+        <div className="bp-card sticky top-[72px] backdrop-blur-sm">
+          <div className="px-5 py-4" style={{ borderBottom: '1px solid var(--app-border)' }}>
+            <h3 className="text-sm font-bold" style={{ color: 'var(--app-text)' }}>Recent Activity</h3>
           </div>
-          <div className="divide-y divide-app-border max-h-[calc(100vh-120px)] overflow-y-auto">
-            {activity.map((item, i) => (
-              <div key={i} className="flex items-start gap-2.5 px-4 py-3">
-                <CheckCircle2 className="w-4 h-4 text-[var(--status-success)] shrink-0 mt-0.5" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-[11px] text-app-text leading-tight line-clamp-2">{item.label}</p>
-                  <p className="text-[9px] text-app-muted mt-1">{item.time}</p>
+          <div className="max-h-[calc(100vh-180px)] overflow-y-auto" style={{ borderTop: '1px solid var(--app-border)' }}>
+            {activity.length === 0 ? (
+              <div className="px-5 py-10 flex flex-col items-center justify-center text-center">
+                <div className="w-16 h-16 rounded-2xl mb-4 flex items-center justify-center shrink-0"
+                     style={{ background: 'var(--accent-soft)', border: '1px solid var(--app-border)', boxShadow: '0 0 20px var(--neon-blue)' }}>
+                  <span style={{ color: 'var(--accent)', filter: 'drop-shadow(0 0 8px var(--accent))', display: 'flex' }}>
+                    <Brain className="w-8 h-8 stroke-1" />
+                  </span>
                 </div>
-                <ScoreBadge score={item.score} />
+                <p className="text-xs font-bold" style={{ color: 'var(--app-muted)' }}>No activity yet.</p>
+                <p className="text-[10px] mt-1" style={{ color: 'var(--app-faint)' }}>Start practicing!</p>
               </div>
-            ))}
+            ) : activity.map((item, i) => {
+              const dot = activityIcons[i % activityIcons.length];
+              return (
+                <div key={i} className="flex items-start gap-3 px-5 py-3.5 transition-colors hover:bg-black/5 dark:hover:bg-white/5" style={{ borderBottom: '1px solid var(--app-border)' }}>
+                  <div className={`w-2 h-2 rounded-full ${dot.color} mt-1.5 shrink-0 shadow-[0_0_6px_currentColor]`} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[11px] leading-tight line-clamp-2" style={{ color: 'var(--app-text)' }}>{item.label}</p>
+                    <p className="text-[9px] mt-1" style={{ color: 'var(--app-faint)' }}>{item.time}</p>
+                  </div>
+                  <ScoreBadge score={item.score} />
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>

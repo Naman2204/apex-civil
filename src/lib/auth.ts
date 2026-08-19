@@ -13,7 +13,14 @@ export async function getOrCreateDbUser() {
     throw new Error("Unauthorized");
   }
 
-  // Fetch Clerk user details for creation data
+  // Fast path: Check if user exists in the database
+  let dbUser = await db.user.findUnique({ where: { clerkId: userId } });
+  
+  if (dbUser) {
+    return dbUser;
+  }
+
+  // Slow path: User is missing. Fetch Clerk user details for creation data
   const user = await currentUser();
   if (!user) {
     throw new Error("Clerk user not found");
@@ -21,33 +28,22 @@ export async function getOrCreateDbUser() {
 
   const email = user.emailAddresses[0]?.emailAddress || `${userId}@placeholder.com`;
 
-  let dbUser = await db.user.findUnique({ where: { clerkId: userId } });
-
-  if (!dbUser) {
-    // The clerkId is not in the database.
-    // Check if the email already exists (e.g., user deleted Clerk account and recreated it)
-    dbUser = await db.user.findUnique({ where: { email } });
-    
-    if (dbUser) {
-      // Update the existing user with the new clerkId
-      dbUser = await db.user.update({
-        where: { id: dbUser.id },
-        data: { clerkId: userId },
-      });
-    } else {
-      // Create a brand new user
-      dbUser = await db.user.create({
-        data: {
-          clerkId: userId,
-          email: email,
-        },
-      });
-    }
-  } else if (dbUser.email !== email) {
-    // If the user changed their email in Clerk, sync it here
+  // Check if the email already exists (e.g., user deleted Clerk account and recreated it)
+  dbUser = await db.user.findUnique({ where: { email } });
+  
+  if (dbUser) {
+    // Update the existing user with the new clerkId
     dbUser = await db.user.update({
       where: { id: dbUser.id },
-      data: { email: email },
+      data: { clerkId: userId },
+    });
+  } else {
+    // Create a brand new user
+    dbUser = await db.user.create({
+      data: {
+        clerkId: userId,
+        email: email,
+      },
     });
   }
 

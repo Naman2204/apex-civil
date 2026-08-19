@@ -1,131 +1,207 @@
 @import "tailwindcss";
 
-/* The desktop app keeps a private workspace DB in .freebuff/ whose raw bytes
-   are not valid class candidates; exclude it so Tailwind never generates
-   malformed rules from it (build CSS parse error fix). */
 @source not "../../.freebuff";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* ============================================================
-   ApexCivil Design Tokens (Stitch Reference System)
+   ApexCivil Design Tokens — Blueprint Draft Palette
+   Light: Blueprint paper · Dark: Blueprint night
    ============================================================ */
 @theme inline {
-  --color-app-bg: var(--app-bg);
-  --color-app-card: var(--app-card);
-  --color-app-card-hover: var(--app-card-hover);
-  --color-app-card2: var(--app-card2);
-  --color-app-border: var(--app-border);
-  --color-app-border2: var(--app-border2);
+  --color-app-bg:           var(--app-bg);
+  --color-app-card:         var(--app-card);
+  --color-app-card-hover:   var(--app-card-hover);
+  --color-app-card2:        var(--app-card2);
+  --color-app-border:       var(--app-border);
+  --color-app-border2:      var(--app-border2);
   --color-app-border-focus: var(--app-border-focus);
-  --color-app-deep: var(--app-deep);
-  --color-app-sidebar: var(--app-sidebar);
+  --color-app-deep:         var(--app-deep);
+  --color-app-sidebar:      var(--app-sidebar);
 
-  --color-status-success: var(--status-success);
-  --color-status-danger: var(--status-danger);
-  --color-status-info: var(--status-info);
-  --color-status-warning: var(--status-warning);
-  --color-status-neutral: var(--status-neutral);
+  --color-status-success:        var(--status-success);
+  --color-status-danger:         var(--status-danger);
+  --color-status-info:           var(--status-info);
+  --color-status-warning:        var(--status-warning);
+  --color-status-neutral:        var(--status-neutral);
   --color-status-neutral-border: var(--status-neutral-border);
 
-  --color-app-text: var(--app-text);
-  --color-app-muted: var(--app-muted);
-  --color-app-faint: var(--app-faint);
+  --color-app-text:   var(--app-text);
+  --color-app-muted:  var(--app-muted);
+  --color-app-faint:  var(--app-faint);
 
-  --color-accent: var(--accent);
+  --color-accent:        var(--accent);
   --color-accent-bright: var(--accent-bright);
-  --color-accent-soft: var(--accent-soft);
+  --color-accent-soft:   var(--accent-soft);
 
-  --color-app-blue: var(--app-blue);
+  --color-app-blue:      var(--app-blue);
   --color-app-blue-soft: var(--app-blue-soft);
 
   --color-primary-start: var(--primary-start);
-  --color-primary-end: var(--primary-end);
+  --color-primary-end:   var(--primary-end);
+
+  --color-neon-blue:     var(--neon-blue);
+  --color-neon-gold:     var(--neon-gold);
+  --color-neon-teal:     var(--neon-teal);
+  --color-neon-purple:   var(--neon-purple);
 }
 
+/* ──────────────────────────────────────────────────────────
+   LIGHT MODE  (Blueprint Paper)
+   ────────────────────────────────────────────────────────── */
 :root {
-  /* Light theme fallback */
-  --app-bg: #f5f7fc;
-  --app-card: #ffffff;
-  --app-card-hover: #f9fafb;
-  --app-card2: #f0f2f8;
-  --app-border: #e4e9f4;
-  --app-border2: #d1d8e8;
-  --app-border-focus: #534ab7;
-  --app-deep: #eef1f8;
-  --app-sidebar: #fafbfe;
+  /* Backgrounds */
+  --app-bg:           #EEF5FB;
+  --app-card:         #FFFFFF;
+  --app-card-hover:   #F0F8FF;
+  --app-card2:        #E3EFF9;
+  --app-border:       rgba(79,168,232,0.22);
+  --app-border2:      rgba(79,168,232,0.38);
+  --app-border-focus: #4FA8E8;
+  --app-deep:         #D8EAF8;
+  --app-sidebar:      #FFFFFF;
 
-  --status-success: #43A047;
-  --status-danger: #E24B4A;
-  --status-info: #8E63F0;
-  --status-warning: #E0A63D;
-  --status-neutral: #f1f5f9;
-  --status-neutral-border: #cbd5e1;
+  /* Status */
+  --status-success:        #2E9D6C;
+  --status-danger:         #D14040;
+  --status-info:           #2E8FD4;
+  --status-warning:        #B8820A;
+  --status-neutral:        #E3EFF9;
+  --status-neutral-border: rgba(79,168,232,0.2);
 
-  --app-text: #101828;
-  --app-muted: #5a6a85;
-  --app-faint: #8c9ab5;
+  /* Text */
+  --app-text:  #0B1622;
+  --app-muted: #4A6A8A;
+  --app-faint: #8AAAC0;
 
-  --accent: #7C5CFC;
-  --accent-bright: #6C4EE0;
-  --accent-soft: #EDE9FE;
+  /* Accent — sky blue */
+  --accent:        #2E8FD4;
+  --accent-bright: #4FA8E8;
+  --accent-soft:   rgba(79,168,232,0.1);
 
-  --app-blue: #3B82F6;
-  --app-blue-soft: #DBEAFE;
+  --app-blue:      #2E8FD4;
+  --app-blue-soft: rgba(79,168,232,0.08);
 
-  --primary-start: #7C5CFC;
-  --primary-end: #534AB7;
+  /* Blueprint palette */
+  --bp-navy:    #0B1622;
+  --bp-surface: #FFFFFF;
+  --bp-blue:    #2E8FD4;
+  --bp-gold:    #B8820A;
+  --bp-teal:    #2E9D6C;
+  --bp-text:    #0B1622;
+
+  --primary-start: #2E8FD4;
+  --primary-end:   #2E9D6C;
+
+  /* Neon glow (subtle in light mode) */
+  --neon-blue: rgba(46,143,212,0.25);
+  --neon-gold: rgba(184,130,10,0.25);
+  --neon-teal: rgba(46,157,108,0.25);
+  --neon-purple: rgba(168,85,247,0.25);
+
+  /* Card shadow */
+  --card-shadow: 0 1px 4px rgba(11,22,34,0.08), 0 4px 16px rgba(79,168,232,0.08);
 }
 
-.dark {
-  /* Dark theme strict to ApexCivil Spec */
-  --app-bg: #0B0E17;
-  --app-card: #12162A;
-  --app-card-hover: #1A1F38;
-  --app-card2: #0E1120;
-  --app-border: #262B45;
-  --app-border2: #353B58;
-  --app-border-focus: #534AB7;
-  --app-deep: #080A12;
-  --app-sidebar: #0A0D18;
 
-  --status-success: #43A047;
-  --status-danger: #E24B4A;
-  --status-info: #8E63F0;
-  --status-warning: #E0A63D;
-  --status-neutral: #3A3F58;
-  --status-neutral-border: #565B77;
-
-  --app-text: #F5F5FA;
-  --app-muted: #A8ACC4;
-  --app-faint: #6E7292;
-
-  --accent: #7C5CFC;
-  --accent-bright: #9B7DFF;
-  --accent-soft: #2D1B69;
-
-  --app-blue: #3B82F6;
-  --app-blue-soft: #1E2A4A;
-
-  --primary-start: #7C5CFC;
-  --primary-end: #534AB7;
-}
-
+/* ──────────────────────────────────────────────────────────
+   BODY
+   ────────────────────────────────────────────────────────── */
 body {
-  background: var(--app-bg);
+  background-color: var(--app-bg);
   color: var(--app-text);
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
   -webkit-font-smoothing: antialiased;
+  transition: background-color 0.2s, color 0.2s;
 }
 
-/* Interactive controls should always look clickable. */
-button:not(:disabled):not([aria-disabled="true"]),
-[role="button"]:not([aria-disabled="true"]) {
-  cursor: pointer;
+
+/* ──────────────────────────────────────────────────────────
+   ANIMATIONS
+   ────────────────────────────────────────────────────────── */
+@keyframes float-up {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-6px); }
 }
 
-/* Reference-style subtle scrollbars */
+@keyframes pulse-glow-blue {
+  0%, 100% { box-shadow: 0 0 10px var(--neon-blue), 0 0 20px var(--neon-blue); }
+  50%       { box-shadow: 0 0 25px var(--neon-blue), 0 0 50px var(--neon-blue); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+
+@keyframes slideInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes sparkle {
+  0%, 100% { opacity: 0.4; transform: scale(0.8); }
+  50%       { opacity: 1;   transform: scale(1.2); }
+}
+
+.animate-float   { animation: float-up 3s ease-in-out infinite; }
+.animate-sparkle { animation: sparkle 1.5s ease-in-out infinite; }
+
+/* ──────────────────────────────────────────────────────────
+   THEME CARD UTILITIES  (use these instead of inline styles)
+   ────────────────────────────────────────────────────────── */
+.bp-card {
+  background: var(--app-card);
+  border: 1px solid var(--app-border);
+  box-shadow: var(--card-shadow);
+  border-radius: 1rem;
+}
+
+/* Scrollbars */
 * {
   scrollbar-width: thin;
-  scrollbar-color: var(--app-border) transparent;
+  scrollbar-color: rgba(79,168,232,0.2) transparent;
+}
+
+/* ──────────────────────────────────────────────────────────
+   DARK MODE  (Blueprint Night)
+   ────────────────────────────────────────────────────────── */
+.dark {
+  /* Backgrounds */
+  --app-bg:           #0B0F19;
+  --app-card:         #13182b;
+  --app-card-hover:   #1a2138;
+  --app-card2:        #1c233b;
+  --app-border:       rgba(99,102,241,0.2);
+  --app-border2:      rgba(99,102,241,0.3);
+  --app-border-focus: rgba(168,85,247,0.5);
+  --app-deep:         #0c1222;
+  --app-sidebar:      #0c1222;
+
+  /* Status */
+  --status-success:        #06b6d4;
+  --status-danger:         #f97316;
+  --status-info:           #3b82f6;
+  --status-warning:        #eab308;
+  --status-neutral:        #1c233b;
+  --status-neutral-border: rgba(99,102,241,0.2);
+
+  /* Text */
+  --app-text:  #f8fafc;
+  --app-muted: #94a3b8;
+  --app-faint: #64748b;
+
+  /* Accent — Purple */
+  --accent:        #a855f7;
+  --accent-bright: #c084fc;
+  --accent-soft:   rgba(168,85,247,0.1);
+
+  --app-blue:      #3b82f6;
+  --app-blue-soft: rgba(59,130,246,0.1);
+
+  /* Blueprint palette overrides */
+  --primary-start: #3b82f6;
+  --primary-end:   #06b6d4;
+  
+  --card-shadow: inset 0 0 30px rgba(99,102,241,0.05), 0 0 20px rgba(0,0,0,0.5);
 }

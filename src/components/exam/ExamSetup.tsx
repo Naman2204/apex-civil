@@ -1,7 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { Play, Clock, Brain, ArrowLeft, ShieldCheck, Database, Lightbulb, ChevronRight } from "lucide-react";
-import { GlassCard, SectionHeader, Segmented, Btn } from "../ui/primitives";
+import { Play, Clock, Zap, Database, ChevronDown } from "lucide-react";
 
 export interface ExamConfig {
   mode: "PRACTICE" | "EXAM";
@@ -20,7 +19,76 @@ interface ExamSetupProps {
   onBack?: () => void;
 }
 
-export const ExamSetup: React.FC<ExamSetupProps> = ({ availableChapters, totalAvailable, onStartExam, prefilledChapter, onBack }) => {
+/* ── Shared card style ── */
+const CARD_STYLE = {
+  background: 'var(--app-card)',
+  border: '1px solid var(--app-border)',
+  borderRadius: '1rem',
+  boxShadow: 'var(--card-shadow)',
+} as const;
+
+/* ── Pill selector ── */
+function PillGroup<T extends string | number>({
+  options, value, onChange,
+}: { options: { value: T; label: string }[]; value: T; onChange: (v: T) => void }) {
+  return (
+    <div className="flex flex-wrap gap-2">
+      {options.map(o => {
+        const active = o.value === value;
+        return (
+          <button key={String(o.value)} type="button" onClick={() => onChange(o.value)}
+            className="h-9 px-4 rounded-xl text-sm font-bold transition-all"
+            style={active ? {
+              background: 'linear-gradient(135deg, var(--primary-start), var(--primary-end))',
+              color: '#fff',
+              boxShadow: '0 0 16px var(--neon-blue)',
+            } : {
+              background: 'var(--accent-soft)',
+              border: '1px solid var(--app-border)',
+              color: 'var(--app-muted)',
+            }}>
+            {o.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+const ModeCard = ({ id, label, desc, icon: Icon, active, onSelect }: { 
+  id: "PRACTICE" | "EXAM"; 
+  label: string; 
+  desc: string; 
+  icon: React.ComponentType<{ className?: string }>;
+  active: boolean;
+  onSelect: (id: "PRACTICE" | "EXAM") => void;
+}) => {
+  return (
+    <button type="button" onClick={() => onSelect(id)}
+      className="flex flex-col items-center gap-3 p-6 rounded-2xl transition-all min-h-[160px] justify-center text-center"
+      style={active ? {
+        background: 'linear-gradient(135deg, var(--app-border2), var(--accent-soft))',
+        border: '1px solid var(--accent)',
+        boxShadow: '0 0 24px var(--neon-blue)',
+      } : {
+        background: 'var(--app-bg)',
+        border: '1px solid var(--app-border)',
+      }}>
+      <span className="w-14 h-14 flex items-center justify-center rounded-full"
+        style={active
+          ? { background: 'linear-gradient(135deg, var(--primary-start), var(--primary-end))', boxShadow: '0 0 20px var(--neon-blue)' }
+          : { background: 'var(--app-card)', border: '1px solid var(--app-border)' }}>
+        <span style={{ color: active ? '#fff' : 'var(--accent)', display: 'flex' }}>
+          <Icon className="w-7 h-7" />
+        </span>
+      </span>
+      <span className="text-lg font-bold" style={{ color: active ? 'var(--app-text)' : 'var(--app-muted)' }}>{label}</span>
+      <span className="text-sm leading-snug" style={{ color: active ? 'var(--accent)' : 'var(--app-faint)' }}>{desc}</span>
+    </button>
+  );
+};
+
+export const ExamSetup: React.FC<ExamSetupProps> = ({ availableChapters, totalAvailable, onStartExam, prefilledChapter }) => {
   const [mode, setMode] = useState<"PRACTICE" | "EXAM">("PRACTICE");
   const [chapter, setChapter] = useState(prefilledChapter || "All");
   const [difficulty, setDifficulty] = useState("All");
@@ -29,190 +97,115 @@ export const ExamSetup: React.FC<ExamSetupProps> = ({ availableChapters, totalAv
   const [negativeMarking, setNegativeMarking] = useState(0.25);
 
   const handleStart = () => {
-    onStartExam({
-      mode,
-      chapter,
-      difficulty,
-      questionCount,
-      timeLimitMinutes: timeLimit,
-      negativeMarking: mode === "EXAM" ? negativeMarking : 0,
-    });
+    onStartExam({ mode, chapter, difficulty, questionCount, timeLimitMinutes: timeLimit, negativeMarking: mode === "EXAM" ? negativeMarking : 0 });
   };
 
+
   return (
-    <div className="w-full pb-12">
+    <section className="w-full pb-12 space-y-6 font-sans">
+
       {/* Header */}
-      <div className="flex items-center gap-4 mb-7">
-        <button
-          onClick={onBack}
-          aria-label="Back"
-          className="w-9 h-9 rounded-xl border border-app-border text-app-muted hover:text-app-text hover:border-app-border2 hover:bg-app-card transition-colors flex items-center justify-center"
-        >
-          <ArrowLeft className="w-4 h-4" />
-        </button>
-        <h1 className="text-2xl sm:text-[28px] font-extrabold tracking-tight text-app-text leading-tight">
-          Exam Session Configurator
-        </h1>
+      <div>
+        <p className="text-[10px] font-bold uppercase tracking-widest mb-2 text-[var(--accent)]">Configure Session</p>
+        <h1 className="text-2xl sm:text-[28px] font-extrabold tracking-tight text-[var(--app-text)] leading-tight">Configure Your Exam</h1>
+        <p className="mt-1 text-sm text-[var(--app-muted)]">
+          Customize your practice session from our pool of{' '}
+          <span className="font-bold text-[var(--accent)]">{totalAvailable.toLocaleString()}</span> questions.
+        </p>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-6">
-        {/* Left column: config steps */}
-        <div className="flex-1 min-w-0 space-y-5">
-          {/* Step 1: Mode */}
-          <GlassCard className="p-5">
-            <SectionHeader number="1." title="Exam Mode" />
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-              <button
-                onClick={() => setMode("PRACTICE")}
-                className={`flex items-center gap-3.5 p-4 rounded-xl border text-left transition-all ${
-                  mode === "PRACTICE"
-                    ? "bg-accent-soft/50 border-accent/60 shadow-lg shadow-accent/20"
-                    : "bg-app-deep border-app-border hover:border-app-border2"
-                }`}
-              >
-                <span className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${mode === "PRACTICE" ? "bg-accent text-white" : "bg-app-card2 text-app-muted"}`}>
-                  <Brain className="w-5 h-5" />
-                </span>
-                <span className="min-w-0">
-                  <span className="block text-sm font-bold text-app-text">Practice</span>
-                  <span className="block text-[11px] text-app-muted mt-0.5">Instant Feedback</span>
-                </span>
-              </button>
-              <button
-                onClick={() => setMode("EXAM")}
-                className={`flex items-center gap-3.5 p-4 rounded-xl border text-left transition-all ${
-                  mode === "EXAM"
-                    ? "bg-accent-soft/50 border-accent/60 shadow-lg shadow-accent/20"
-                    : "bg-app-deep border-app-border hover:border-app-border2"
-                }`}
-              >
-                <span className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${mode === "EXAM" ? "bg-accent text-white" : "bg-app-card2 text-app-muted"}`}>
-                  <Clock className="w-5 h-5" />
-                </span>
-                <span className="min-w-0">
-                  <span className="block text-sm font-bold text-app-text">Strict Exam</span>
-                  <span className="block text-[11px] text-app-muted mt-0.5">Timed</span>
-                </span>
-              </button>
+      <div className="rounded-2xl border border-[var(--app-border2)] bg-[var(--app-card)]/40 p-5 sm:p-6 lg:p-8">
+        <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_380px] gap-8">
+        {/* Left panel */}
+        <div className="space-y-5 min-w-0">
+          {/* Mode selection */}
+          <div className="rounded-2xl p-5 bg-app-card border border-app-border" style={{ background: 'var(--app-card)', border: '1px solid var(--app-border)' }}>
+            <p className="text-sm font-bold mb-3" style={{ color: 'var(--app-muted)' }}>Exam Mode</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <ModeCard id="PRACTICE" label="Practice" desc="Get instant feedback after every question." icon={Zap} active={mode === 'PRACTICE'} onSelect={setMode} />
+              <ModeCard id="EXAM" label="Strict Exam" desc="Attempt questions under timed exam conditions." icon={Clock} active={mode === 'EXAM'} onSelect={setMode} />
             </div>
-          </GlassCard>
+          </div>
 
-          {/* Step 2: Topic */}
-          <GlassCard className="p-5">
-            <SectionHeader number="2." title="Topic / Chapter" />
-            <select
-              value={chapter}
-              onChange={(e) => setChapter(e.target.value)}
-              className="mt-2 w-full bg-app-deep border border-app-border rounded-xl px-4 py-3 text-sm font-semibold text-app-text focus:outline-none focus:border-accent/60 focus:ring-2 focus:ring-accent/15 transition-all appearance-none"
-            >
-              <option value="All">All Chapters (Mixed)</option>
-              {availableChapters.map(c => (
-                <option key={c} value={c}>{c}</option>
+          {/* Chapter */}
+          <div className="rounded-2xl p-5 bg-app-card border border-app-border" style={{ background: 'var(--app-card)', border: '1px solid var(--app-border)' }}>
+            <label className="text-sm font-bold block mb-3" style={{ color: 'var(--app-muted)' }}>Topic / Chapter</label>
+            <div className="relative">
+              <select value={chapter} onChange={e => setChapter(e.target.value)}
+                className="w-full appearance-none rounded-xl px-4 py-3 text-sm font-semibold pr-10 focus:outline-none focus:ring-1"
+                style={{ background: 'var(--app-bg)', border: '1px solid var(--app-border2)', color: 'var(--app-text)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05)' }}>
+                <option value="All">All Chapters (Mixed)</option>
+                {availableChapters.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+              <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2" style={{ color: 'var(--accent)' }} />
+            </div>
+          </div>
+
+          {/* Difficulty & Questions */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="rounded-2xl p-5" style={{ background: 'var(--app-card)', border: '1px solid var(--app-border)' }}>
+              <p className="text-sm font-bold mb-3" style={{ color: 'var(--app-muted)' }}>Difficulty Level</p>
+              <PillGroup options={["All", "Easy", "Medium", "Hard"].map(v => ({ value: v, label: v }))} value={difficulty} onChange={setDifficulty} />
+            </div>
+            <div className="rounded-2xl p-5" style={{ background: 'var(--app-card)', border: '1px solid var(--app-border)' }}>
+              <p className="text-sm font-bold mb-3" style={{ color: 'var(--app-muted)' }}>Number of Questions</p>
+              <PillGroup options={[10, 25, 50, 100].map(n => ({ value: n, label: `${n}` }))} value={questionCount} onChange={setQuestionCount} />
+            </div>
+          </div>
+
+          {/* Time limit — EXAM mode only */}
+          {mode === "EXAM" && (
+            <div className="rounded-2xl p-5" style={{ background: 'var(--app-card)', border: '1px solid var(--app-border)' }}>
+              <p className="text-sm font-bold mb-3" style={{ color: 'var(--app-muted)' }}>Time Limit</p>
+              <PillGroup options={[5, 15, 30, 60].map(m => ({ value: m, label: `${m} min` }))} value={timeLimit} onChange={setTimeLimit} />
+            </div>
+          )}
+        </div>
+
+        {/* Right sidebar — Exam Summary */}
+        <aside className="space-y-4">
+          {/* Summary card */}
+          <div className="rounded-2xl p-5" style={{ background: 'var(--app-card)', border: '1px solid var(--app-border)' }}>
+            <h2 className="text-base font-bold mb-4" style={{ color: 'var(--app-text)' }}>Exam Summary</h2>
+            <div className="divide-y" style={{ borderColor: 'var(--app-border)' }}>
+              {[
+                { label: 'Mode',       value: mode === 'PRACTICE' ? 'Practice' : 'Strict Exam' },
+                { label: 'Topic',      value: chapter === 'All' ? 'All Chapters (Mixed)' : chapter },
+                { label: 'Difficulty', value: difficulty === 'All' ? 'All Levels' : difficulty },
+                { label: 'Questions',  value: `${questionCount}` },
+                ...(mode === 'EXAM' ? [{ label: 'Time', value: `${timeLimit} min` }] : []),
+              ].map(row => (
+                <div key={row.label} className="flex items-center justify-between gap-4 py-3">
+                  <p className="text-sm shrink-0" style={{ color: 'var(--app-muted)' }}>{row.label}</p>
+                  <p className="text-sm font-bold text-right truncate" style={{ color: 'var(--app-text)' }}>{row.value}</p>
+                </div>
               ))}
-            </select>
-          </GlassCard>
-
-          {/* Step 3: Difficulty */}
-          <GlassCard className="p-5">
-            <SectionHeader number="3." title="Difficulty Level" />
-            <div className="pt-2">
-              <Segmented
-                options={[
-                  { value: "All", label: "All" },
-                  { value: "Easy", label: "Easy" },
-                  { value: "Medium", label: "Medium" },
-                  { value: "Hard", label: "Hard" },
-                ]}
-                value={difficulty}
-                onChange={setDifficulty}
-              />
             </div>
-          </GlassCard>
+          </div>
 
-          {/* Step 4: Number of Questions */}
-          <GlassCard className="p-5">
-            <SectionHeader number="4." title="Number of Questions" />
-            <div className="pt-2">
-              <Segmented
-                options={[10, 25, 50, 100].map(n => ({ value: n, label: `${n}` }))}
-                value={questionCount}
-                onChange={setQuestionCount}
-              />
+          {/* Total available */}
+          <div className="rounded-2xl p-5 flex items-center justify-between" style={{ background: 'var(--app-card)', border: '1px solid var(--app-border)' }}>
+            <div>
+              <p className="text-xs mb-1" style={{ color: 'var(--app-muted)' }}>Total Questions Available</p>
+              <p className="text-4xl font-black leading-none" style={{ color: 'var(--app-text)' }}>{totalAvailable.toLocaleString()}</p>
             </div>
-          </GlassCard>
+            <Database className="h-10 w-10" style={{ color: 'var(--accent)', filter: 'drop-shadow(0 0 8px var(--neon-blue))' }} />
+          </div>
 
-          {/* Step 5: Time Limit */}
-          <GlassCard className="p-5">
-            <SectionHeader number="5." title="Time Limit" />
-            <div className="pt-2">
-              <Segmented
-                options={[5, 15, 30, 60].map(m => ({ value: m, label: `${m} min` }))}
-                value={timeLimit}
-                onChange={setTimeLimit}
-              />
-            </div>
-          </GlassCard>
-
-          {/* Launch Exam */}
-          <Btn
-            onClick={handleStart}
-            className="w-full py-4 text-base bg-gradient-to-r from-accent to-app-blue shadow-lg shadow-accent/30"
-          >
-            <Play className="w-5 h-5 fill-current" />
-            Launch Exam
-            <ChevronRight className="w-4 h-4" />
-          </Btn>
-        </div>
-
-        {/* Right column: summary */}
-        <div className="w-full lg:w-96 shrink-0">
-          <GlassCard className="p-6 lg:sticky lg:top-24">
-            <h3 className="text-base font-bold text-app-text tracking-tight">Exam Summary</h3>
-
-            <div className="mt-5 divide-y divide-app-border">
-              <SummaryRow label="Mode:" value={mode === "PRACTICE" ? "Practice" : "Strict Exam"} />
-              <SummaryRow label="Topic:" value={chapter === "All" ? "All Chapters" : chapter} />
-              <SummaryRow label="Difficulty:" value={difficulty === "All" ? "All" : difficulty} />
-              <SummaryRow label="Questions:" value={`${questionCount}`} />
-              {mode === "EXAM" && <SummaryRow label="Time Limit:" value={`${timeLimit} Minutes`} />}
-              {mode === "EXAM" && <SummaryRow label="Negative Marking:" value={`−${(negativeMarking * 100).toFixed(0)}%`} />}
-            </div>
-
-            <div className="mt-6 bg-app-deep rounded-xl p-4 border border-app-border flex items-center justify-between">
-              <div className="min-w-0">
-                <p className="text-[10px] text-app-faint font-bold uppercase tracking-wider mb-1">Total Questions Available:</p>
-                <p className="text-2xl font-black text-app-text leading-none">{totalAvailable.toLocaleString()}</p>
-              </div>
-              <Database className="w-8 h-8 text-app-faint shrink-0" />
-            </div>
-
-            {/* Tip — inside the summary card, per reference */}
-            <div className="mt-6 pt-5 border-t border-app-border">
-              <div className="flex items-center gap-2 text-amber-400 mb-2">
-                <Lightbulb className="w-4 h-4" />
-                <h4 className="text-xs font-bold text-app-text">Tip</h4>
-              </div>
-              <p className="text-xs text-app-muted leading-relaxed">
-                Practice regularly to improve accuracy and speed. Start with mixed chapters to identify weak areas.
-              </p>
-            </div>
-
-            <div className="flex justify-center items-center text-[10px] text-app-faint font-semibold gap-1.5 mt-5">
-              <ShieldCheck className="w-3.5 h-3.5" />
-              Your progress will be saved automatically
-            </div>
-          </GlassCard>
+          {/* CTA */}
+          <button onClick={handleStart}
+            className="flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-4 text-base font-bold transition-all hover:brightness-110 hover:scale-[1.02]"
+            style={{
+              background: 'linear-gradient(135deg, var(--primary-start) 0%, var(--primary-end) 100%)',
+              color: '#fff',
+              boxShadow: '0 0 32px var(--neon-blue), 0 0 64px var(--neon-teal)',
+            }}>
+            <Play className="h-5 w-5 fill-current" />
+            Start {mode === "PRACTICE" ? "Practice" : "Exam"} Now
+          </button>
+        </aside>
         </div>
       </div>
-    </div>
+    </section>
   );
 };
-
-function SummaryRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0">
-      <p className="text-sm text-app-muted shrink-0">{label}</p>
-      <p className="text-sm font-bold text-app-text text-right truncate">{value}</p>
-    </div>
-  );
-}

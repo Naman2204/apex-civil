@@ -1,0 +1,367 @@
+# =============================================================================
+# ApexCivil CI/CD Pipeline
+# =============================================================================
+# Runs automatically on:
+#   - Push to main/develop branches
+#   - Pull requests to main
+#
+# Jobs:
+#   1. Lint & Type Check
+#   2. Build
+#   3. E2E Smoke Tests (Playwright)
+#   4. Lighthouse Audit
+#   5. Deploy (main branch only)
+# =============================================================================
+
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+# Cancel in-progress runs for the same branch/PR
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '20'
+  PNPM_VERSION: '9'
+
+# =============================================================================
+# JOBS
+# =============================================================================
+jobs:
+  # =============================================================================
+  # 1. LINT & TYPE CHECK
+  # =============================================================================
+  lint:
+    name: 🔍 Lint & Type Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📥 Install dependencies
+        run: npm ci
+
+      - name: 🔍 Run ESLint
+        run: npm run lint
+        continue-on-error: true  # Non-blocking for now
+
+      - name: 🔍 TypeScript Check
+        run: npx tsc --noEmit
+
+  # =============================================================================
+  # 2. BUILD
+  # =============================================================================
+  build:
+    name: 🏗️ Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [lint]
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📥 Install dependencies
+        run: npm ci
+
+      - name: 🔧 Generate Prisma Client
+        run: npx prisma generate
+
+      - name: 🏗️ Build Next.js
+        run: npm run build
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+
+      - name: 💾 Cache build artifacts
+        uses: actions/cache@v4
+        with:
+          path: |
+            .next/cache
+            node_modules/.cache
+          key: build-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            build-${{ runner.os }}-
+
+  # =============================================================================
+  # 3. E2E SMOKE TESTS
+  # =============================================================================
+  e2e-tests:
+    name: 🧪 E2E Smoke Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: [build]
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📥 Install dependencies
+        run: npm ci
+
+      - name: 🔧 Generate Prisma Client
+        run: npx prisma generate
+
+      - name: 🎭 Install Playwright Browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: 🏗️ Build application
+        run: npm run build
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+
+      - name: 🧪 Run Smoke Tests
+        run: npm run test:smoke
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+
+      - name: 📊 Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            test-results/
+            .freebuff/playwright-report/
+          retention-days: 7
+
+  # =============================================================================
+  # 4. LIGHTHOUSE AUDIT
+  # =============================================================================
+  lighthouse:
+    name: 📈 Lighthouse Audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [build]
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📥 Install dependencies
+        run: npm ci
+
+      - name: 🔧 Generate Prisma Client
+        run: npx prisma generate
+
+      - name: 🏗️ Build application
+        run: npm run build
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+
+      - name: 🚀 Start server
+        run: |
+          npm start &
+          sleep 5
+          curl -f http://localhost:3000 || exit 1
+
+      - name: 📈 Run Lighthouse
+        uses: treosh/lighthouse-ci-action@v12
+        with:
+          urls: |
+            http://localhost:3000
+          configPath: .lighthouserc.json
+          uploadArtifacts: true
+
+      - name: 📊 Upload Lighthouse Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-report
+          path: .lighthouseci/
+          retention-days: 7
+
+  # =============================================================================
+  # 5. SECURITY AUDIT
+  # =============================================================================
+  security:
+    name: 🔒 Security Audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [lint]
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 🔍 Run npm audit
+        run: npm audit --audit-level=high
+        continue-on-error: true  # Don't block on audit findings
+
+      - name: 🔍 Check for secrets in code
+        uses: trufflesecurity/trufflehog@main
+        with:
+          extra_args: --only-verified
+        continue-on-error: true
+
+  # =============================================================================
+  # 6. DEPLOY (Main Branch Only)
+  # =============================================================================
+  deploy:
+    name: 🚀 Deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [e2e-tests, lighthouse, security]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment:
+      name: production
+      url: ${{ steps.deploy.outputs.url }}
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📥 Install dependencies
+        run: npm ci
+
+      - name: 🔧 Generate Prisma Client
+        run: npx prisma generate
+
+      - name: 🏗️ Build for production
+        run: npm run build
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+          NEXT_PUBLIC_CLERK_SIGN_IN_URL: ${{ secrets.NEXT_PUBLIC_CLERK_SIGN_IN_URL }}
+          NEXT_PUBLIC_CLERK_SIGN_UP_URL: ${{ secrets.NEXT_PUBLIC_CLERK_SIGN_UP_URL }}
+
+      # ============================================================
+      # OPTION A: Vercel Deployment (Recommended for Next.js)
+      # ============================================================
+      - name: 🚀 Deploy to Vercel
+        uses: amondnet/vercel-action@v25
+        id: deploy
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          vercel-args: '--prod'
+          working-directory: ./
+
+      # ============================================================
+      # OPTION B: Docker + AWS/ECS (Alternative)
+      # ============================================================
+      # - name: 🐳 Build Docker image
+      #   run: |
+      #     docker build -t apexcivil:${{ github.sha }} .
+      #     docker tag apexcivil:${{ github.sha }} ${{ secrets.ECR_REGISTRY }}/apexcivil:${{ github.sha }}
+      #
+      # - name: 🚀 Push to ECR
+      #   run: |
+      #     aws ecr get-login-password | docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY }}
+      #     docker push ${{ secrets.ECR_REGISTRY }}/apexcivil:${{ github.sha }}
+      #
+      # - name: 🚀 Deploy to ECS
+      #   run: |
+      #     aws ecs update-service --cluster ${{ secrets.ECS_CLUSTER }} --service apexcivil --force-new-deployment
+
+      # ============================================================
+      # OPTION C: Netlify (Alternative)
+      # ============================================================
+      # - name: 🚀 Deploy to Netlify
+      #   uses: nwtgck/actions-netlify@v3
+      #   with:
+      #     publish-dir: '.next'
+      #     production-deploy: true
+      #     github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: ✅ Deployment Complete
+        run: |
+          echo "🚀 Deployment successful!"
+          echo "URL: ${{ steps.deploy.outputs.url }}"
+
+  # =============================================================================
+  # 7. NOTIFICATIONS
+  # =============================================================================
+  notify:
+    name: 📢 Notify
+    runs-on: ubuntu-latest
+    needs: [e2e-tests, lighthouse, security, deploy]
+    if: always()
+    timeout-minutes: 5
+
+    steps:
+      - name: 📊 Report Status
+        run: |
+          echo "=========================================="
+          echo "         CI/CD Pipeline Results"
+          echo "=========================================="
+          echo ""
+          echo "Commit: ${{ github.sha }}"
+          echo "Branch: ${{ github.ref_name }}"
+          echo "Author: ${{ github.actor }}"
+          echo ""
+          echo "Jobs completed:"
+          echo "  - Lint & Type Check"
+          echo "  - Build"
+          echo "  - E2E Tests"
+          echo "  - Lighthouse Audit"
+          echo "  - Security Audit"
+          echo "  - Deploy"
+          echo ""
+          echo "Check the Actions tab for detailed results."
+          echo "=========================================="
+
+      # Optional: Slack/Discord notification
+      # - name: 📢 Notify Slack
+      #   if: always()
+      #   uses: slackapi/slack-github-action@v1
+      #   with:
+      #     payload: |
+      #       {
+      #         "text": "CI/CD ${{ needs.deploy.result == 'success' && '✅ succeeded' || '❌ failed' }} for ${{ github.repository }}@${{ github.ref_name }}"
+      #       }
+      #   env:
+      #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

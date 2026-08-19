@@ -139,35 +139,37 @@ export const LiveExam: React.FC<LiveExamProps> = ({ questions, config, onFinish,
         {/* ================= Main column ================= */}
         <div className="flex-1 w-full space-y-5 min-w-0">
           {/* ---------- Sticky header: brand · timer · scoring · end ---------- */}
-          <header className="sticky top-4 z-20 bg-[#131627]/95 backdrop-blur-xl border border-slate-800/80 rounded-2xl px-4 py-3 shadow-lg shadow-black/25">
+          <header className="sticky top-4 z-20 bp-card px-4 py-3 shadow-lg shadow-black/25">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 min-w-0">
                 <button
                   type="button"
                   onClick={onCancel}
                   aria-label="End exam"
-                  className="w-8 h-8 rounded-lg bg-[#0A0C18] border border-slate-800 text-slate-400 hover:text-rose-400 hover:border-rose-500/40 flex items-center justify-center transition-colors shrink-0"
+                  className="w-8 h-8 rounded-lg border flex items-center justify-center transition-colors shrink-0"
+                  style={{ background: 'var(--app-bg)', borderColor: 'var(--app-border)', color: 'var(--app-muted)' }}
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-4 h-4 hover:text-[var(--status-danger)]" />
                 </button>
                 <div className="min-w-0">
-                  <div className="text-sm font-black text-white leading-none tracking-tight">
-                    Apex<span className="text-[#9b66ff]">Civil</span>
+                  <div className="text-sm font-black leading-none tracking-tight" style={{ color: 'var(--app-text)' }}>
+                    Apex<span style={{ color: 'var(--accent)' }}>Civil</span>
                   </div>
-                  <div className="mt-1 flex items-center gap-1 text-[11px] text-slate-400 truncate">
-                    <span className="font-semibold text-slate-300 shrink-0">Simulated Exam</span>
-                    <ChevronRight className="w-3 h-3 shrink-0 text-slate-600" />
-                    <span className="truncate text-[#9b66ff] font-medium">{chapterLabel}</span>
+                  <div className="mt-1 flex items-center gap-1 text-[11px] truncate" style={{ color: 'var(--app-faint)' }}>
+                    <span className="font-semibold shrink-0" style={{ color: 'var(--app-muted)' }}>Simulated Exam</span>
+                    <ChevronRight className="w-3 h-3 shrink-0" style={{ color: 'var(--app-faint)' }} />
+                    <span className="truncate font-medium" style={{ color: 'var(--accent)' }}>{chapterLabel}</span>
                   </div>
                 </div>
               </div>
 
               <div className="flex items-center gap-2 shrink-0">
                 {/* Scoring rules chip */}
-                <span className="hidden md:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[#0A0C18] border border-slate-800 text-[11px] font-bold text-slate-300">
-                  <span className="text-emerald-400">+1.0</span>
-                  <span className="text-slate-600">/</span>
-                  <span className="text-rose-400">-{marking.toFixed(2)}</span>
+                <span className="hidden md:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-[11px] font-bold"
+                  style={{ background: 'var(--app-bg)', borderColor: 'var(--app-border)', color: 'var(--app-muted)' }}>
+                  <span style={{ color: 'var(--status-success)' }}>+1.0</span>
+                  <span style={{ color: 'var(--app-faint)' }}>/</span>
+                  <span style={{ color: 'var(--status-danger)' }}>-{marking.toFixed(2)}</span>
                 </span>
 
                 {/* Time remaining */}
@@ -175,12 +177,13 @@ export const LiveExam: React.FC<LiveExamProps> = ({ questions, config, onFinish,
                   className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border font-mono font-bold ${
                     isWarning
                       ? "bg-rose-500/15 border-rose-500/50 text-rose-300 animate-pulse"
-                      : "bg-[#0A0C18] border-slate-800 text-slate-100"
+                      : ""
                   }`}
+                  style={!isWarning ? { background: 'var(--app-bg)', borderColor: 'var(--app-border)', color: 'var(--app-text)' } : {}}
                   role="timer"
                   aria-label={`Time remaining ${formatTime(timeLeft)}`}
                 >
-                  {isWarning ? <AlertTriangle className="w-3.5 h-3.5" /> : <Clock className="w-3.5 h-3.5 text-[#9b66ff]" />}
+                  {isWarning ? <AlertTriangle className="w-3.5 h-3.5" /> : <Clock className="w-3.5 h-3.5" style={{ color: 'var(--accent)' }} />}
                   <span>{formatTime(timeLeft)}</span>
                 </div>
 
@@ -196,25 +199,25 @@ export const LiveExam: React.FC<LiveExamProps> = ({ questions, config, onFinish,
           </header>
 
           {/* ---------- Question card ---------- */}
-          <div className="bg-[#131627] border border-slate-800/80 rounded-2xl p-5 sm:p-8 xl:p-10">
+          <div className="bp-card p-5 sm:p-8 xl:p-10">
             <div className="flex flex-wrap items-center gap-2 mb-5">
-              <span className="px-2.5 py-1 rounded-md bg-[#0A0C18] border border-slate-800 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+              <span className="px-2.5 py-1 rounded-md border text-[10px] font-bold uppercase tracking-wider" style={{ background: 'var(--app-bg)', borderColor: 'var(--app-border)', color: 'var(--app-faint)' }}>
                 Question {currentIndex + 1} / {questions.length}
               </span>
-              <span className="px-2.5 py-1 rounded-md bg-[#0A0C18] border border-slate-800 text-[10px] font-bold uppercase tracking-wider text-[#9b66ff]">
+              <span className="px-2.5 py-1 rounded-md border text-[10px] font-bold uppercase tracking-wider" style={{ background: 'var(--app-bg)', borderColor: 'var(--app-border)', color: 'var(--accent)' }}>
                 {currentQ.difficulty || "Medium"}
               </span>
-              <span className="px-2.5 py-1 rounded-md bg-[#0A0C18] border border-slate-800 text-[10px] font-bold uppercase tracking-wider text-slate-400 truncate max-w-[150px] sm:max-w-[240px]">
+              <span className="px-2.5 py-1 rounded-md border text-[10px] font-bold uppercase tracking-wider truncate max-w-[150px] sm:max-w-[240px]" style={{ background: 'var(--app-bg)', borderColor: 'var(--app-border)', color: 'var(--app-faint)' }}>
                 {currentQ.chapter || "General"}
               </span>
               {markedForReview[currentQ.id] && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-amber-500/15 border border-amber-500/40 text-[10px] font-bold uppercase tracking-wider text-amber-300">
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider" style={{ background: 'var(--status-warning)', color: '#fff', opacity: 0.9 }}>
                   <Flag className="w-3 h-3" /> Marked
                 </span>
               )}
             </div>
 
-            <h2 className="text-lg sm:text-xl xl:text-2xl font-bold text-white leading-relaxed mb-7">
+            <h2 className="text-lg sm:text-xl xl:text-2xl font-bold leading-relaxed mb-7" style={{ color: 'var(--app-text)' }}>
               {currentQ.question}
             </h2>
 
@@ -231,12 +234,13 @@ export const LiveExam: React.FC<LiveExamProps> = ({ questions, config, onFinish,
             </div>
 
             {/* Clear Response · Mark for Review */}
-            <div className="mt-6 flex flex-wrap items-center gap-3 border-t border-slate-800/80 pt-5">
+            <div className="mt-6 flex flex-wrap items-center gap-3 border-t pt-5" style={{ borderColor: 'var(--app-border)' }}>
               <button
                 type="button"
                 onClick={handleClearResponse}
                 disabled={!answers[currentQ.id]}
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[#0A0C18] border border-slate-700/80 text-slate-300 text-xs font-bold hover:border-slate-500 hover:text-white transition-colors disabled:opacity-35 min-h-[40px]"
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border text-xs font-bold transition-colors disabled:opacity-35 min-h-[40px] hover:brightness-110"
+                style={{ background: 'var(--app-bg)', borderColor: 'var(--app-border)', color: 'var(--app-muted)' }}
               >
                 <Eraser className="w-3.5 h-3.5" />
                 Clear Response
@@ -245,11 +249,8 @@ export const LiveExam: React.FC<LiveExamProps> = ({ questions, config, onFinish,
                 type="button"
                 onClick={toggleMarkForReview}
                 aria-pressed={!!markedForReview[currentQ.id]}
-                className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border text-xs font-bold transition-colors min-h-[40px] ${
-                  markedForReview[currentQ.id]
-                    ? "bg-amber-500/15 border-amber-500/50 text-amber-300"
-                    : "bg-[#0A0C18] border-slate-700/80 text-slate-300 hover:border-amber-500/40 hover:text-amber-300"
-                }`}
+                className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border text-xs font-bold transition-colors min-h-[40px] hover:brightness-110`}
+                style={markedForReview[currentQ.id] ? { background: 'var(--status-warning)', borderColor: 'var(--status-warning)', color: '#fff' } : { background: 'var(--app-bg)', borderColor: 'var(--app-border)', color: 'var(--app-muted)' }}
               >
                 <Flag className="w-3.5 h-3.5" />
                 {markedForReview[currentQ.id] ? "Unmark for Review" : "Mark for Review"}
@@ -263,7 +264,8 @@ export const LiveExam: React.FC<LiveExamProps> = ({ questions, config, onFinish,
               type="button"
               onClick={() => setCurrentIndex((prev) => Math.max(0, prev - 1))}
               disabled={currentIndex === 0}
-              className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[#0A0C18] border border-slate-700/80 text-slate-300 text-sm font-bold hover:border-[#5c2dd5] hover:text-white transition-colors disabled:opacity-35 min-h-[44px]"
+              className="inline-flex items-center gap-2 px-5 py-3 rounded-xl border text-sm font-bold transition-colors disabled:opacity-35 min-h-[44px] hover:brightness-110"
+              style={{ background: 'var(--app-bg)', borderColor: 'var(--app-border)', color: 'var(--app-muted)' }}
             >
               <ChevronLeft className="w-4 h-4" />
               Previous
@@ -274,7 +276,8 @@ export const LiveExam: React.FC<LiveExamProps> = ({ questions, config, onFinish,
                 type="button"
                 onClick={handleSubmit}
                 disabled={submitting}
-                className="inline-flex items-center gap-2 px-8 py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white text-sm font-bold shadow-lg shadow-emerald-500/20 transition-all disabled:opacity-60 min-h-[44px]"
+                className="inline-flex items-center gap-2 px-8 py-3 rounded-xl text-white text-sm font-bold transition-all disabled:opacity-60 min-h-[44px]"
+                style={{ background: 'var(--status-success)', boxShadow: '0 0 20px var(--neon-teal)' }}
               >
                 <CheckCircle2 className="w-4 h-4" />
                 {submitting ? "Submitting…" : "Submit Exam"}
@@ -283,7 +286,8 @@ export const LiveExam: React.FC<LiveExamProps> = ({ questions, config, onFinish,
               <button
                 type="button"
                 onClick={() => setCurrentIndex((prev) => Math.min(questions.length - 1, prev + 1))}
-                className="inline-flex items-center gap-2 px-8 py-3 rounded-xl bg-[#8c32ff] hover:bg-[#7b24e6] text-white text-sm font-bold shadow-[0_0_20px_rgba(140,50,255,0.35)] transition-all active:scale-[0.98] min-h-[44px]"
+                className="inline-flex items-center gap-2 px-8 py-3 rounded-xl text-white text-sm font-bold transition-all active:scale-[0.98] min-h-[44px]"
+                style={{ background: 'linear-gradient(135deg, var(--primary-start), var(--primary-end))', boxShadow: '0 0 20px var(--neon-blue)' }}
               >
                 Next Question
                 <ChevronRight className="w-4 h-4" />
@@ -299,12 +303,13 @@ export const LiveExam: React.FC<LiveExamProps> = ({ questions, config, onFinish,
       </div>
 
       {/* ================= Mobile/tablet: sticky bottom nav (< lg) ================= */}
-      <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 border-t border-slate-800 bg-[#0A0C18]/95 backdrop-blur-xl p-3 grid grid-cols-3 gap-2">
+      <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 border-t p-3 grid grid-cols-3 gap-2 backdrop-blur-xl" style={{ background: 'var(--app-bg)', borderColor: 'var(--app-border)' }}>
         <button
           type="button"
           onClick={() => setCurrentIndex((prev) => Math.max(0, prev - 1))}
           disabled={currentIndex === 0}
-          className="inline-flex items-center justify-center gap-1 rounded-xl bg-[#131627] border border-slate-700/80 text-slate-300 text-xs font-bold py-3 disabled:opacity-35 min-h-[44px]"
+          className="inline-flex items-center justify-center gap-1 rounded-xl border text-xs font-bold py-3 disabled:opacity-35 min-h-[44px]"
+          style={{ background: 'var(--app-card)', borderColor: 'var(--app-border)', color: 'var(--app-muted)' }}
         >
           <ChevronLeft className="w-4 h-4" />
           Prev
@@ -313,7 +318,8 @@ export const LiveExam: React.FC<LiveExamProps> = ({ questions, config, onFinish,
           ref={questionsBtnRef}
           type="button"
           onClick={() => setShowMobilePalette(true)}
-          className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#2a1758] border border-[#5c2dd5] text-[#c4a8ff] text-xs font-bold py-3 min-h-[44px]"
+          className="inline-flex items-center justify-center gap-1.5 rounded-xl border text-xs font-bold py-3 min-h-[44px]"
+          style={{ background: 'var(--accent-soft)', borderColor: 'var(--accent)', color: 'var(--accent)' }}
         >
           <LayoutGrid className="w-4 h-4" />
           Questions
@@ -323,7 +329,8 @@ export const LiveExam: React.FC<LiveExamProps> = ({ questions, config, onFinish,
             type="button"
             onClick={handleSubmit}
             disabled={submitting}
-            className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 text-white text-xs font-bold py-3 disabled:opacity-60 min-h-[44px]"
+            className="inline-flex items-center justify-center rounded-xl text-white text-xs font-bold py-3 disabled:opacity-60 min-h-[44px]"
+            style={{ background: 'var(--status-success)' }}
           >
             Submit
           </button>
@@ -331,7 +338,8 @@ export const LiveExam: React.FC<LiveExamProps> = ({ questions, config, onFinish,
           <button
             type="button"
             onClick={() => setCurrentIndex((prev) => Math.min(questions.length - 1, prev + 1))}
-            className="inline-flex items-center justify-center gap-1 rounded-xl bg-[#8c32ff] text-white text-xs font-bold py-3 min-h-[44px]"
+            className="inline-flex items-center justify-center gap-1 rounded-xl text-white text-xs font-bold py-3 min-h-[44px]"
+            style={{ background: 'linear-gradient(135deg, var(--primary-start), var(--primary-end))' }}
           >
             Next
             <ChevronRight className="w-4 h-4" />
@@ -343,15 +351,17 @@ export const LiveExam: React.FC<LiveExamProps> = ({ questions, config, onFinish,
       {showMobilePalette && (
         <div role="dialog" aria-modal="true" aria-label="Question palette" className="fixed inset-0 z-50 lg:hidden">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowMobilePalette(false)} />
-          <div className="absolute right-0 top-0 h-full w-[85vw] max-w-[340px] bg-[#0F1120] border-l border-slate-800 shadow-2xl overflow-y-auto p-5 flex flex-col">
+          <div className="absolute right-0 top-0 h-full w-[85vw] max-w-[340px] border-l shadow-2xl overflow-y-auto p-5 flex flex-col"
+            style={{ background: 'var(--app-card2)', borderColor: 'var(--app-border)' }}>
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-sm font-bold text-white" id="palette-drawer-title">Questions</h2>
+              <h2 className="text-sm font-bold" style={{ color: 'var(--app-text)' }} id="palette-drawer-title">Questions</h2>
               <button
                 ref={drawerCloseRef}
                 type="button"
                 onClick={() => setShowMobilePalette(false)}
                 aria-label="Close question palette"
-                className="w-8 h-8 rounded-lg bg-[#131627] border border-slate-800 text-slate-400 flex items-center justify-center hover:text-white transition-colors"
+                className="w-8 h-8 rounded-lg border flex items-center justify-center transition-colors hover:brightness-110"
+                style={{ background: 'var(--app-bg)', borderColor: 'var(--app-border)', color: 'var(--app-muted)' }}
               >
                 <X className="w-4 h-4" />
               </button>

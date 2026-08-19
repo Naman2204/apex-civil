@@ -77,3 +77,18 @@ scripts/*.png
 
 # Zip archives
 *.zip
+
+# One-off Python scripts (not part of app)
+*.py
+
+# Design mockup PNGs at repo root
+apexcivil_*.png
+
+# Public media assets (not referenced in app code)
+public/media_*.png
+
+# Test results output
+test-results/
+
+# Generated palettes
+palette.json

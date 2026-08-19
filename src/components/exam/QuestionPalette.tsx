@@ -46,23 +46,23 @@ export const QuestionPalette: React.FC<QuestionPaletteProps> = ({
   };
 
   const cellClass: Record<CellState, string> = {
-    current: "bg-[#2a1758] border-[#8c32ff] text-white ring-2 ring-[#8c32ff]/50",
-    answered: "bg-emerald-500/15 border-emerald-500/60 text-emerald-300",
-    marked: "bg-amber-500/15 border-amber-500/60 text-amber-300",
+    current: "bg-[var(--accent-soft)] border-[var(--accent)] text-white ring-2 ring-[var(--accent)]/50",
+    answered: "bg-[var(--status-success)]/15 border-[var(--status-success)]/60 text-[var(--status-success)]",
+    marked: "bg-[var(--status-warning)]/15 border-[var(--status-warning)]/60 text-[var(--status-warning)]",
     answeredMarked:
-      "bg-gradient-to-br from-emerald-500/15 via-[#1a1c2e] to-amber-500/15 border-amber-500/60 text-amber-200",
-    unanswered: "bg-[#1a1c2e] border-slate-600 text-slate-300",
-    notVisited: "bg-[#0A0C18] border-slate-800 text-slate-400",
+      "bg-gradient-to-br from-[var(--status-success)]/15 via-[var(--app-bg)] to-[var(--status-warning)]/15 border-[var(--status-warning)]/60 text-[var(--status-warning)]",
+    unanswered: "bg-[var(--app-bg)] border-[var(--app-border)] text-[var(--app-text)]",
+    notVisited: "bg-[var(--app-card2)] border-[var(--app-border)] text-[var(--app-muted)]",
   };
 
   return (
     <div className={className}>
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-xs font-bold text-slate-300 uppercase tracking-widest flex items-center gap-2">
-          <ListChecks className="w-4 h-4 text-[#9b66ff]" />
+        <h3 className="text-xs font-bold uppercase tracking-widest flex items-center gap-2" style={{ color: 'var(--app-muted)' }}>
+          <ListChecks className="w-4 h-4" style={{ color: 'var(--accent)' }} />
           Question Palette
         </h3>
-        <span className="text-[10px] font-semibold text-slate-400">
+        <span className="text-[10px] font-semibold" style={{ color: 'var(--app-faint)' }}>
           {questions.length} Q
         </span>
       </div>
@@ -84,21 +84,24 @@ export const QuestionPalette: React.FC<QuestionPaletteProps> = ({
               {(st === "marked" || st === "answeredMarked") && (
                 <Flag
                   aria-hidden="true"
-                  className="absolute -top-1 -right-1 w-3.5 h-3.5 text-amber-400 drop-shadow"
+                  className="absolute -top-1 -right-1 w-3.5 h-3.5 drop-shadow"
+                  style={{ color: 'var(--status-warning)' }}
                   fill="currentColor"
                 />
               )}
               {st === "answered" && (
                 <Check
                   aria-hidden="true"
-                  className="absolute -top-1 -right-1 w-3.5 h-3.5 text-emerald-400 drop-shadow"
+                  className="absolute -top-1 -right-1 w-3.5 h-3.5 drop-shadow"
+                  style={{ color: 'var(--status-success)' }}
                   strokeWidth={3}
                 />
               )}
               {st === "current" && (
                 <span
                   aria-hidden="true"
-                  className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-[#9b66ff] ring-2 ring-[#0A0C18]"
+                  className="absolute -top-1 -right-1 w-2 h-2 rounded-full ring-2"
+                  style={{ background: 'var(--accent)', borderColor: 'var(--app-bg)' }}
                 />
               )}
             </button>
@@ -107,12 +110,12 @@ export const QuestionPalette: React.FC<QuestionPaletteProps> = ({
       </div>
 
       {/* Legend — swatch + glyph + label, never color-only */}
-      <div className="mt-5 space-y-2.5 text-[11px] font-medium text-slate-400 bg-[#0A0C18] border border-slate-800 rounded-xl p-4">
-        <LegendRow swatch="bg-emerald-500/15 border-emerald-500/60 text-emerald-300" glyph={<Check className="w-3 h-3" strokeWidth={3} />} label="Answered" />
-        <LegendRow swatch="bg-amber-500/15 border-amber-500/60 text-amber-300" glyph={<Flag className="w-3 h-3" fill="currentColor" />} label="Marked for Review" />
-        <LegendRow swatch="bg-gradient-to-br from-emerald-500/15 to-amber-500/15 border-amber-500/60 text-amber-200" glyph={<Check className="w-3 h-3" strokeWidth={3} />} label="Answered &amp; Marked" />
-        <LegendRow swatch="bg-[#0A0C18] border-slate-800 text-slate-600" glyph={null} label="Not Visited" />
-        <LegendRow swatch="bg-[#1a1c2e] border-slate-600 text-slate-300" glyph={<span className="w-1.5 h-1.5 rounded-full bg-slate-400" />} label="Unanswered" />
+      <div className="mt-5 space-y-2.5 text-[11px] font-medium border rounded-xl p-4" style={{ background: 'var(--app-card2)', borderColor: 'var(--app-border)', color: 'var(--app-muted)' }}>
+        <LegendRow swatch="bg-[var(--status-success)]/15 border-[var(--status-success)]/60 text-[var(--status-success)]" glyph={<Check className="w-3 h-3" strokeWidth={3} />} label="Answered" />
+        <LegendRow swatch="bg-[var(--status-warning)]/15 border-[var(--status-warning)]/60 text-[var(--status-warning)]" glyph={<Flag className="w-3 h-3" fill="currentColor" />} label="Marked for Review" />
+        <LegendRow swatch="bg-gradient-to-br from-[var(--status-success)]/15 to-[var(--status-warning)]/15 border-[var(--status-warning)]/60 text-[var(--status-warning)]" glyph={<Check className="w-3 h-3" strokeWidth={3} />} label="Answered &amp; Marked" />
+        <LegendRow swatch="bg-[var(--app-card2)] border-[var(--app-border)] text-[var(--app-faint)]" glyph={null} label="Not Visited" />
+        <LegendRow swatch="bg-[var(--app-bg)] border-[var(--app-border)] text-[var(--app-text)]" glyph={<span className="w-1.5 h-1.5 rounded-full" style={{ background: 'var(--app-muted)' }} />} label="Unanswered" />
       </div>
     </div>
   );
