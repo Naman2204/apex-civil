@@ -162,26 +162,26 @@ function AttemptCard({ record, index }: { record: HistoryRecord; index: number }
     >
       {/* Outer glow border */}
       <div
-        className="absolute -inset-[1px] rounded-2xl opacity-60 group-hover:opacity-100 transition-opacity duration-500"
+        className="absolute -inset-[1px] rounded-2xl opacity-40 group-hover:opacity-70 transition-opacity duration-500"
         style={{
           background: isTop
-            ? "linear-gradient(135deg, rgba(250,204,21,0.65), rgba(234,179,8,0.25), rgba(250,204,21,0.65))"
+            ? "linear-gradient(135deg, rgba(6,182,212,0.4), rgba(34,211,238,0.15), rgba(6,182,212,0.4))"
             : isStrict
-              ? "linear-gradient(135deg, rgba(59, 130, 246, 0.45), rgba(139, 92, 246, 0.3), rgba(59, 130, 246, 0.45))"
-              : "linear-gradient(135deg, rgba(124, 92, 252, 0.45), rgba(139, 92, 246, 0.3), rgba(124, 92, 252, 0.45))",
-          filter: "blur(1px)",
+              ? "linear-gradient(135deg, rgba(59, 130, 246, 0.35), rgba(139, 92, 246, 0.2), rgba(59, 130, 246, 0.35))"
+              : "linear-gradient(135deg, rgba(124, 92, 252, 0.35), rgba(139, 92, 246, 0.2), rgba(124, 92, 252, 0.35))",
+          filter: "blur(2px)",
         }}
       />
 
       {/* Card content */}
-      <div className="relative rounded-2xl overflow-hidden bg-[linear-gradient(180deg,rgba(255,255,255,0.11)_0%,rgba(255,255,255,0.03)_22%,rgba(0,0,0,0.05)_100%)] border border-app-border backdrop-blur-sm">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_0%,rgba(255,255,255,0.28),transparent_42%)] opacity-65" />
+      <div className="relative rounded-2xl overflow-hidden bg-[rgba(15,15,25,0.85)] border border-app-border/60">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_0%,rgba(255,255,255,0.06),transparent_42%)] opacity-50" />
         {/* Inner subtle glow at top */}
         <div
           className="absolute top-0 left-0 right-0 h-px"
           style={{
             background: isTop
-              ? "linear-gradient(90deg, transparent, rgba(250,204,21,0.7), transparent)"
+              ? "linear-gradient(90deg, transparent, rgba(6,182,212,0.6), transparent)"
               : isStrict
                 ? "linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.5), transparent)"
                 : "linear-gradient(90deg, transparent, rgba(124, 92, 252, 0.5), transparent)",
@@ -207,7 +207,7 @@ function AttemptCard({ record, index }: { record: HistoryRecord; index: number }
             className="w-16 h-16 rounded-xl flex items-center justify-center shrink-0 bg-accent-soft/50"
             style={{
               boxShadow: isTop
-                ? "0 0 20px rgba(250,204,21,0.2)"
+                ? "0 0 20px rgba(6,182,212,0.2)"
                 : isStrict
                   ? "0 0 20px rgba(59, 130, 246, 0.12)"
                   : "0 0 20px rgba(124, 92, 252, 0.12)",

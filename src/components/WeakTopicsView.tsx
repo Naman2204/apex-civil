@@ -282,10 +282,18 @@ export const WeakTopicsView: React.FC<WeakTopicsViewProps> = ({ onStartExam }) =
     : 0;
   const improvementPotential = weakTopics.length > 0 ? Math.round((100 - avgAccuracy) * 0.3) : 0;
 
+  /* Color-coded accuracy thresholds */
+  const getAccuracyColor = (accuracy: number) => {
+    if (accuracy < 40) return { color: '#EF4444', glow: 'rgba(239,68,68,0.5)', border: 'rgba(239,68,68,0.3)' };
+    if (accuracy <= 60) return { color: '#F59E0B', glow: 'rgba(245,158,11,0.5)', border: 'rgba(245,158,11,0.3)' };
+    return { color: '#22C55E', glow: 'rgba(34,197,94,0.5)', border: 'rgba(34,197,94,0.3)' };
+  };
+
   /* Map topics to subjects for the Priority grid */
   const priorityTopics = weakTopics.slice(0, 4).map((topic, i) => {
     const match = SUBJECT_ILLUSTRATIONS[topic.name];
     const fallback = FALLBACK_SUBJECTS[i % FALLBACK_SUBJECTS.length];
+    const accuracyStyle = getAccuracyColor(topic.accuracy);
     return {
       name: topic.name,
       accuracy: topic.accuracy,
@@ -295,6 +303,9 @@ export const WeakTopicsView: React.FC<WeakTopicsViewProps> = ({ onStartExam }) =
       glow: match?.glow || fallback.glow,
       border: match?.border || fallback.border,
       examWeight: examWeightFor(topic.name),
+      accuracyColor: accuracyStyle.color,
+      accuracyGlow: accuracyStyle.glow,
+      accuracyBorder: accuracyStyle.border,
     };
   });
 
@@ -427,32 +438,32 @@ export const WeakTopicsView: React.FC<WeakTopicsViewProps> = ({ onStartExam }) =
                     <IllustrationComp opacity={0.9} />
                   </div>
 
-                  <h3 className="text-sm font-black text-center mb-4" style={{ color: 'var(--app-text)' }}>{topic.name}</h3>
+                  <h3 className="text-sm font-black text-center mb-2" style={{ color: 'var(--app-text)' }}>{topic.name}</h3>
 
-                  {/* Stats */}
-                  <div className="space-y-3 mt-auto">
-                    <div>
-                      <div className="flex items-center justify-between text-xs mb-1.5">
-                        <span style={{ color: 'var(--app-faint)' }}>Exam Weightage:</span>
-                        <span className="font-bold" style={{ color: 'var(--app-text)' }}>{topic.examWeight}%</span>
-                      </div>
-                      <div className="h-1.5 rounded-full" style={{ background: 'rgba(255,255,255,0.06)' }}>
-                        <div className="h-1.5 rounded-full transition-all" style={{ width: `${topic.examWeight * 5}%`, background: topic.color, boxShadow: `0 0 6px ${topic.color}` }} />
-                      </div>
+                  {/* Weak badge */}
+                  <div className="flex justify-center mb-3">
+                    <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full"
+                      style={{ background: `${topic.accuracyColor}20`, color: topic.accuracyColor, border: `1px solid ${topic.accuracyBorder}` }}>
+                      Weak Chapter
+                    </span>
+                  </div>
+
+                  {/* Accuracy percentage */}
+                  <div className="mt-auto">
+                    <div className="flex items-center justify-between text-xs mb-1.5">
+                      <span style={{ color: 'var(--app-faint)' }}>Accuracy</span>
+                      <span className="font-black text-base" style={{ color: topic.accuracyColor, textShadow: `0 0 12px ${topic.accuracyGlow}` }}>{topic.accuracy}%</span>
                     </div>
-                    <div>
-                      <div className="flex items-center justify-between text-xs mb-1.5">
-                        <span style={{ color: 'var(--app-faint)' }}>Mastery Level:</span>
-                        <span className="font-bold" style={{ color: topic.color }}>{topic.accuracy}%</span>
-                      </div>
-                      <div className="h-1.5 rounded-full" style={{ background: 'rgba(255,255,255,0.06)' }}>
-                        <div className="h-1.5 rounded-full transition-all" style={{ width: `${mastery}%`, background: topic.color, boxShadow: `0 0 6px ${topic.color}` }} />
-                      </div>
+                    <div className="h-2 rounded-full" style={{ background: 'rgba(255,255,255,0.06)' }}>
+                      <div className="h-2 rounded-full transition-all" style={{ width: `${mastery}%`, background: topic.accuracyColor, boxShadow: `0 0 8px ${topic.accuracyGlow}` }} />
                     </div>
+                    <p className="text-[10px] mt-1.5 text-center" style={{ color: 'var(--app-faint)' }}>
+                      You got {topic.accuracy}% of questions right in this chapter
+                    </p>
                   </div>
 
                   <button className="mt-4 w-full h-9 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-all hover:brightness-125"
-                    style={{ background: `${topic.color}18`, border: `1px solid ${topic.border}`, color: topic.color }}>
+                    style={{ background: `${topic.accuracyColor}18`, border: `1px solid ${topic.accuracyBorder}`, color: topic.accuracyColor }}>
                     Practice Now <ArrowRight className="w-3.5 h-3.5" />
                   </button>
                 </div>

@@ -48,7 +48,7 @@ export async function getDashboardStats() {
   
   // Sort by lowest accuracy first, and filter out those with very few questions
   const weakTopics = topicsArray
-    .filter(t => t.total >= 5) // At least 5 questions attempted
+    .filter(t => t.total >= 2) // At least 2 questions attempted
     .sort((a, b) => a.accuracy - b.accuracy)
     .slice(0, 3);
 

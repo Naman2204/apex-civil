@@ -55,7 +55,7 @@ export async function getWeakTopics() {
     WHERE ae."userId" = ${dbUser.id}
       AND ae."completedAt" IS NOT NULL
     GROUP BY COALESCE(NULLIF(q."chapter", 'None'), 'Uncategorized')
-    HAVING COUNT(*) >= 5
+    HAVING COUNT(*) >= 2
     ORDER BY (COUNT(*) FILTER (WHERE aa."isCorrect"))::float / COUNT(*) ASC
     LIMIT 5
   `;
