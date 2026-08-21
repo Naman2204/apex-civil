@@ -160,34 +160,9 @@ function AttemptCard({ record, index }: { record: HistoryRecord; index: number }
       className="group relative"
       style={{ animation: `slideInUp 0.5s ease-out ${delay}s both` }}
     >
-      {/* Outer glow border */}
-      <div
-        className="absolute -inset-[1px] rounded-2xl opacity-40 group-hover:opacity-70 transition-opacity duration-500"
-        style={{
-          background: isTop
-            ? "linear-gradient(135deg, rgba(6,182,212,0.4), rgba(34,211,238,0.15), rgba(6,182,212,0.4))"
-            : isStrict
-              ? "linear-gradient(135deg, rgba(59, 130, 246, 0.35), rgba(139, 92, 246, 0.2), rgba(59, 130, 246, 0.35))"
-              : "linear-gradient(135deg, rgba(124, 92, 252, 0.35), rgba(139, 92, 246, 0.2), rgba(124, 92, 252, 0.35))",
-          filter: "blur(2px)",
-        }}
-      />
-
       {/* Card content */}
-      <div className="relative rounded-2xl overflow-hidden bg-[rgba(15,15,25,0.85)] border border-app-border/60">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_0%,rgba(255,255,255,0.06),transparent_42%)] opacity-50" />
-        {/* Inner subtle glow at top */}
-        <div
-          className="absolute top-0 left-0 right-0 h-px"
-          style={{
-            background: isTop
-              ? "linear-gradient(90deg, transparent, rgba(6,182,212,0.6), transparent)"
-              : isStrict
-                ? "linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.5), transparent)"
-                : "linear-gradient(90deg, transparent, rgba(124, 92, 252, 0.5), transparent)",
-          }}
-        />
-
+      <div className="relative rounded-2xl overflow-hidden bg-[#111827] border border-app-border/50">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_0%,rgba(255,255,255,0.04),transparent_42%)] opacity-50" />
         <div className="relative px-5 py-4 sm:px-6 sm:py-5 flex items-center gap-4 sm:gap-6">
           {/* Date & Time Column */}
           <div className="flex flex-col items-center min-w-[112px] shrink-0">
@@ -204,14 +179,7 @@ function AttemptCard({ record, index }: { record: HistoryRecord; index: number }
 
           {/* Topic Icon */}
           <div
-            className="w-16 h-16 rounded-xl flex items-center justify-center shrink-0 bg-accent-soft/50"
-            style={{
-              boxShadow: isTop
-                ? "0 0 20px rgba(6,182,212,0.2)"
-                : isStrict
-                  ? "0 0 20px rgba(59, 130, 246, 0.12)"
-                  : "0 0 20px rgba(124, 92, 252, 0.12)",
-            }}
+            className="w-16 h-16 rounded-xl flex items-center justify-center shrink-0 bg-accent-soft/30"
           >
             <span style={{ color: 'var(--accent-bright)', filter: 'drop-shadow(0 0 8px var(--accent-bright))', display: 'flex' }}>
               {React.createElement(topicIcon, { className: "w-8 h-8 stroke-1" })}
